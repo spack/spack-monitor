@@ -1,6 +1,11 @@
-.PHONY: collect migrate migrations
+.PHONY: build collect migrate migrations run
 
-# target: collect - calls the "collectstatic" django command
+# Intended to be run outside of container
+build: 
+	docker-compose build
+
+
+# intended to be run inside the django container
 collect:
 	python manage.py collectstatic --noinput
 
@@ -12,6 +17,3 @@ migrate:
 
 run: 
 	python manage.py runserver
-
-deploy:
-	gcloud app deploy
