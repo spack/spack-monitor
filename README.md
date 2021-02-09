@@ -10,6 +10,8 @@ status codes, and other metadata around a build. It's original design will run
 with docker-compose (containers), but it could also be installed and run natively
 using a hosted database elsewhere, if necessary.
 
+⚠️ *This respository is under development! All is subject to change. Use at your own risk!* ⚠️
+
 ## Development Plan
 
 1. Develop the base models for a spec
