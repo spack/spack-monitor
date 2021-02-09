@@ -1,6 +1,6 @@
 __author__ = "Vanessa Sochat"
 __copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache 2.0"
+__license__ = "Apache-2.0 OR MIT"
 
 from django.db import models, IntegrityError
 
@@ -88,6 +88,19 @@ class Configuration(BaseModel):
         related_query_name="packages",
     )
 
+    def print(self):
+        for package in self.packages.order_by("name"):
+            package.print()
+
+    # TODO: generate an export function (to json or yaml) OR we could just save
+    # the original config file (but it might not exist)
+
+    def __str__(self):
+        return "[configuration:%s packages]" % self.packages.count()
+
+    def __repr__(self):
+        return str(self)
+
     class Meta:
         app_label = "main"
 
@@ -107,6 +120,12 @@ class Architecture(BaseModel):
     target = models.ForeignKey(
         "main.Target", null=False, blank=False, on_delete=models.CASCADE
     )
+
+    def __str__(self):
+        return "[architecture:%s|%s]" % (self.platform, self.platform_os)
+
+    def __repr__(self):
+        return str(self)
 
     class Meta:
         app_label = "main"
@@ -136,14 +155,22 @@ class Target(BaseModel):
         related_name="features",
         related_query_name="features",
     )
-    generation = models.PositiveIntegerField()
+    generation = models.PositiveIntegerField(blank=True, null=True)
     parents = models.ManyToManyField(
         "main.Target",
         blank=True,
         default=None,
-        related_name="parents",
-        related_query_name="parents",
+        related_name="targets",
+        related_query_name="targets",
     )
+
+    def __str__(self):
+        if self.vendor:
+            return "[target:%s|%s]" % (self.name, self.vendor)
+        return "[target:%s|%s]" % self.name
+
+    def __repr__(self):
+        return str(self)
 
     class Meta:
         app_label = "main"
@@ -162,6 +189,15 @@ class Compiler(BaseModel):
         max_length=50, blank=False, null=False, help_text="The compiler version string"
     )
 
+    def __str__(self):
+        return "[compiler:%s|%s]" % (self.name, self.version)
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        app_label = "main"
+
 
 class Feature(BaseModel):
     """A feature of an architecture. While this is one a few fields (inherited
@@ -172,29 +208,40 @@ class Feature(BaseModel):
         max_length=50, blank=False, null=False, help_text="The name of the feature"
     )
 
+    def __str__(self):
+        return "[feature:%s]" % self.name
+
+    def __repr__(self):
+        return str(self)
+
 
 class Package(BaseModel):
-    """A package corresponds with a package, meaning it has a version,"""
+    """A package corresponds with a package, meaning it has a version, hashes,
+    and other metadata. Since the spack package spec has dependencies with only
+    the package name and hash, these are the only two fields we can require.
+    """
 
+    # REQUIRED FIELDS: The hash is used as the unique identifier along with name
     name = models.CharField(
         max_length=250,
         blank=False,
         null=False,
         help_text="The package name (without version)",
     )
+    hash = models.CharField(
+        max_length=50, blank=False, null=False, help_text="The hash", unique=True
+    )
+
+    # OPTIONAL FIELDS: We might not have all these at creation time
     namespace = models.CharField(
         max_length=250, blank=True, null=True, help_text="The package namespace"
     )
     version = models.CharField(
-        max_length=50, blank=False, null=False, help_text="The package version"
+        max_length=50, blank=True, null=True, help_text="The package version"
     )
 
-    # Will there always be a build hash (here assumes no)?
-    hash_ = models.CharField(
-        max_length=50, blank=False, null=False, help_text="The hash"
-    )
     full_hash = models.CharField(
-        max_length=50, blank=False, null=False, help_text="The full hash"
+        max_length=50, blank=True, null=True, help_text="The full hash"
     )
     build_hash = models.CharField(
         max_length=50, blank=True, null=True, help_text="The build hash"
@@ -203,7 +250,7 @@ class Package(BaseModel):
     # This assumes that a package can only have one architecture
     # If we delete an architecture, the associated packages are deleted too
     arch = models.ForeignKey(
-        "main.Architecture", null=False, blank=False, on_delete=models.CASCADE
+        "main.Architecture", null=True, blank=True, on_delete=models.CASCADE
     )
 
     # Assume that we won't represent compilers in the future
@@ -213,7 +260,7 @@ class Package(BaseModel):
 
     # Parameters are less likely to be queried (we still can with json field) but we should
     # use json field to allow for more flexibility in variance or change
-    parameters = JSONField(blank=False, null=False, default="{}")
+    parameters = JSONField(blank=True, null=True, default="{}")
 
     # Dependencies are just other packages
     dependencies = models.ManyToManyField(
@@ -224,13 +271,26 @@ class Package(BaseModel):
         related_query_name="dependencies",
     )
 
+    def print(self):
+        if self.version:
+            name = "%s v%s" % (self.name, self.version)
+            print("%-35s %-35s" % (name, self.hash))
+        else:
+            print("%-35s %-35s" % (self.name, self.hash))
+
+    def __str__(self):
+        if self.version:
+            return "[package:%s|%s|%s]" % (self.name, self.version, self.hash)
+        return "[package:%s|%s]" % (self.name, self.hash)
+
+    def __repr__(self):
+        return str(self)
+
     # TODO: have a function to easily add a dependency based on hash
 
     class Meta:
         app_label = "main"
-
-        # Or should we use hash or full_hash?
-        unique_together = (("name", "version", "arch", "full_hash"),)
+        unique_together = (("name", "hash"),)
 
 
 class Dependency(BaseModel):
@@ -249,6 +309,12 @@ class Dependency(BaseModel):
     )
 
     # TODO: have a function to easily add / remove a type
+
+    def __str__(self):
+        return "[dependency:%s|%s]" % (self.package.name, self.dependency_type)
+
+    def __repr__(self):
+        return str(self)
 
     class Meta:
         app_label = "main"

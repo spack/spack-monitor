@@ -7,4 +7,4 @@
 # python manage.py migrate auth
 # python manage.py migrate
 # python manage.py collectstatic --noinput
-uwsgi uwsgi.ini
+uwsgi nginx/uwsgi.ini

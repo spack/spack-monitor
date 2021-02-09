@@ -13,4 +13,5 @@ If you have a question please `let us know <https://github.com/spack/spack-monit
 
    background
    setup
+   documentation
 

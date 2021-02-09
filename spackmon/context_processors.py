@@ -1,6 +1,6 @@
 __author__ = "Vanessa Sochat"
 __copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache 2.0"
+__license__ = "Apache-2.0 OR MIT"
 
 from django.contrib.sites.shortcuts import get_current_site
 from spackmon import settings

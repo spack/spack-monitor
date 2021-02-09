@@ -22,5 +22,5 @@ using a hosted database elsewhere, if necessary.
 
 ## License
 
- * Free software: Apache License
+ * Free software: Apache License 2.0 or MIT. See the [.github](.github) folder for LICENSE and copyright notice, and [AUTHORS](AUTHORS) for a list of contributions and maintainers
 

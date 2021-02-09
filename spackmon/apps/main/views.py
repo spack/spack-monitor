@@ -1,12 +1,12 @@
 __author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2020-2021, Vanessa Sochat"
-__license__ = "Apache 2.0"
+__copyright__ = "Copyright 2021, Vanessa Sochat"
+__license__ = "Apache-2.0 OR MIT"
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden, JsonResponse
-from spackmon.main.models import Configuration
+from spackmon.apps.main.models import Configuration
 import os
 
 from ratelimit.decorators import ratelimit
