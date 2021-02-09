@@ -59,19 +59,19 @@ master_doc = "index"
 
 # General information about the project.
 project = "Spackmon"
-copyright = "2020, Johannes Koester and Vanessa Sochat"
+copyright = "2021, Vanessa Sochat"
 
-from spackmon import version
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "spackmon.settings")
-import django
-django.setup()
+here = os.path.dirname(os.path.abspath(__file__))
+version_file = os.path.abspath(os.path.join(here, "..", "spackmon", "version.py"))
+with open(version_file, "r") as fd:
+    text = fd.readlines()
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = version.__version__
+version = [x.strip().split(" ")[-1].strip('"') for x in text if "__version__" in x][0]
 
 if os.environ.get("READTHEDOCS") == "True":
     # Because Read The Docs modifies conf.py, versioneer gives a "dirty"
@@ -220,7 +220,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ("index", "Spackmon.tex", "Spackmon Documentation", "Johannes Koester", "manual"),
+    ("index", "Spackmon.tex", "Spackmon Documentation", "Vanessa Sochat", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -253,7 +253,7 @@ man_pages = [
         "index",
         "Spackmon",
         "Spackmon Documentation",
-        ["Johannes Koester", "Vanessa Sochat"],
+        ["Vanessa Sochat"],
         1,
     )
 ]

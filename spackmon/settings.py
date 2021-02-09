@@ -98,12 +98,11 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-
-# base will eventually have the home to the interfaces
-#    "spackmon.apps.base",
+    # base will eventually have the home to the interfaces
+    #    "spackmon.apps.base",
     # api includes all api endpoints for spack to interact with
     "spackmon.apps.api",
-    # main includes the main application models 
+    # main includes the main application models
     "spackmon.apps.main",
     # users is relevant to create an authenticated user
     "spackmon.apps.users",
@@ -147,7 +146,6 @@ if cfg.ENABLE_CACHE:
     CACHE_MIDDLEWARE_SECONDS = 86400  # one day
 
 
-
 ROOT_URLCONF = "spackmon.urls"
 
 TEMPLATES = [
@@ -169,7 +167,6 @@ TEMPLATES = [
 
 TEMPLATES[0]["OPTIONS"]["debug"] = DEBUG
 WSGI_APPLICATION = "spackmon.wsgi.application"
-ASGI_APPLICATION = "spackmon.asgi.application"
 
 AUTH_USER_MODEL = "users.User"
 SOCIAL_AUTH_USER_MODEL = "users.User"
@@ -227,7 +224,7 @@ else:
             "HOST": "db",
             "PORT": "5432",
         }
-}
+    }
 
 
 # Password validation

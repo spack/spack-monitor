@@ -1,3 +1,5 @@
+# docker-compose up -d
+
 db:
   image: postgres
   environment:
@@ -5,13 +7,13 @@ db:
 
 uwsgi:
   restart: always
-  image: spack/spackmon
+  build: .
   volumes:
     - .:/code
     - ./static:/var/www/static
     - ./images:/var/www/images
   links:
-    - redis
+    - db
 
 nginx:
   restart: always
