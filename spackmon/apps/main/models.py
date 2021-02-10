@@ -228,11 +228,15 @@ class Package(BaseModel):
         null=False,
         help_text="The package name (without version)",
     )
-    hash = models.CharField(
-        max_length=50, blank=False, null=False, help_text="The hash", unique=True
+    build_hash = models.CharField(
+        max_length=50, blank=True, null=True, help_text="The build hash", unique=True
     )
 
     # OPTIONAL FIELDS: We might not have all these at creation time
+    hash = models.CharField(
+        max_length=50, blank=False, null=False, help_text="The hash"
+    )
+
     namespace = models.CharField(
         max_length=250, blank=True, null=True, help_text="The package namespace"
     )
@@ -242,9 +246,6 @@ class Package(BaseModel):
 
     full_hash = models.CharField(
         max_length=50, blank=True, null=True, help_text="The full hash"
-    )
-    build_hash = models.CharField(
-        max_length=50, blank=True, null=True, help_text="The build hash"
     )
 
     # This assumes that a package can only have one architecture
@@ -290,7 +291,7 @@ class Package(BaseModel):
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "hash"),)
+        unique_together = (("name", "build_hash"),)
 
 
 class Dependency(BaseModel):

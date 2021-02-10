@@ -81,7 +81,7 @@ def add_dependencies(package, dependency_lookup):
     # Create dependencies (other packages) - they will be updated later
     for dep_name, dep in dependency_lookup.items():
         dependency_package, _ = Package.objects.get_or_create(
-            name=dep_name, hash=dep["hash"]
+            name=dep_name, build_hash=dep["hash"]
         )
         dependency, _ = Dependency.objects.get_or_create(
             package=dependency_package, dependency_type=dep["type"]
@@ -94,13 +94,13 @@ def add_dependencies(package, dependency_lookup):
 
 def get_package(name, meta, arch=None, compiler=None):
     """Given a package name and metadata (hash is required) get or create it"""
-    package, _ = Package.objects.get_or_create(name=name, hash=meta["hash"])
+    package, _ = Package.objects.get_or_create(name=name, build_hash=meta["build_hash"])
     package.version = meta.get("version")
     package.arch = arch
     package.compiler = compiler
     package.namespace = meta.get("namespace")
     package.parameters = meta.get("parameters", {})
-    package.build_hash = meta.get("build_hash")
+    package.hash = meta.get("hash")
     package.full_hash = meta.get("full_hash")
     package.save()
     return package
