@@ -115,7 +115,7 @@ we can run a command to do the import:
 
 .. ::code console
 
-    $ python manage.py import_package_configuration --filename specs/singularity-3.6.4.json
+    $ python manage.py import_package_configuration specs/singularity-3.6.4.json
     
     
 You'll then see a summary printout to the screen of the packages, versions, and hashes
@@ -176,7 +176,7 @@ externally from the container (and this extends to any command) by doing:
 
 .. ::code console
 
-    $ docker exec -it python manage.py import_package_configuration --filename specs/singularity-3.6.4.json
+    $ docker exec -it python manage.py import_package_configuration specs/singularity-3.6.4.json
 
 Note that this will work because the working directory is ``/code`` (where the specs folder is)
 and ``./code`` is bound to the host at the root of the repository.  If you need to interact

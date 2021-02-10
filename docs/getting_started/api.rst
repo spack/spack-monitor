@@ -219,3 +219,34 @@ With a location header for just this request:
 
 For each of the above, if the server does not return a Location header, the client
 should issue an error.
+
+
+--------------
+Authentication
+--------------
+
+Since we currently are not exposing a web interface to create accounts, etc.,
+all account creation happens on the command line. For example, if we want to add
+a user:
+
+.. code:: console
+
+    $ docker exec -it spack-monitor_uwsgi_1 python manage.py add_user vsoch
+    Username: vsoch
+    Enter Password:
+    User vsoch successfully created.
+
+
+You can then get your token (for the API here) as follows:
+
+
+.. code:: console
+
+    $ docker exec -it spack-monitor_uwsgi_1 python manage.py get_token vsoch
+    Username: vsoch
+    Enter Password:
+    50445263afd8f67e59bd79bff597836ee6c05438
+
+
+TADA! We will export this token as ``SPACKMON_TOKEN`` in the environment to
+authenticate via the API.
