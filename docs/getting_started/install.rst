@@ -1,9 +1,12 @@
-.. _getting_started-example-workflow:
+.. _getting_started-install:
 
 ======================
 Bringing Up Containers
 ======================
 
+Installation comes down to bringing up containers. You likely want to start with
+your database in a container, and for a more substantial service, update
+the database credentials to be for something more production oriented.
 For using Spackmon you will need:
 
  - `Docker <https://docs.docker.com/get-docker/>`_
@@ -137,12 +140,6 @@ that were added to the screen:
     gmp v6.1.2                          qtuzif6jphtihuzkwi7cemiega7wk2db   
     go v1.14.4                          b2dgl74ooxml4zbt74rsgwfopcmttabf   
     go-bootstrap v1.4-bootstrap-20161024 tml5d3dajx7i5j3rx5h7f5vud2qigpgr   
-    json-c v0.13.1                      6vf6agvfhv24xcjlro7w5akwydq4zozf   
-    libaio v0.3.110                     7znuy7fde74mdndxawqjezjgd6zlevd2   
-    libbsd v0.10.0                      z4fnf3d2ewsptdgeua3h5pssdg3gdoog   
-    libedit v3.1-20191231               25hpeyyoc3vozwu4b47khocesjxdw33l   
-    libffi v3.3                         umq6vkiev6xtv433ezamg74is65eh643   
-    libgpg-error v1.37                  pbytmevkno53sctoh6pweq25ze6bzc54   
     libiconv v1.16                      af5tdk6ilv6mah2ntgb5odryvlosijnz   
     libidn2 v2.3.0                      6pvigszeej5gqkvpp5u6cmlb4iezsqaf   
     libseccomp v2.3.3                   u2g4h3rba4be7rcvwqnbz6gn5gg5aonl   
@@ -172,7 +169,41 @@ that were added to the screen:
     util-linux v2.36                    ancj25wbm4bqt6zw5i3h3zt3x56uhscd   
     util-linux-uuid v2.36               noev42z5uio4vav777to5kqgthwdikt5   
     xz v5.2.5                           4kcnj3oypwyyr3o46ipejwuk3x5gzrar   
-    zlib v1.2.11                        sl7m27mzkbejtkrajigj3a3m37ygv4u2   
+    zlib v1.2.11                        sl7m27mzkbejtkrajigj3a3m37ygv4u2     
     
-    
-Wow, that's quite a lot just for Singularity!
+Wow, that's quite a lot just for Singularity! You could run the same command
+externally from the container (and this extends to any command) by doing:
+
+.. ::code console
+
+    $ docker exec -it python manage.py import_package_configuration --filename specs/singularity-3.6.4.json
+
+Note that this will work because the working directory is ``/code`` (where the specs folder is)
+and ``./code`` is bound to the host at the root of the repository.  If you need to interact
+with files outside of this location, you should move them here.
+Note that this interaction is intended for development or testing. If you
+want to interact with the database from spack, the avenue will be via the
+:ref:`getting-started_api`.
+
+Databases
+=========
+
+By default, Spackmon will deploy with it's own postgres container, deployed
+via the docker-compose.yml. If you want to downgrade to sqlite, you can
+set ``USE_SQLITE`` in your ``spackmon/settings.yml`` file to a non null value.
+This will save a file, ``db.sqlite3`` in your application root.
+If you want to update to use a more production database, you can remove the 
+``db`` section in your docker-compose.yml, and then export variables for 
+your database to the environment:
+
+.. ::code console
+
+    export DATABASE_ENGINE=django.db.mysql # this is the default if you don't set it
+    export DATABASE_HOST=my.hostname.dev
+    export DATABASE_USER=mydatabaseuser
+    export DATABASE_PASSWORD=topsecretbanana
+    export DATABASE_NAME=databasename
+
+We have developed and tested with the postgres database, so please report any issues
+that you find if you try sqlite. If you want to try the application outside of the containers,
+this is possible (but not developed or documented yet) so please `open an issue <https://github.com/spackmon/spack-monitor>`_.

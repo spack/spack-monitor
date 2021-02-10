@@ -9,10 +9,12 @@ to keep track of your spack builds. This means that we store entire configuratio
 with package specs, along with error and output for the builds. The guide
 here should walk you through basic usage of spackmon. If you have other questions
 or find something missing, please `let us know <https://github.com/spack/spackmon/issues>`_
-We recommend that you start by :ref:`getting_started-containers`.
+We recommend that you start by :ref:`getting_started-install`, which includes
+specifics for starting with containers.
 
 .. toctree::
    :maxdepth: 2
 
-   containers
+   install
+   api
 
