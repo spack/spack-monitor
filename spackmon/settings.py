@@ -52,26 +52,25 @@ for key, value in cfg:
 # Secret Key
 
 
-def generate_secret_key(filename):
+def generate_secret_keys(filename):
     """A helper function to write a randomly generated secret key to file"""
-    key = get_random_secret_key()
     with open(filename, "w") as fd:
-        fd.writelines("SECRET_KEY = '%s'" % key)
+        for keyname in ["SECRET_KEY", "JWT_SERVER_SECRET"]:
+            key = get_random_secret_key()
+            fd.writelines("%s = '%s'\n" % (keyname, key))
 
 
-# Generate secret key if doesn't exist, and not defined in environment
+# Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
-if not SECRET_KEY:
+JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
+
+if not SECRET_KEY or not JWT_SERVER_SECRET:
     try:
-        from .secret_key import SECRET_KEY
+        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
     except ImportError:
         SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
-        generate_secret_key(os.path.join(SETTINGS_DIR, "secret_key.py"))
-        from .secret_key import SECRET_KEY
-
-
-# Private only should be a boolean
-cfg.PRIVATE_ONLY = cfg.PRIVATE_ONLY is not None
+        generate_secret_keys(os.path.join(SETTINGS_DIR, "secret_key.py"))
+        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
 
 # Set the domain name
 DOMAIN_NAME = cfg.DOMAIN_NAME
@@ -133,19 +132,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Do we want to enable the cache?
-
-if cfg.ENABLE_CACHE:
-    MIDDLEWARE += [
-        "django.middleware.cache.UpdateCacheMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.cache.FetchFromCacheMiddleware",
-    ]
-
-    CACHE_MIDDLEWARE_ALIAS = "default"
-    CACHE_MIDDLEWARE_SECONDS = 86400  # one day
-
-
 ROOT_URLCONF = "spackmon.urls"
 
 TEMPLATES = [
@@ -168,22 +154,16 @@ TEMPLATES = [
 TEMPLATES[0]["OPTIONS"]["debug"] = DEBUG
 WSGI_APPLICATION = "spackmon.wsgi.application"
 
+# Authentication and Users
+
 AUTH_USER_MODEL = "users.User"
 SOCIAL_AUTH_USER_MODEL = "users.User"
 GRAVATAR_DEFAULT_IMAGE = "retro"
 
-
-# Cache to tmp
-CACHE_LOCATION = os.path.join(tempfile.gettempdir(), "spackmon-cache")
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": CACHE_LOCATION,
-    }
-}
-
-if not os.path.exists(CACHE_LOCATION):
-    os.mkdir(CACHE_LOCATION)
+# TODO: add authenticated views here
+authenticated_views = [
+    "spackmon.apps.api.views.UploadConfiguration",
+]
 
 
 # Database
@@ -266,6 +246,51 @@ STATIC_ROOT = "static"
 STATIC_URL = "/static/"
 MEDIA_ROOT = "data"
 MEDIA_URL = "/data/"
+
+# Caches
+
+# Do we want to enable the cache?
+
+# Cache to tmp
+# The default cache is for views, likely not used until we have them
+CACHE_LOCATION = os.path.join(tempfile.gettempdir(), "spackmon-cache")
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": CACHE_LOCATION,
+    }
+}
+
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 86400  # one day
+
+if not os.path.exists(CACHE_LOCATION):
+    os.mkdir(CACHE_LOCATION)
+
+# Add cache middleware
+for entry in [
+    "django.middleware.cache.UpdateCacheMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
+]:
+    if entry not in MIDDLEWARE:
+        MIDDLEWARE.append(entry)
+
+
+# Create a filesystem cache for temporary upload sessions
+cache = cfg.CACHE_DIR or os.path.join(MEDIA_ROOT, "cache")
+if not os.path.exists(cache):
+    os.makedirs(cache)
+
+CACHES.update(
+    {
+        "spackmon_api": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": cache,
+        }
+    }
+)
+
 
 # Rate Limiting
 

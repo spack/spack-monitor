@@ -11,7 +11,7 @@ from .permissions import AllowAnyGet
 
 urlpatterns = [
     path(
-        "ms1/",
+        "%s/" % cfg.URL_API_PREFIX,
         api_views.ServiceInfo.as_view(),
         name="service_info",
     ),

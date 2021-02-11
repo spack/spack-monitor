@@ -10,5 +10,5 @@ For using this software you will need:
  - `docker-compose <https://docs.docker.com/compose/install/>`_
 
 Once you have these dependencies, you'll first want to build your container, which we might call `spack/spackmon`.
-You can reference :ref:`getting_started-containers` to see how to build and
+You can reference :ref:`getting-started_install` to see how to build and
 then start containers, and test basic import.

@@ -46,14 +46,14 @@ Resources
    :caption: Getting started
    :name: getting_started
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
 
    getting_started/index
 
 .. toctree::
-  :caption: Development
+  :caption: Development Guide
   :name: development
   :hidden:
-  :maxdepth: 2
+  :maxdepth: 3
 
   development/index

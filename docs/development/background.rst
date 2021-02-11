@@ -46,7 +46,7 @@ For example, for each stage in configure, build, and test, we likely would want 
 a spec,error, output, and possibly repos (or urls to them). For the install component,
 if it is successful, we might then have a manifest.
 
-.. ::code console
+.. ::code-block console
 
     stage: output, error spec, repos?
     configure: output, error spec, repos?
@@ -60,7 +60,7 @@ the repository here to just save the spec to the filesystem. If you use this scr
 you should first have the spack bin on your path so the ``spack-python`` interpreter
 can be found. Then run the script providing a library name and output directory. E.g.,
 
-.. ::code console
+.. ::code-block console
 
      git clone git@github.com:spack/spack-monitor.git
      cd spack-monitor

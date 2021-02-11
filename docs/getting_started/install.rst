@@ -1,4 +1,4 @@
-.. _getting_started-install:
+.. _getting-started_install:
 
 ======================
 Bringing Up Containers
@@ -16,7 +16,7 @@ Once you have these dependencies, you'll first want to build your container, whi
 To do this with docker-compose:
 
 
-.. ::code console
+.. code-block:: console
 
     $ docker-compose build
       
@@ -24,14 +24,14 @@ Once you have the base container built, you can bring it up (which also will pul
 the other containers for nginx and the database).
 
 
-.. ::code console
+.. ::code-block console
 
     $ docker-compose up -d
 
 
 You can verify they are running without any exit error codes:
 
-.. ::code console
+.. ::code-block console
 
     $ docker-compose ps
             Name                       Command               State         Ports       
@@ -43,7 +43,7 @@ You can verify they are running without any exit error codes:
 
 And you can look at logs for the containers as follows:
 
-.. ::code console
+.. ::code-block console
 
     $ docker-compose logs
     $ docker-compose logs uwsgi
@@ -71,7 +71,7 @@ that will make it easy to generate a spec (if you don't have one handy). Let's d
 Since we need spack (on our host) we will run this outside of the container.
 Make sure that you have exported the spack bin to your path:
 
-.. ::code console
+.. ::code-block console
 
     $ export PATH=$PATH:/path/to/spack/bin
 
@@ -79,7 +79,7 @@ Make sure that you have exported the spack bin to your path:
 And then (if you haven't yet) clone the repository to run the generation script.
 Not all examples will work, but here is one that seems to work:
 
-.. ::code console
+.. ::code-block console
 
      $ git clone git@github.com:spack/spack-monitor.git
      $ cd spack-monitor
@@ -94,7 +94,7 @@ Not all examples will work, but here is one that seems to work:
 Your containers should already be running. Let's now shell into the container, 
 where we can interact directly with the database.
 
-.. ::code console
+.. ::code-block console
    
    $ docker exec -it spack-monitor_uwsgi_1 bash
 
@@ -103,7 +103,7 @@ The script ``manage.py`` provides an easy interface to run custom commands. For 
 here is how to do migrations and setup the database (this needs to be done first or manually
 if you disable the commands in ``run_uwsgi.sh``:
 
-.. ::code console
+.. ::code-block console
 
     $ python manage.py makemigrations main
     $ python manage.py makemigrations users
@@ -113,7 +113,7 @@ if you disable the commands in ``run_uwsgi.sh``:
 When the database is setup (the above commands are run, if they haven't been yet)
 we can run a command to do the import:
 
-.. ::code console
+.. ::code-block console
 
     $ python manage.py import_package_configuration specs/singularity-3.6.4.json
     
@@ -122,7 +122,7 @@ You'll then see a summary printout to the screen of the packages, versions, and 
 that were added to the screen:
 
 
-.. ::code console
+.. ::code-block console
 
     autoconf v2.69                      q4ep32s7zcw3kyfyemgivrxv53mqjenc   
     autoconf-archive v2019.01.06        mplalc4sz2cys2wkwzji2ltyklv7x5xf   
@@ -174,7 +174,7 @@ that were added to the screen:
 Wow, that's quite a lot just for Singularity! You could run the same command
 externally from the container (and this extends to any command) by doing:
 
-.. ::code console
+.. ::code-block console
 
     $ docker exec -it python manage.py import_package_configuration specs/singularity-3.6.4.json
 
@@ -196,7 +196,7 @@ If you want to update to use a more production database, you can remove the
 ``db`` section in your docker-compose.yml, and then export variables for 
 your database to the environment:
 
-.. ::code console
+.. ::code-block console
 
     export DATABASE_ENGINE=django.db.mysql # this is the default if you don't set it
     export DATABASE_HOST=my.hostname.dev

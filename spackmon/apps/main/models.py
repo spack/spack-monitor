@@ -73,6 +73,8 @@ class Configuration(BaseModel):
     field so each configuration can point to the set of packages that it needs.
     See the m2m signal at the bottom of this file (verify_unique_configuration)
     to see how we ensure that a Configuration cannot be duplicated.
+
+    # full_hash for top node is hash for entire specification
     """
 
     # Allow for arbitrary storage of output and error
