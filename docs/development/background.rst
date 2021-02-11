@@ -11,9 +11,9 @@ to design the original models.
 Early Discussion
 ================
 
-The first discussion between `vsoch <https://github.com/vsoch>_` and `tgamblin <https://github.com/tgamblin>_`
+The first discussion between `vsoch <https://github.com/vsoch>`_ and `tgamblin <https://github.com/tgamblin>`_
 talked about how spack doesn't currently allow deployment of something it wasn't built with (but it's a 
-`work in progress <https://github.com/spack/spack/pull/20262>_`. We'd want to do something called splicing,
+`work in progress <https://github.com/spack/spack/pull/20262>`_. We'd want to do something called splicing,
 or cloning a node spec and then pointing it to a different dependency version, all the while preserving
 the provenance. Once this works, we would be able to do combinatorial builds and deployments.
 The discussion then moved into how we'd want to be able to put "all this stuff" into a database

@@ -8,7 +8,8 @@ This is the build database for spack, or specifically, a monitoring database
 that can be run alongside spack to collect output and error, build specs,
 status codes, and other metadata around a build. It's original design will run
 with docker-compose (containers), but it could also be installed and run natively
-using a hosted database elsewhere, if necessary.
+using a hosted database elsewhere, if necessary. You can read the [documentation](https://spack-monitor.readthedocs.io/)
+to get started, but keep in mind this is under development. 👇️
 
 ⚠️ *This respository is under development! All is subject to change. Use at your own risk!* ⚠️
 

@@ -18,7 +18,7 @@ Let's first create a client, and use it to get service info for the running serv
 This section will also show us how to create a client, which we will do across
 all examples here. This particular request does not require a token.
 
-.. ::code-block python
+.. code-block:: python
 
     from spackmoncli import SpackMonitorClient
 
@@ -26,7 +26,7 @@ all examples here. This particular request does not require a token.
 If we are using the server running on localhost, and the default endpoint, we don't
 need to customize the arguments.
 
-.. ::code-block python
+.. code-block:: python
 
     client = SpackMonitorClient()
     <spackmoncli.SpackMonitorClient at 0x7f24545fdb80>
@@ -35,7 +35,7 @@ need to customize the arguments.
 However you could easily customize them as follows:
 
 
-.. ::code-block python
+.. code-block:: python
 
     client = SpackMonitorClient(host="https://servername.org", prefix="ms2")
     <spackmoncli.SpackMonitorClient at 0x7f24545fdb80>
@@ -43,7 +43,7 @@ However you could easily customize them as follows:
 
 Next, let's ping the service info endpoint.
 
-.. ::code-block python
+.. code-block:: python
 
     client.service_info()
      {'id': 'spackmon',
