@@ -66,9 +66,10 @@ Next, let's ping the service info endpoint.
      'auth_instructions_url': ''}
 
  
-Note that we provide this example script `in the repository <https://github.com/spack/spack-monitor/blob/main/script/api-examples/service_info.py>`_ so you should be able to just run it to produce the example above:
+Note that we provide this example script `service_info.py <https://github.com/spack/spack-monitor/blob/main/script/api-examples/service_info.py>`_ in the repository so you should be able to just run it to produce the example above:
 
-.. code-block:: python
+
+.. code-block:: console
 
     $ python script/api-examples/service_info.py 
 
@@ -77,9 +78,9 @@ Also take notice that we are running these scripts *outside of the container* as
 imagine would be done with a service.
 
 
--------------------
-Upload Spec Example
--------------------
+---------------------
+Upload Config Example
+---------------------
 
 While most interactions with the API are going to come from spack, we do
 provide an equivalent example and endpoint to upload a spec file, verbatim.
@@ -91,14 +92,14 @@ your token and username first:
     $ export SPACKMON_TOKEN=50445263afd8f67e59bd79bff597836ee6c05438
     $ export SPACKMON_USER=vsoch
 
-For this example `in the repository <https://github.com/spack/spack-monitor/blob/main/script/api-examples/upload_spec.py>`_
-you'll see that by way of the `spackmon client <https://github.com/spack/spack-monitor/blob/main/script/spackmoncli.py>`_ 
+For this example `upload_config.py <https://github.com/spack/spack-monitor/blob/main/script/api-examples/upload_config.py>`_
+in the repository you'll see that by way of the `spackmon client <https://github.com/spack/spack-monitor/blob/main/script/spackmoncli.py>`_ 
 we find this token in the environment, and add it as a base64 encoded authorization header.
 
 
-.. code-black:: console
+.. code-block:: console
 
-    $ python script/api-examples/upload_spec.py specs/singularity-3.6.4.json 
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
 
 
 If you haven't added it yet (the full hash of the first spec is the unique id) you'll
@@ -106,14 +107,14 @@ see that it was added:
 
 .. code-block:: console
 
-    $ python script/api-examples/upload_spec.py specs/singularity-3.6.4.json 
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
     The configuration was successfully created.
 
 If you've already added it, you'll see:
 
 .. code-block:: console
 
-    $ python script/api-examples/upload_spec.py specs/singularity-3.6.4.json 
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
     This configuration already exists in the database.
 
 

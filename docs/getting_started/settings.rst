@@ -1,4 +1,4 @@
-.. _getting_started-settings:
+.. _getting-started_settings:
 
 
 ========
