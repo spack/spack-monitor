@@ -12,7 +12,15 @@ For using Spackmon you will need:
  - `Docker <https://docs.docker.com/get-docker/>`_
  - `docker-compose <https://docs.docker.com/compose/install/>`_
 
-Once you have these dependencies, you'll first want to build your container, which we might call `spack/spackmon`.
+
+Once you have these dependencies, you'll first want clone the repository.
+
+.. code-block:: console
+
+     $ git clone git@github.com:spack/spack-monitor.git
+     $ cd spack-monitor
+
+Then you can build your container, which we might call `spack/spackmon`.
 To do this with docker-compose:
 
 
@@ -20,7 +28,9 @@ To do this with docker-compose:
 
     $ docker-compose build
       
-Once you have the base container built, you can bring it up (which also will pull
+Note that if you just do ``docker-compose up -d`` without building, it will build
+it for you. It's good practice to keep these steps separate so you can monitor them
+more closely. Once you have the base container built, you can bring it up (which also will pull
 the other containers for nginx and the database).
 
 
@@ -76,13 +86,11 @@ Make sure that you have exported the spack bin to your path:
     $ export PATH=$PATH:/path/to/spack/bin
 
 
-And then (if you haven't yet) clone the repository to run the generation script.
-Not all examples will work, but here is one that seems to work:
+From the repository, generate a spec file. There is one provided for Singularity
+if you want to skip this step. It was generated as follows:
 
 .. code-block:: console
 
-     $ git clone git@github.com:spack/spack-monitor.git
-     $ cd spack-monitor
      $ mkdir -p specs
                                      # lib       # outdir
      $ ./script/generate_random_spec.py singularity specs
@@ -100,8 +108,10 @@ where we can interact directly with the database.
 
 
 The script ``manage.py`` provides an easy interface to run custom commands. For example,
-here is how to do migrations and setup the database (this needs to be done first or manually
-if you disable the commands in ``run_uwsgi.sh``:
+here is how to do migrations and setup the database (this is done automatically for
+you when you first bring up the container in ``run_uwsgi.sh``, but if you need to change
+models or otherwise update the application, you'll need to run these manually in the
+container:
 
 .. code-block:: console
 
@@ -110,7 +120,7 @@ if you disable the commands in ``run_uwsgi.sh``:
     $ python manage.py migrate
     
 
-When the database is setup (the above commands are run, if they haven't been yet)
+When the database is setup (the above commands are run, by default)
 we can run a command to do the import:
 
 .. code-block:: console
@@ -176,9 +186,20 @@ externally from the container (and this extends to any command) by doing:
 
 .. code-block:: console
 
-    $ docker exec -it python manage.py import_package_configuration specs/singularity-3.6.4.json
+    $ docker exec -it spack-monitor_uwsgi_1 python manage.py import_package_configuration specs/singularity-3.6.4.json
 
-Note that this will work because the working directory is ``/code`` (where the specs folder is)
+
+If you do this twice, however, it's going to tell you that the configuration already exists.
+We use the ``full_hash`` of the first package spec to determine that the configuration is already there.
+
+
+.. code-block:: console
+
+    $ docker exec -it spack-monitor_uwsgi_1 python manage.py import_package_configuration specs/singularity-3.6.4.json
+    Configuration with hash awyonorkudptvnp5xswtdeeuso2ztete already exists.
+
+
+Note that these commands will work because the working directory is ``/code`` (where the specs folder is)
 and ``./code`` is bound to the host at the root of the repository.  If you need to interact
 with files outside of this location, you should move them here.
 Note that this interaction is intended for development or testing. If you
@@ -207,3 +228,6 @@ your database to the environment:
 We have developed and tested with the postgres database, so please report any issues
 that you find if you try sqlite. If you want to try the application outside of the containers,
 this is possible (but not developed or documented yet) so please `open an issue <https://github.com/spackmon/spack-monitor>`_.
+Now that you have your container running and you've import a spec, you should
+read the :ref:`getting-started_api` docs to create a user and learn how to
+interact with your application in a RESTful, authenticated manner.

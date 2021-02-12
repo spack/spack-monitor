@@ -10,5 +10,4 @@ djangorestframework==3.11.1
 django-crispy-forms==1.11.0
 social-auth-app-django==4.0.0
 ipython
-yaml
-
+pyaml

@@ -161,8 +161,8 @@ SOCIAL_AUTH_USER_MODEL = "users.User"
 GRAVATAR_DEFAULT_IMAGE = "retro"
 
 # TODO: add authenticated views here
-authenticated_views = [
-    "spackmon.apps.api.views.UploadConfiguration",
+AUTHENTICATED_VIEWS = [
+    "spackmon.apps.api.views.configs.UploadConfig",
 ]
 
 
@@ -294,6 +294,7 @@ CACHES.update(
 
 # Rate Limiting
 
+# Set to very high values to allow for development, etc.
 VIEW_RATE_LIMIT = "1000/1d"  # The rate limit for each view, django-ratelimit, "50 per day per ipaddress)
 VIEW_RATE_LIMIT_BLOCK = (
     True  # Given that someone goes over, are they blocked for the period?

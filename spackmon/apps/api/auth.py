@@ -2,8 +2,9 @@ __author__ = "Vanessa Sochat"
 __copyright__ = "Copyright 2021, Vanessa Sochat"
 __license__ = "Apache-2.0 OR MIT"
 
+from django.conf import settings
 from django.urls import resolve
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from spackmon.settings import cfg
 
@@ -18,6 +19,9 @@ import base64
 import re
 import time
 import jwt
+
+
+User = get_user_model()
 
 
 def get_server(request):
@@ -59,14 +63,14 @@ def is_authenticated(request, scopes=None):
     # Case 2: Response will return request for auth
     user = get_user(request)
     if not user:
-        headers = {"Www-Authenticate": get_challenge(request, name, scopes=scopes)}
+        headers = {"Www-Authenticate": get_challenge(request, scopes=scopes)}
         return False, Response(status=401, headers=headers), user
 
     # Denied for any other reason
     return False, Response(status=403), user
 
 
-def generate_jwt(username, scope, realm, repository):
+def generate_jwt(username, scope, realm):
     """Given a username, scope, realm, repository, and service, generate a jwt
     token to return to the user with a default expiration of 10 minutes.
 
@@ -78,11 +82,11 @@ def generate_jwt(username, scope, realm, repository):
     """
     # The jti expires after TOKEN_EXPIRES_SECONDS
     issued_at = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-    filecache = cache.caches["django_oci_upload"]
+    filecache = cache.caches["spackmon_api"]
     jti = str(uuid.uuid4())
     filecache.set(jti, "good", timeout=cfg.API_TOKEN_EXPIRES_SECONDS)
     now = int(time.time())
-    expires_at = now + cfg.TOKEN_EXPIRES_SECONDS
+    expires_at = now + cfg.API_TOKEN_EXPIRES_SECONDS
 
     # import jwt and generate token
     # https://tools.ietf.org/html/rfc7519#section-4.1.5
@@ -95,12 +99,10 @@ def generate_jwt(username, scope, realm, repository):
         "jti": jti,
         "access": [{"type": "build", "actions": scope}],
     }
-    token = jwt.encode(payload, settings.JWT_SERVER_SECRET, algorithm="HS256").decode(
-        "utf-8"
-    )
+    token = jwt.encode(payload, settings.JWT_SERVER_SECRET, algorithm="HS256")
     return {
         "token": token,
-        "expires_in": cfg.TOKEN_EXPIRES_SECONDS,
+        "expires_in": cfg.API_TOKEN_EXPIRES_SECONDS,
         "issued_at": issued_at,
     }
 
@@ -134,13 +136,15 @@ def validate_jwt(request):
         # The user must exist
         try:
             user = User.objects.get(username=decoded.get("sub"))
+            return True, user
+
         except User.DoesNotExist:
             print("Username %s not found" % decoded.get("sub"))
             return False, None
 
         # TODO: any validation needed for access type or permissions?
 
-    return True, user
+    return False, None
 
 
 def get_user(request):
@@ -205,10 +209,9 @@ def get_challenge(request, scopes=["build"]):
     DOMAIN_NAME = get_server(request)
     if not isinstance(scopes, list):
         scopes = [scopes]
-    auth_server = settings.AUTH_SERVER or "%s/auth/token" % DOMAIN_NAME
-    return 'realm="%s",service="%s",scope="repository:%s:%s"' % (
+    auth_server = cfg.AUTH_SERVER or "%s/auth/token" % DOMAIN_NAME
+    return 'realm="%s",service="%s",scope="%s"' % (
         auth_server,
         DOMAIN_NAME,
-        repository,
         ",".join(scopes),
     )

@@ -16,6 +16,7 @@ specifics for starting with containers.
    :maxdepth: 2
 
    install
+   auth
    api
    api_tutorial
-
+   settings

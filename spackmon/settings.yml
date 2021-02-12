@@ -18,10 +18,10 @@ TWITTER_USERNAME: spackpm
 
 # Repository and Documentation
 GITHUB_REPOSITORY: https://github.com/spack/spack-monitor
-GITHUB_DOCUMENTATION: https://spack.io
+GITHUB_DOCUMENTATION: https://spack-monitor.readthedocs.io
 
 # Force use of sqlite (set to none null)
-USE_SQLITE: true
+USE_SQLITE: null
 
 # Global server settings
 ENVIRONMENT: test

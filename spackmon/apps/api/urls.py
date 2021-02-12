@@ -7,13 +7,22 @@ from django.urls import path
 
 from spackmon.settings import cfg
 import spackmon.apps.api.views as api_views
-from .permissions import AllowAnyGet
 
 urlpatterns = [
+    path(
+        "auth/token/",
+        api_views.GetAuthToken.as_view(),
+        name="auth_token",
+    ),
     path(
         "%s/" % cfg.URL_API_PREFIX,
         api_views.ServiceInfo.as_view(),
         name="service_info",
+    ),
+    path(
+        "%s/config/upload/" % cfg.URL_API_PREFIX,
+        api_views.UploadConfig.as_view(),
+        name="upload_config",
     ),
 ]
 

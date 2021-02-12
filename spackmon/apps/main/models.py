@@ -74,12 +74,21 @@ class Configuration(BaseModel):
     See the m2m signal at the bottom of this file (verify_unique_configuration)
     to see how we ensure that a Configuration cannot be duplicated.
 
-    # full_hash for top node is hash for entire specification
+    The full_hash for top node is the hash for entire specification
     """
 
     # Allow for arbitrary storage of output and error
     output = models.TextField(blank=True, null=True)
     error = models.TextField(blank=True, null=True)
+
+    # The full hash of the first package is the unique identifier for a config
+    full_hash = models.CharField(
+        max_length=50,
+        blank=False,
+        null=False,
+        unique=True,
+        help_text="The full hash of the first package is the unique identifier for the configuration.",
+    )
 
     # And a set of packages determine uniqueness
     packages = models.ManyToManyField(
@@ -263,7 +272,7 @@ class Package(BaseModel):
 
     # Parameters are less likely to be queried (we still can with json field) but we should
     # use json field to allow for more flexibility in variance or change
-    parameters = JSONField(blank=True, null=True, default="{}")
+    parameters = JSONField(blank=True, null=True, default=dict)
 
     # Dependencies are just other packages
     dependencies = models.ManyToManyField(
@@ -307,7 +316,7 @@ class Dependency(BaseModel):
     dependency_type = JSONField(
         blank=False,
         null=False,
-        default="[]",
+        default=list,
         help_text="The dependency type, e.g., build run",
     )
 

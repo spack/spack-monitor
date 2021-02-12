@@ -22,30 +22,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_configuration(packages):
-    """A configuration is unique based on it's package specs. We query
-    for a match based on a list, and if one is not found, we create a new
-    configuration with the specs.
-
-    Parameters
-    ==========
-    packages (list models.Package): a list of Package objects in the config
-    """
-    # Filter down to those with same packages (id and number)
-    existing = (
-        Configuration.objects.filter(packages__in=packages)
-        .annotate(number_packages=Count("packages"))
-        .filter(number_packages=len(packages))
-    )
-    if existing:
-        return existing.first()
-
-    config = Configuration.objects.create()
-    config.packages.set(packages)
-    config.save()
-    return config
-
-
 def get_target(meta):
     """Given a section of metadata for a target (expected to have name, vendor,
     features, and parents) create the Target objects, which includes also
@@ -106,13 +82,8 @@ def get_package(name, meta, arch=None, compiler=None):
     return package
 
 
-def import_configuration(filename):
-    """Given a post of a spec / configuration, add the configuration and
-    packages to the database. This function will likely be broken into pieces
-    when we create the API endpoints for spack (since it won't all be done at
-    once).
-    """
-
+def import_configuration_file(filename):
+    """import a configuration from file (intended to be run from the command line)"""
     filename = os.path.abspath(filename)
 
     # Tell the user it doesn't exist, but we don't want to exit or raise error
@@ -121,6 +92,15 @@ def import_configuration(filename):
         return
 
     config = read_json(filename)
+    return import_configuration(config)
+
+
+def import_configuration(config):
+    """Given a post of a spec / configuration, add the configuration and
+    packages to the database. This function will likely be broken into pieces
+    when we create the API endpoints for spack (since it won't all be done at
+    once).
+    """
 
     # We are required to have a top level spec
     if "spec" not in config:
@@ -130,9 +110,19 @@ def import_configuration(filename):
     # Keep a full list of specs for the config
     specs = []
 
-    for metadata in config["spec"]:
+    for i, metadata in enumerate(config["spec"]):
         name = list(metadata.keys())[0]
         meta = metadata[name]
+
+        # The first package has the config hash
+        if i == 0:
+            full_hash = meta["full_hash"]
+            configuration, created = Configuration.objects.get_or_create(
+                full_hash=full_hash
+            )
+            if not created:
+                print("Configuration with hash %s already exists." % full_hash)
+                return
 
         # Create target for architecture (uniqueness based on name)
         target = get_target(meta=meta["arch"]["target"])
@@ -159,5 +149,7 @@ def import_configuration(filename):
         specs.append(package)
 
     # Create the top level configuration
-    config = get_configuration(specs)
-    return config
+    configuration.packages.set(specs)
+    configuration.save()
+
+    return configuration
