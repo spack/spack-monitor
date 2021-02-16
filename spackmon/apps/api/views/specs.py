@@ -1,6 +1,7 @@
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.conf import settings
 
@@ -11,8 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
-from spackmon.settings import cfg
 from spackmon.apps.main.tasks import import_configuration
+from spackmon.settings import cfg
 from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -26,9 +27,9 @@ import re
 import json
 
 
-class UploadSpec(APIView):
-    """Given a loaded spec file as data, add to database if the user has
-    the correct permissions.
+class NewSpec(APIView):
+    """Given a loaded config (spec) file as data, add to database if the user has
+    the correct permissions. We return the top level parent package.
     """
 
     permission_classes = []
@@ -44,17 +45,29 @@ class UploadSpec(APIView):
         )
     )
     def post(self, request, *args, **kwargs):
-        """POST /v2/config/new/ to upload a new spec file"""
+        """POST /v2/specs/new/ to upload a configuration file"""
 
         # If allow_continue False, return response
         allow_continue, response, _ = is_authenticated(request)
-        print(allow_continue)
-        print(response)
-
         if not allow_continue:
             return response
 
-        print(json.loads(request.body))
+        # Generate the config
+        result = import_configuration(json.loads(request.body))
+        data = {"message": result["message"]}
 
-        # Return response that spec was created (should return an id?)
-        return Response(status=201)
+        # Created or already existed
+        if result["spec"]:
+
+            # Full data includes message, id and serialized list of package ids
+            data["data"] = result["spec"].to_dict_ids()
+
+            # Tell the user that it was created, and didn't exist
+            if result["created"]:
+                return Response(status=201, data=data)
+
+            # 409 conflict means that it already exists
+            return Response(status=200, data=data)
+
+        # 400 Bad request, there was an error parsing the data
+        return Response(status=400, data=data)

@@ -1,9 +1,10 @@
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spackmon.apps.main.models import (
-    Package,
+    Spec,
     Architecture,
     Target,
     Dependency,
@@ -47,41 +48,39 @@ def get_target(meta):
     return target
 
 
-def add_dependencies(package, dependency_lookup):
-    """Given an already created package and a lookup of dependencies (a dict
+def add_dependencies(spec, dependency_lookup):
+    """Given an already created spec and a lookup of dependencies (a dict
     where keys are the dependency (package) name and values include the hash
     and the type) add dependencies to the package, and return a list of all
-    (flattened) packages as a list to generate a configuration.
+    (flattened) specs as a list to generate a configuration.
     """
-    # Create dependencies (other packages) - they will be updated later
+    # Create dependencies (other specs) - they will be updated later
     for dep_name, dep in dependency_lookup.items():
-        dependency_package, _ = Package.objects.get_or_create(
+        dependency_spec, _ = Spec.objects.get_or_create(
             name=dep_name, full_hash=dep["hash"]
         )
         dependency, _ = Dependency.objects.get_or_create(
-            package=dependency_package, dependency_type=dep["type"]
+            spec=dependency_spec, dependency_type=dep["type"]
         )
-        package.dependencies.add(dependency)
+        spec.dependencies.add(dependency)
 
-    package.save()
-    return package
+    spec.save()
+    return spec
 
 
-def get_package(name, meta, arch=None, compiler=None):
-    """Given a package name and metadata (hash is required) get or create it"""
-    package, created = Package.objects.get_or_create(
-        name=name, full_hash=meta["full_hash"]
-    )
-    package.version = meta.get("version")
-    package.arch = arch
-    package.compiler = compiler
-    package.namespace = meta.get("namespace")
-    package.parameters = meta.get("parameters", {})
-    package.hash = meta.get("hash")
-    package.build_hash = meta.get("build_hash")
-    package.package_hash = meta.get("package_hash")
-    package.save()
-    return package, created
+def get_spec(name, meta, arch=None, compiler=None):
+    """Given a spec name and metadata (hash is required) get or create it"""
+    spec, created = Spec.objects.get_or_create(name=name, full_hash=meta["full_hash"])
+    spec.version = meta.get("version")
+    spec.arch = arch
+    spec.compiler = compiler
+    spec.namespace = meta.get("namespace")
+    spec.parameters = meta.get("parameters", {})
+    spec.hash = meta.get("hash")
+    spec.build_hash = meta.get("build_hash")
+    spec.package_hash = meta.get("package_hash")
+    spec.save()
+    return spec, created
 
 
 def import_configuration_file(filename):
@@ -99,7 +98,7 @@ def import_configuration_file(filename):
 
 def import_configuration(config):
     """Given a post of a spec / configuration, add the configuration and
-    packages to the database. We return a dictionary with three values:
+    specs to the database. We return a dictionary with three values:
     a configuration object, a boolean to indicate if it was created or not,
     and an optional message to return to the user. If None is returned
     for the configuration, this means that the data was malformed or there
@@ -109,9 +108,9 @@ def import_configuration(config):
     # We are required to have a top level spec
     if "spec" not in config:
         logging.error("spec key not found in %s" % filename)
-        return {"config": None, "created": False, "message": "spec key missing"}
+        return {"spec": None, "created": False, "message": "spec key missing"}
 
-    first_package = None
+    first_spec = None
     for i, metadata in enumerate(config["spec"]):
         name = list(metadata.keys())[0]
         meta = metadata[name]
@@ -133,15 +132,15 @@ def import_configuration(config):
                 name=meta["compiler"]["name"], version=meta["compiler"]["version"]
             )
 
-        # Create the package (hash and name are unique together)
-        package, created = get_package(name, meta, arch, compiler)
+        # Create the spec (full hash and name are unique together)
+        spec, created = get_spec(name, meta, arch, compiler)
 
         if not created:
-            package = add_dependencies(package, meta.get("dependencies", {}))
-            package.save()
+            spec = add_dependencies(spec, meta.get("dependencies", {}))
+            spec.save()
 
-        # Keep a handle on the first package
+        # Keep a handle on the first spec
         if i == 0:
-            first_package = package
+            first_spec = spec
 
-    return {"package": first_package, "created": created, "message": "success"}
+    return {"spec": first_spec, "created": created, "message": "success"}

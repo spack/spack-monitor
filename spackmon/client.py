@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spackmon.logger import setup_logger
 from django.core.wsgi import get_wsgi_application

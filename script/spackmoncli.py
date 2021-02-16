@@ -1,6 +1,7 @@
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # This class can be imported into examples cripts to easily interact
 # with a Spack Monitor interface. You can customize this for your use case,
@@ -124,7 +125,7 @@ class SpackMonitorClient:
         """Given a spec file (must be json) upload to the UploadSpec endpoint"""
         # We load as json just to validate it
         spec = read_json(filename)
-        return self.do_request("config/new/", "POST", data=json.dumps(spec))
+        return self.do_request("specs/new/", "POST", data=json.dumps(spec))
 
 
 # Helper functions

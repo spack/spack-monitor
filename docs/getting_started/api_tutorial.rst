@@ -63,7 +63,7 @@ Next, let's ping the service info endpoint.
      'updatedAt': '2021-02-11T00:06:06Z',
      'environment': 'test',
      'version': '0.0.1',
-     'auth_instructions_url': ''}
+     'auth_instructions_url': 'https://spack-monitor.readthedocs.io/en/latest/getting_started/auth.html'}
 
  
 Note that we provide this example script `service_info.py <https://github.com/spack/spack-monitor/blob/main/script/api-examples/service_info.py>`_ in the repository so you should be able to just run it to produce the example above:

@@ -1,6 +1,7 @@
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.conf.urls import url
 from django.urls import path
@@ -20,9 +21,9 @@ urlpatterns = [
         name="service_info",
     ),
     path(
-        "%s/config/new/" % cfg.URL_API_PREFIX,
-        api_views.NewConfig.as_view(),
-        name="upload_config",
+        "%s/specs/new/" % cfg.URL_API_PREFIX,
+        api_views.NewSpec.as_view(),
+        name="new_spec",
     ),
 ]
 

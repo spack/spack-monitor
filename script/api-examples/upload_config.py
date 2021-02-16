@@ -35,7 +35,6 @@ if not username or not token:
 # defaults to host=http:127.0.0.1 and prefix=ms1
 client = SpackMonitorClient()
 
-
 response = client.upload_specfile(spec_file)
 if response.status_code == 200:
     print("This package already exists in the database.")

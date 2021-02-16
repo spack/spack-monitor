@@ -1,6 +1,7 @@
-__author__ = "Vanessa Sochat"
-__copyright__ = "Copyright 2021, Vanessa Sochat"
-__license__ = "Apache-2.0 OR MIT"
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.db import models, IntegrityError
 
@@ -57,7 +58,7 @@ class BaseModel(models.Model):
 
 
 class Architecture(BaseModel):
-    """the architecture for a package. Each package only has one."""
+    """the architecture for a spec. Each spec only has one."""
 
     platform = models.CharField(
         max_length=50, blank=False, null=False, help_text="The platform (e.g., linux)"
@@ -152,9 +153,9 @@ class Target(BaseModel):
 
 
 class Compiler(BaseModel):
-    """A compiler associated with a package. I'm not sure this is going to be
-    kept in the long run (a compiler will be represented as a package) but
-    I'm adding for now since it's currently represented in a package spec.
+    """A compiler associated with a spec. I'm not sure this is going to be
+    kept in the long run (a compiler will be represented as a spec) but
+    I'm adding for now since it's currently represented in a spec spec.
     """
 
     name = models.CharField(
@@ -208,17 +209,13 @@ BUILD_STATUS = [
 ]
 
 
-class Package(BaseModel):
-    """A package corresponds with a spack package, meaning it has a version,
-    hashes, and other metadata. Since the spack package spec has dependencies
-    with only the package name and hash, these are the only two fields we can
-    require. Note that by default 'spack spec <package>' returns dependencies
-    with a build hash, but here we use the full_hash as the identifier.
+class Spec(BaseModel):
+    """A spec is a descriptor for a package, or a particular build configuration
+    for it. It doesn't just include package information, but also information
+    about a compiler, targets, and other dependnecies. Note that by default
+    'spack spec <package>' returns dependencies with a build hash, but here we
+    use the full_hash as the identifier.
     """
-
-    # Allow for arbitrary storage of output and error
-    output = models.TextField(blank=True, null=True)
-    error = models.TextField(blank=True, null=True)
 
     # States: succeed, fail, fail because dependency failed (cancelled), not run
     build_status = models.CharField(
@@ -227,7 +224,7 @@ class Package(BaseModel):
         blank=False,
         null=False,
         max_length=25,
-        help_text="The status of the package build.",
+        help_text="The status of the spec build.",
     )
 
     # REQUIRED FIELDS: The full hash is used as the unique identifier along with name
@@ -235,7 +232,7 @@ class Package(BaseModel):
         max_length=250,
         blank=False,
         null=False,
-        help_text="The package name (without version)",
+        help_text="The spec name (without version)",
     )
     full_hash = models.CharField(
         max_length=50, blank=True, null=True, help_text="The full hash", unique=True
@@ -256,14 +253,14 @@ class Package(BaseModel):
     # I'm not sure why I see this instead of build_hash after specifying to
     # use the full_hash as the identifier instead of build_hash
     package_hash = models.CharField(
-        max_length=250, blank=True, null=True, help_text="The package hash"
+        max_length=250, blank=True, null=True, help_text="The spec hash"
     )
 
     namespace = models.CharField(
-        max_length=250, blank=True, null=True, help_text="The package namespace"
+        max_length=250, blank=True, null=True, help_text="The spec namespace"
     )
     version = models.CharField(
-        max_length=50, blank=True, null=True, help_text="The package version"
+        max_length=50, blank=True, null=True, help_text="The spec version"
     )
 
     # This assumes that a package can only have one architecture
@@ -281,7 +278,7 @@ class Package(BaseModel):
     # use json field to allow for more flexibility in variance or change
     parameters = JSONField(blank=True, null=True, default=dict)
 
-    # Dependencies are just other packages
+    # Dependencies are just other specs
     dependencies = models.ManyToManyField(
         "main.Dependency",
         blank=True,
@@ -289,6 +286,10 @@ class Package(BaseModel):
         related_name="dependencies",
         related_query_name="dependencies",
     )
+
+    # Allow for arbitrary storage of output and error
+    output = models.TextField(blank=True, null=True)
+    error = models.TextField(blank=True, null=True)
 
     def print(self):
         if self.version:
@@ -299,30 +300,28 @@ class Package(BaseModel):
 
     def __str__(self):
         if self.version:
-            return "[package:%s|%s|%s]" % (self.name, self.version, self.full_hash)
-        return "[package:%s|%s]" % (self.name, self.full_hash)
+            return "[spec:%s|%s|%s]" % (self.name, self.version, self.full_hash)
+        return "[spec:%s|%s]" % (self.name, self.full_hash)
 
     def __repr__(self):
         return str(self)
 
     def to_dict_ids(self):
         """This function is intended to return a simple json response that
-        includes the configuration and package ids, but not additional
+        includes the configuration and spec ids, but not additional
         metadata. It's intended to be a lookup for a calling client to make
         additional calls.
         """
         return {
             "full_hash": self.full_hash,
-            "packages": {
-                p.package.name: p.package.full_hash for p in self.dependencies.all()
-            },
+            "specs": {p.spec.name: p.spec.full_hash for p in self.dependencies.all()},
         }
 
     def to_dict(self):
         """return the original configuration object, a list of specs"""
         specs = []
-        for package in self.packages.all():
-            specs.append(package.to_dict())
+        for spec in self.specs.all():
+            specs.append(spec.to_dict())
         return {"spec": specs}
 
     def list_dependencies(self):
@@ -338,7 +337,7 @@ class Package(BaseModel):
         """return the serialized dependency packages"""
         deps = {}
         for dep in self.dependencies.all():
-            deps[dep.package.name] = dep.package.to_dict()
+            deps[dep.spec.name] = dep.spec.to_dict()
         return deps
 
     def to_dict(self, include_deps=False):
@@ -350,8 +349,8 @@ class Package(BaseModel):
         result = {
             self.name: {
                 "version": self.version,
-                "arch": self.arch.to_dict(),
-                "compiler": self.compiler.to_dict(),
+                "arch": self.arch.to_dict() if self.arch else None,
+                "compiler": self.compiler.to_dict() if self.compiler else None,
                 "namespace": self.namespace,
                 "parameters": self.parameters,
                 "dependencies": self.list_dependencies(),
@@ -374,12 +373,12 @@ class Package(BaseModel):
 
 
 class Dependency(BaseModel):
-    """A dependency is actually just a link to a package, but it also includes
+    """A dependency is actually just a link to a spec, but it also includes
     the dependency type
     """
 
-    package = models.ForeignKey(
-        "main.Package", null=False, blank=False, on_delete=models.CASCADE
+    spec = models.ForeignKey(
+        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
     )
     dependency_type = JSONField(
         blank=False,
@@ -389,7 +388,7 @@ class Dependency(BaseModel):
     )
 
     def __str__(self):
-        return "[dependency:%s|%s]" % (self.package.name, self.dependency_type)
+        return "[dependency:%s|%s]" % (self.spec.name, self.dependency_type)
 
     def __repr__(self):
         return str(self)
@@ -399,12 +398,12 @@ class Dependency(BaseModel):
         combine them into one dict by updating based on the name as key.
         """
         return {
-            self.package.name: {
-                "hash": self.package.build_hash,
+            self.spec.name: {
+                "hash": self.spec.build_hash,
                 "type": self.dependency_type,
             }
         }
 
     class Meta:
         app_label = "main"
-        unique_together = (("package", "dependency_type"),)
+        unique_together = (("spec", "dependency_type"),)
