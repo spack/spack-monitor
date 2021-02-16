@@ -26,9 +26,9 @@ import re
 import json
 
 
-class UploadConfig(APIView):
+class NewConfig(APIView):
     """Given a loaded config file as data, add to database if the user has
-    the correct permissions.
+    the correct permissions. We return the top level parent package.
     """
 
     permission_classes = []
@@ -48,16 +48,25 @@ class UploadConfig(APIView):
 
         # If allow_continue False, return response
         allow_continue, response, _ = is_authenticated(request)
-
         if not allow_continue:
             return response
 
         # Generate the config
-        config = import_configuration(json.loads(request.body))
+        result = import_configuration(json.loads(request.body))
+        data = {"message": result["message"]}
 
-        # Tell the user that it was created
-        if config:
-            return Response(status=201)
+        # Created or already existed
+        if result["package"]:
 
-        # 409 conflict means that it already exists
-        return Response(status=409)
+            # Full data includes message, id and serialized list of package ids
+            data["data"] = result["package"].to_dict_ids()
+
+            # Tell the user that it was created, and didn't exist
+            if result["created"]:
+                return Response(status=201, data=data)
+
+            # 409 conflict means that it already exists
+            return Response(status=200, data=data)
+
+        # 400 Bad request, there was an error parsing the data
+        return Response(status=400, data=data)

@@ -46,3 +46,4 @@ API_TOKEN_EXPIRES_SECONDS: 6000
 
 # If you change the authentication server, set to non null
 AUTH_SERVER: null
+AUTH_INSTRUCTIONS: https://spack-monitor.readthedocs.io/en/latest/getting_started/auth.html

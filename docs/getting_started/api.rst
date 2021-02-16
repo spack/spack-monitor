@@ -87,6 +87,18 @@ must provide the following endpoints:
 Response Details
 ================
 
+Successful Responses
+--------------------
+
+Generally, a successful response will return a json object that shows a message
+with "success" along with a data object with metadata specific to the endpoint.
+
+.. code-block:: python
+
+    {"message": "success", "data" {...}}
+
+
+
 Errors
 ------
 
@@ -225,10 +237,10 @@ For each of the above, if the server does not return a Location header, the clie
 should issue an error.
 
 
-Upload Config
--------------
+New Config
+----------
 
-``POST /ms1/config/upload/``
+``POST /ms1/config/new/``
 
 If you have a configuration file, you can load it into Python and issue a request
 to this endpoint. The response can be any of the following:
@@ -236,7 +248,57 @@ to this endpoint. The response can be any of the following:
 - `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented
 - `201 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201>`_: success (indicates created)
 - `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
 - `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
-- `409 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409>`_: conflict (the config already exists)
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success (but the config already exists)
 
-Currently, no data is returned with the response - the code alone indicates the status.
+
+New Config Created 201
+''''''''''''''''''''''
+
+If the configuration is created, you'll get a 201 response with data that
+includes the configuration id (the full_hash) along with full hashes
+for each package included:
+
+.. code-block:: python
+
+    {
+        "message": "success",
+        "data": {
+            "full_hash": "hxkll3hd7eb7qp7oos4utjjyjq7v3kek",
+            "packages": {
+                "autoconf": "qobbaw2iiotqd6zllbmckbxacw6h2ivk",
+                "m4": "nhqxxeekukxwmss7juovorh74liclysw",
+                "libsigsegv": "r2wa677ntwzamepabphbhwfyikiyg37j",
+                "perl": "bcivb4krzgesrlcdhsz6k5ul3vlzdd7w",
+                "berkeley-db": "la233dfen54tshpywjqhjq446j7o4hqr",
+                "gdbm": "fjy3imkxjkvqemteo2pysxmuwfb32ely",
+                "readline": "gml7funyikp2tu4ngg4jiexp6otysay4",
+                "ncurses": "zuimpjfdx7gd6o3xhhzqekxazfgdgivh",
+                "pkgconf": "faqkgt22jrp7wnmqal5zsl7olisc22qk",
+                "automake": "y2mlu7ou6wx54i5qwagrviy2foeefaho",
+                "libiconv": "qhvlpedcedmc7akojaftw46i5daybsfr",
+                "libxml2": "o5bqxfuieaf37mc2gdvnfdqqthzpbmis",
+                "xz": "w7qivbfd35zjgjavs6kl36yhl6oev75y",
+                "libtool": "witmr33yv7xogeaxyynobdblkuzwenwr",
+                "openssl": "u3aemyff3aw4nnh3igoyktpwukal3zjv",
+                "zlib": "nfa3orbnlq6az76gfdesjmej62pvjh7x",
+                "hdf5": "hxkll3hd7eb7qp7oos4utjjyjq7v3kek",
+                "util-macros": "yeype6hteniz6bj3ec4dt2evcvslxi63",
+                "libevent": "xcvquzui2mjux3hg2qarpbwv42u6cnfv",
+                "openmpi": "pekjjw3a5qbgwfwktvv3jqie4veeq7m6",
+                "numactl": "bvjlcnxyyumevwp2wvc3ht2uudje7owh",
+                "hwloc": "vifktdoq6zle3rfjplmzxoltht5iral5",
+                "libpciaccess": "rr2nr5f4lxs53onoycnq47j7yhygibg2"
+            }
+        }
+    }
+
+
+New Config Already Exists 200
+'''''''''''''''''''''''''''''
+
+If the configuration in question already exists, you'll get the same data response,
+but a status code of 200 to indicate success (but not create).
+
+

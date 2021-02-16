@@ -56,66 +56,6 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class Configuration(BaseModel):
-    """A configuration is one or more packages (specs) that are being tested
-    to work together, e.g., with singularity we have cryptsetup, autoconf, etc.
-    Technically I think we have one main package and then it's dependencies,
-    but since we represent them all as a set of packages together, this model
-    of a Configuration removes the directionality and simply allows us to say
-    "These packages (names and versions unique) are represented together for
-    this configuration. In the spack landscape, it would be exported to
-    json/yaml with the top level "spec" and each entry under that a
-    package name. For example:
-
-    {"spec": {"singularity": .. , "cryptsetup": ...}}
-
-    Since packages can be shared between configurations, we use a many to many
-    field so each configuration can point to the set of packages that it needs.
-    See the m2m signal at the bottom of this file (verify_unique_configuration)
-    to see how we ensure that a Configuration cannot be duplicated.
-
-    The full_hash for top node is the hash for entire specification
-    """
-
-    # Allow for arbitrary storage of output and error
-    output = models.TextField(blank=True, null=True)
-    error = models.TextField(blank=True, null=True)
-
-    # The full hash of the first package is the unique identifier for a config
-    full_hash = models.CharField(
-        max_length=50,
-        blank=False,
-        null=False,
-        unique=True,
-        help_text="The full hash of the first package is the unique identifier for the configuration.",
-    )
-
-    # And a set of packages determine uniqueness
-    packages = models.ManyToManyField(
-        "main.Package",
-        blank=True,
-        default=None,
-        related_name="packages",
-        related_query_name="packages",
-    )
-
-    def print(self):
-        for package in self.packages.order_by("name"):
-            package.print()
-
-    # TODO: generate an export function (to json or yaml) OR we could just save
-    # the original config file (but it might not exist)
-
-    def __str__(self):
-        return "[configuration:%s packages]" % self.packages.count()
-
-    def __repr__(self):
-        return str(self)
-
-    class Meta:
-        app_label = "main"
-
-
 class Architecture(BaseModel):
     """the architecture for a package. Each package only has one."""
 
@@ -137,6 +77,13 @@ class Architecture(BaseModel):
 
     def __repr__(self):
         return str(self)
+
+    def to_dict(self):
+        return {
+            "platform": self.platform,
+            "platform_os": self.platform_os,
+            "target": self.target.to_dict(),
+        }
 
     class Meta:
         app_label = "main"
@@ -175,6 +122,14 @@ class Target(BaseModel):
         related_query_name="targets",
     )
 
+    def list_features(self):
+        """Return the features as a list of strings"""
+        return [x.name for x in self.features.all()]
+
+    def list_parents(self):
+        """Return the parents as a list of strings"""
+        return [x.name for x in self.parents.all()]
+
     def __str__(self):
         if self.vendor:
             return "[target:%s|%s]" % (self.name, self.vendor)
@@ -182,6 +137,15 @@ class Target(BaseModel):
 
     def __repr__(self):
         return str(self)
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "vendor": self.vendor,
+            "features": self.list_features(),
+            "generation": self.generation,
+            "parents": self.list_parents(),
+        }
 
     class Meta:
         app_label = "main"
@@ -206,6 +170,10 @@ class Compiler(BaseModel):
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        """Dump the data back into it's original dictionary representation"""
+        return {"name": self.name, "version": self.version}
+
     class Meta:
         app_label = "main"
 
@@ -219,6 +187,12 @@ class Feature(BaseModel):
         max_length=50, blank=False, null=False, help_text="The name of the feature"
     )
 
+    def to_dict(self):
+        """It's unlikely that we want a single feature in a list, but we provide
+        this function to be consistent with the other models
+        """
+        return [self.name]
+
     def __str__(self):
         return "[feature:%s]" % self.name
 
@@ -226,21 +200,52 @@ class Feature(BaseModel):
         return str(self)
 
 
+BUILD_STATUS = [
+    ("CANCELLED", "CANCELLED"),
+    ("SUCCESS", "SUCCESS"),
+    ("NOTRUN", "NOTRUN"),
+    ("FAILED", "FAILED"),
+]
+
+
 class Package(BaseModel):
-    """A package corresponds with a package, meaning it has a version, hashes,
-    and other metadata. Since the spack package spec has dependencies with only
-    the package name and hash, these are the only two fields we can require.
+    """A package corresponds with a spack package, meaning it has a version,
+    hashes, and other metadata. Since the spack package spec has dependencies
+    with only the package name and hash, these are the only two fields we can
+    require. Note that by default 'spack spec <package>' returns dependencies
+    with a build hash, but here we use the full_hash as the identifier.
     """
 
-    # REQUIRED FIELDS: The hash is used as the unique identifier along with name
+    # Allow for arbitrary storage of output and error
+    output = models.TextField(blank=True, null=True)
+    error = models.TextField(blank=True, null=True)
+
+    # States: succeed, fail, fail because dependency failed (cancelled), not run
+    build_status = models.CharField(
+        choices=BUILD_STATUS,
+        default="NOTRUN",
+        blank=False,
+        null=False,
+        max_length=25,
+        help_text="The status of the package build.",
+    )
+
+    # REQUIRED FIELDS: The full hash is used as the unique identifier along with name
     name = models.CharField(
         max_length=250,
         blank=False,
         null=False,
         help_text="The package name (without version)",
     )
+    full_hash = models.CharField(
+        max_length=50, blank=True, null=True, help_text="The full hash", unique=True
+    )
+
     build_hash = models.CharField(
-        max_length=50, blank=True, null=True, help_text="The build hash", unique=True
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="The build hash",
     )
 
     # OPTIONAL FIELDS: We might not have all these at creation time
@@ -248,15 +253,17 @@ class Package(BaseModel):
         max_length=50, blank=False, null=False, help_text="The hash"
     )
 
+    # I'm not sure why I see this instead of build_hash after specifying to
+    # use the full_hash as the identifier instead of build_hash
+    package_hash = models.CharField(
+        max_length=250, blank=True, null=True, help_text="The package hash"
+    )
+
     namespace = models.CharField(
         max_length=250, blank=True, null=True, help_text="The package namespace"
     )
     version = models.CharField(
         max_length=50, blank=True, null=True, help_text="The package version"
-    )
-
-    full_hash = models.CharField(
-        max_length=50, blank=True, null=True, help_text="The full hash"
     )
 
     # This assumes that a package can only have one architecture
@@ -286,23 +293,84 @@ class Package(BaseModel):
     def print(self):
         if self.version:
             name = "%s v%s" % (self.name, self.version)
-            print("%-35s %-35s" % (name, self.hash))
+            print("%-35s %-35s" % (name, self.full_hash))
         else:
-            print("%-35s %-35s" % (self.name, self.hash))
+            print("%-35s %-35s" % (self.name, self.full_hash))
 
     def __str__(self):
         if self.version:
-            return "[package:%s|%s|%s]" % (self.name, self.version, self.hash)
-        return "[package:%s|%s]" % (self.name, self.hash)
+            return "[package:%s|%s|%s]" % (self.name, self.version, self.full_hash)
+        return "[package:%s|%s]" % (self.name, self.full_hash)
 
     def __repr__(self):
         return str(self)
 
-    # TODO: have a function to easily add a dependency based on hash
+    def to_dict_ids(self):
+        """This function is intended to return a simple json response that
+        includes the configuration and package ids, but not additional
+        metadata. It's intended to be a lookup for a calling client to make
+        additional calls.
+        """
+        return {
+            "full_hash": self.full_hash,
+            "packages": {
+                p.package.name: p.package.full_hash for p in self.dependencies.all()
+            },
+        }
+
+    def to_dict(self):
+        """return the original configuration object, a list of specs"""
+        specs = []
+        for package in self.packages.all():
+            specs.append(package.to_dict())
+        return {"spec": specs}
+
+    def list_dependencies(self):
+        """Loop through associated dependencies and return a single dictionary,
+        with the key as the dependency name
+        """
+        deps = {}
+        for dep in self.dependencies.all():
+            deps.update(dep.to_dict())
+        return deps
+
+    def to_dict_dependencies(self):
+        """return the serialized dependency packages"""
+        deps = {}
+        for dep in self.dependencies.all():
+            deps[dep.package.name] = dep.package.to_dict()
+        return deps
+
+    def to_dict(self, include_deps=False):
+        """We return a dictionary with the package name as key, metadata as
+        another dictionary as the main item. This should mimic the original
+        spec json object imported.
+        """
+
+        result = {
+            self.name: {
+                "version": self.version,
+                "arch": self.arch.to_dict(),
+                "compiler": self.compiler.to_dict(),
+                "namespace": self.namespace,
+                "parameters": self.parameters,
+                "dependencies": self.list_dependencies(),
+                "hash": self.hash,
+                "full_hash": self.full_hash,
+                "build_hash": self.build_hash,
+                "package_hash": self.package_hash,
+            }
+        }
+
+        # Do we want to also dump the dependency packages?
+        if include_deps:
+            result.update(self.to_dict_dependencies())
+
+        return result
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "build_hash"),)
+        unique_together = (("name", "full_hash"),)
 
 
 class Dependency(BaseModel):
@@ -320,42 +388,23 @@ class Dependency(BaseModel):
         help_text="The dependency type, e.g., build run",
     )
 
-    # TODO: have a function to easily add / remove a type
-
     def __str__(self):
         return "[dependency:%s|%s]" % (self.package.name, self.dependency_type)
 
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        """If we return a single dependency as a dict, the configuration can
+        combine them into one dict by updating based on the name as key.
+        """
+        return {
+            self.package.name: {
+                "hash": self.package.build_hash,
+                "type": self.dependency_type,
+            }
+        }
+
     class Meta:
         app_label = "main"
         unique_together = (("package", "dependency_type"),)
-
-
-@receiver(m2m_changed, sender=Configuration.packages.through)
-def verify_unique_configuration(sender, **kwargs):
-    """This is a many to many manager signal that ensures that the packages
-    (names and versions) provided to the Configuration model are unique.
-    This would prevent us from adding the same configuration twice. Since
-    packages are unique based on name and version, we can do this check by
-    way of ensuring that no other configurations exist with exactly those
-    packages.
-    """
-    action = kwargs.get("action", None)
-    packages = kwargs.get("pk_set", None)
-
-    if action == "pre_add":
-
-        # Filter down to those with same packages (id and number)
-        contenders = (
-            Configuration.objects.filter(packages__in=packages)
-            .annotate(number_packages=Count("packages"))
-            .filter(number_packages=len(packages))
-        ).count()
-
-        # If we have a result, this means the Configuration already exists
-        if contenders > 0:
-            raise IntegrityError(
-                "Configuration already exists for packages %s" % packages
-            )

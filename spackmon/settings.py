@@ -162,7 +162,7 @@ GRAVATAR_DEFAULT_IMAGE = "retro"
 
 # TODO: add authenticated views here
 AUTHENTICATED_VIEWS = [
-    "spackmon.apps.api.views.configs.UploadConfig",
+    "spackmon.apps.api.views.configs.NewConfig",
 ]
 
 

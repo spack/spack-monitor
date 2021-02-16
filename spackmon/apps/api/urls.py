@@ -20,8 +20,8 @@ urlpatterns = [
         name="service_info",
     ),
     path(
-        "%s/config/upload/" % cfg.URL_API_PREFIX,
-        api_views.UploadConfig.as_view(),
+        "%s/config/new/" % cfg.URL_API_PREFIX,
+        api_views.NewConfig.as_view(),
         name="upload_config",
     ),
 ]

@@ -12,6 +12,7 @@ from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
 from spackmon.settings import cfg
+from spackmon.apps.main.tasks import import_configuration
 from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -43,7 +44,7 @@ class UploadSpec(APIView):
         )
     )
     def post(self, request, *args, **kwargs):
-        """POST /v2/config/upload to upload a spec file"""
+        """POST /v2/config/new/ to upload a new spec file"""
 
         # If allow_continue False, return response
         allow_continue, response, _ = is_authenticated(request)
@@ -53,7 +54,7 @@ class UploadSpec(APIView):
         if not allow_continue:
             return response
 
-        print(request.body)
+        print(json.loads(request.body))
 
-        # Return response that spec was created
+        # Return response that spec was created (should return an id?)
         return Response(status=201)

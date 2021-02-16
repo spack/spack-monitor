@@ -9,6 +9,7 @@
 
 import base64
 import os
+import json
 import requests
 import sys
 
@@ -34,9 +35,10 @@ if not username or not token:
 # defaults to host=http:127.0.0.1 and prefix=ms1
 client = SpackMonitorClient()
 
-# TODO: should return the GET endpoint equivalent
+
 response = client.upload_specfile(spec_file)
-if response.status_code == 409:
-    print("This configuration already exists in the database.")
+if response.status_code == 200:
+    print("This package already exists in the database.")
 elif response.status_code == 201:
-    print("The configuration was successfully created.")
+    print("The package was successfully created.")
+print(json.dumps(response.json(), indent=4))

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden, JsonResponse
-from spackmon.apps.main.models import Configuration
+from spackmon.apps.main.models import Package
 import os
 
 from ratelimit.decorators import ratelimit
@@ -23,6 +23,6 @@ from spackmon.settings import (
 @login_required
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def index(request):
-    # All users can see all configurations
-    configs = Configuration.objects.all()
-    return render(request, "main/index.html", {"configs": configs})
+    # All users can see all packages
+    packages = Package.objects.all()
+    return render(request, "main/index.html", {"packages": packages})

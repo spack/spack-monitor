@@ -39,15 +39,13 @@ class SpackMonitorClient:
         self.set_header("Authorization", "Basic %s" % auth_header.decode("utf-8"))
 
     def reset(self):
-        """Reset and prepare for a new request.
-        """
+        """Reset and prepare for a new request."""
         if "Authorization" in self.headers:
-            self.headers = {"Authorization": self.headers['Authorization']}
+            self.headers = {"Authorization": self.headers["Authorization"]}
         else:
             self.headers = {}
 
-    def do_request(
-        self, endpoint, method="GET", data=None, headers=None):
+    def do_request(self, endpoint, method="GET", data=None, headers=None):
         """Do a request. This is a wrapper around requests."""
 
         # Always reset headers for new request.
@@ -92,13 +90,19 @@ class SpackMonitorClient:
 
         # Prepare request to retry
         h = parse_auth_header(authHeaderRaw)
-        headers.update({"service": h.Service, "Accept": "application/json", "User-Agent": "spackmoncli"})
+        headers.update(
+            {
+                "service": h.Service,
+                "Accept": "application/json",
+                "User-Agent": "spackmoncli",
+            }
+        )
 
         # Currently we don't set a scope (it defaults to build)
         authResponse = self.session.request("GET", h.Realm, headers=headers)
         if authResponse.status_code != 200:
             return False
-            
+
         # Request the token
         info = authResponse.json()
         token = info.get("token")
@@ -108,7 +112,6 @@ class SpackMonitorClient:
         # Set the token to the original request and retry
         self.headers.update({"Authorization": "Bearer %s" % token})
         return True
-
 
     # Functions correspond to endpoints
     def service_info(self):
@@ -121,9 +124,11 @@ class SpackMonitorClient:
         """Given a spec file (must be json) upload to the UploadSpec endpoint"""
         # We load as json just to validate it
         spec = read_json(filename)
-        return self.do_request("config/upload/", "POST", data=json.dumps(spec))
+        return self.do_request("config/new/", "POST", data=json.dumps(spec))
+
 
 # Helper functions
+
 
 def parse_auth_header(authHeaderRaw):
     """parse authentication header into pieces"""
@@ -142,10 +147,12 @@ class authHeader:
             if key in ["realm", "service", "scope"]:
                 setattr(self, key.capitalize(), lookup[key])
 
+
 def read_file(filename):
-    with open(filename, 'r') as fd:
+    with open(filename, "r") as fd:
         content = fd.read()
     return content
-        
+
+
 def read_json(filename):
     return json.loads(read_file(filename))

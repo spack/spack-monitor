@@ -3,7 +3,6 @@ __copyright__ = "Copyright 2021, Vanessa Sochat"
 __license__ = "Apache-2.0 OR MIT"
 
 from spackmon.apps.main.models import (
-    Configuration,
     Package,
     Architecture,
     Target,
@@ -57,7 +56,7 @@ def add_dependencies(package, dependency_lookup):
     # Create dependencies (other packages) - they will be updated later
     for dep_name, dep in dependency_lookup.items():
         dependency_package, _ = Package.objects.get_or_create(
-            name=dep_name, build_hash=dep["hash"]
+            name=dep_name, full_hash=dep["hash"]
         )
         dependency, _ = Dependency.objects.get_or_create(
             package=dependency_package, dependency_type=dep["type"]
@@ -70,16 +69,19 @@ def add_dependencies(package, dependency_lookup):
 
 def get_package(name, meta, arch=None, compiler=None):
     """Given a package name and metadata (hash is required) get or create it"""
-    package, _ = Package.objects.get_or_create(name=name, build_hash=meta["build_hash"])
+    package, created = Package.objects.get_or_create(
+        name=name, full_hash=meta["full_hash"]
+    )
     package.version = meta.get("version")
     package.arch = arch
     package.compiler = compiler
     package.namespace = meta.get("namespace")
     package.parameters = meta.get("parameters", {})
     package.hash = meta.get("hash")
-    package.full_hash = meta.get("full_hash")
+    package.build_hash = meta.get("build_hash")
+    package.package_hash = meta.get("package_hash")
     package.save()
-    return package
+    return package, created
 
 
 def import_configuration_file(filename):
@@ -97,32 +99,22 @@ def import_configuration_file(filename):
 
 def import_configuration(config):
     """Given a post of a spec / configuration, add the configuration and
-    packages to the database. This function will likely be broken into pieces
-    when we create the API endpoints for spack (since it won't all be done at
-    once).
+    packages to the database. We return a dictionary with three values:
+    a configuration object, a boolean to indicate if it was created or not,
+    and an optional message to return to the user. If None is returned
+    for the configuration, this means that the data was malformed or there
+    was another issue with creating it.
     """
 
     # We are required to have a top level spec
     if "spec" not in config:
         logging.error("spec key not found in %s" % filename)
-        return
+        return {"config": None, "created": False, "message": "spec key missing"}
 
-    # Keep a full list of specs for the config
-    specs = []
-
+    first_package = None
     for i, metadata in enumerate(config["spec"]):
         name = list(metadata.keys())[0]
         meta = metadata[name]
-
-        # The first package has the config hash
-        if i == 0:
-            full_hash = meta["full_hash"]
-            configuration, created = Configuration.objects.get_or_create(
-                full_hash=full_hash
-            )
-            if not created:
-                print("Configuration with hash %s already exists." % full_hash)
-                return
 
         # Create target for architecture (uniqueness based on name)
         target = get_target(meta=meta["arch"]["target"])
@@ -142,14 +134,14 @@ def import_configuration(config):
             )
 
         # Create the package (hash and name are unique together)
-        package = get_package(name, meta, arch, compiler)
+        package, created = get_package(name, meta, arch, compiler)
 
-        # Return a list of all packages (the main package and deps)
-        package = add_dependencies(package, meta.get("dependencies", {}))
-        specs.append(package)
+        if not created:
+            package = add_dependencies(package, meta.get("dependencies", {}))
+            package.save()
 
-    # Create the top level configuration
-    configuration.packages.set(specs)
-    configuration.save()
+        # Keep a handle on the first package
+        if i == 0:
+            first_package = package
 
-    return configuration
+    return {"package": first_package, "created": created, "message": "success"}

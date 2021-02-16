@@ -102,19 +102,37 @@ we find this token in the environment, and add it as a base64 encoded authorizat
     $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
 
 
-If you haven't added it yet (the full hash of the first spec is the unique id) you'll
+If you haven't added it yet (the full hash of the first package in the file is the unique id) you'll
 see that it was added:
 
 .. code-block:: console
 
     $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
-    The configuration was successfully created.
+    The package was successfully created.
+    {
+        "message": "success",
+        "data": {
+            "full_hash": "xttimnxa2kc4rc33axvrcpzejiil6wbn",
+            "packages": {
+                "cryptsetup": "4riqvvabzho7qyzxumc7csmtcatnfbqd",
+                "go": "2dhsyo2cvpyft5u2ptza7j7kvk5r6626",
+                "libgpg-error": "5fmyz5bhnsaw5vvtbgt3m6cujrw2ajbc",
+                "libseccomp": "3mmhto5wulorfps33lzkzr5ynyanmefn",
+                "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                "squashfs": "mxfspfx44aforrx6shx6r6nu3th6mca3",
+                "util-linux-uuid": "46cwzqnbfi3xdxlrm76z5gazhvog3n3t"
+            }
+        }
+    }
 
-If you've already added it, you'll see:
+That's a hint of the metadata that can be returned to a calling client.
+In the context of spack, we actually don't need to pass around this metadata,
+because spack always carries a representation of a package's full hash
+and dependencies. If you've already added the package, you'll see:
 
 .. code-block:: console
 
     $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
-    This configuration already exists in the database.
+    This package already exists in the database.
 
 

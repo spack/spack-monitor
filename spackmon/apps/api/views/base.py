@@ -42,7 +42,7 @@ class ServiceInfo(RatelimitMixin, APIView):
             "environment": cfg.ENVIRONMENT,
             "version": __version__,
             # TODO: We will provide this for the user to authenticate
-            "auth_instructions_url": "",
+            "auth_instructions_url": cfg.AUTH_INSTRUCTIONS,
         }
 
         # Must make model json serializable
