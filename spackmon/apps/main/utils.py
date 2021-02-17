@@ -9,6 +9,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Valid build statuses
+
+BUILD_STATUS = [
+    ("CANCELLED", "CANCELLED"),
+    ("SUCCESS", "SUCCESS"),
+    ("NOTRUN", "NOTRUN"),
+    ("FAILED", "FAILED"),
+]
+
 
 def read_json(filename):
     with open(filename, "r") as fd:

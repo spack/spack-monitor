@@ -15,6 +15,7 @@ from importlib import import_module
 # Build paths inside the project with the base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 # The spackmon global conflict contains all settings.
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.yml")
 if not os.path.exists(SETTINGS_FILE):
@@ -50,7 +51,7 @@ for key, value in cfg:
     if envar:
         setattr(cfg, key, envar)
 
-# Secret Key
+# Secret Key and Dates
 
 
 def generate_secret_keys(filename):
@@ -61,6 +62,13 @@ def generate_secret_keys(filename):
             fd.writelines("%s = '%s'\n" % (keyname, key))
 
 
+def generate_creation_date(filename):
+    """Keep track of when the server was generated for metadata"""
+    created_at = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    with open(filename, "w") as fd:
+        fd.writelines("SERVER_CREATION_DATE = '%s'\n" % created_at)
+
+
 # Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
 JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
@@ -69,9 +77,15 @@ if not SECRET_KEY or not JWT_SERVER_SECRET:
     try:
         from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
     except ImportError:
-        SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
-        generate_secret_keys(os.path.join(SETTINGS_DIR, "secret_key.py"))
+        generate_secret_keys(os.path.join(BASE_DIR, "secret_key.py"))
         from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
+
+# A record of the server creation date
+try:
+    from .creation_date import SERVER_CREATION_DATE
+except ImportError:
+    generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
+    from .creation_date import SERVER_CREATION_DATE
 
 # Set the domain name
 DOMAIN_NAME = cfg.DOMAIN_NAME

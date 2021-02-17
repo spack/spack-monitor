@@ -45,7 +45,7 @@ class NewSpec(APIView):
         )
     )
     def post(self, request, *args, **kwargs):
-        """POST /v2/specs/new/ to upload a configuration file"""
+        """POST /ms1/specs/new/ to upload a specs file"""
 
         # If allow_continue False, return response
         allow_continue, response, _ = is_authenticated(request)
@@ -66,7 +66,7 @@ class NewSpec(APIView):
             if result["created"]:
                 return Response(status=201, data=data)
 
-            # 409 conflict means that it already exists
+            # 200 is success, but already exists
             return Response(status=200, data=data)
 
         # 400 Bad request, there was an error parsing the data

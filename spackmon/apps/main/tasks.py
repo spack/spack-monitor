@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+from django.shortcuts import get_object_or_404
+
 from spackmon.apps.main.models import (
     Spec,
     Architecture,
@@ -13,13 +15,27 @@ from spackmon.apps.main.models import (
 )
 from spackmon.apps.main.utils import read_json
 
-from django.db.models import Count
 import os
 import re
 
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def update_task_status(full_hash, status):
+    """Given a full hash to identify a spec and a status, update the status
+    for the spec. Given that we are cancelling a spec, this means that all
+    dependencies are cancelled too.
+    """
+    spec = get_object_or_404(Spec, full_hash=full_hash)
+    if spec:
+        spec.build_status = status
+        spec.save()
+
+        # If we cancel or fail, cancel all dependencies that were not successful
+        if status in ["CANCELLED", "FAILED"]:
+            spec.cancel_dependencies()
 
 
 def get_target(meta):
@@ -135,7 +151,8 @@ def import_configuration(config):
         # Create the spec (full hash and name are unique together)
         spec, created = get_spec(name, meta, arch, compiler)
 
-        if not created:
+        # Add dependencies if not added yet
+        if spec.dependencies.count() == 0:
             spec = add_dependencies(spec, meta.get("dependencies", {}))
             spec.save()
 

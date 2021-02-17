@@ -12,6 +12,7 @@ from django.db.models import Field, Count
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
+from .utils import BUILD_STATUS
 
 import json
 
@@ -201,14 +202,6 @@ class Feature(BaseModel):
         return str(self)
 
 
-BUILD_STATUS = [
-    ("CANCELLED", "CANCELLED"),
-    ("SUCCESS", "SUCCESS"),
-    ("NOTRUN", "NOTRUN"),
-    ("FAILED", "FAILED"),
-]
-
-
 class Spec(BaseModel):
     """A spec is a descriptor for a package, or a particular build configuration
     for it. It doesn't just include package information, but also information
@@ -305,6 +298,15 @@ class Spec(BaseModel):
 
     def __repr__(self):
         return str(self)
+
+    def cancel_dependencies(self):
+        """Given that a spec is failed or cancelled, we also cancel any
+        dependencies that aren't already successful.
+        """
+        for dep in self.dependencies.all():
+            if dep.package.build_status != "SUCCESS":
+                dep.package.build_status = "CANCELLED"
+                dep.package.save()
 
     def to_dict_ids(self):
         """This function is intended to return a simple json response that

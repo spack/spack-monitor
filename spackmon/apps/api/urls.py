@@ -25,6 +25,11 @@ urlpatterns = [
         api_views.NewSpec.as_view(),
         name="new_spec",
     ),
+    path(
+        "%s/tasks/update/" % cfg.URL_API_PREFIX,
+        api_views.UpdateTaskStatus.as_view(),
+        name="update_task_status",
+    ),
 ]
 
 

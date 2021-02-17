@@ -31,18 +31,16 @@ class ServiceInfo(RatelimitMixin, APIView):
 
         data = {
             "id": "spackmon",
-            "status": "running",  # Extra field looked for by Snakemake
+            "status": "running",
             "name": "Spack Monitor (Spackmon)",
             "description": "This service provides a database to monitor spack builds.",
             "organization": {"name": "spack", "url": "https://github.com/spack"},
             "contactUrl": cfg.HELP_CONTACT_URL,
             "documentationUrl": "https://spack-monitor.readthedocs.io",
-            # This is when the function was written, should be when server created
-            "createdAt": "2021-02-10T10:40:19Z",
+            "createdAt": settings.SERVER_CREATION_DATE,
             "updatedAt": cfg.UPDATED_AT,
             "environment": cfg.ENVIRONMENT,
             "version": __version__,
-            # TODO: We will provide this for the user to authenticate
             "auth_instructions_url": cfg.AUTH_INSTRUCTIONS,
         }
 

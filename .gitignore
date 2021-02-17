@@ -1,5 +1,6 @@
 backup/
 secret_key.py
+creation_date.py
 app.yaml
 app-dev.yaml
 *.pyc

@@ -87,46 +87,20 @@ must provide the following endpoints:
 Response Details
 ================
 
-Successful Responses
---------------------
-
-Generally, a successful response will return a json object that shows a message
-with "success" along with a data object with metadata specific to the endpoint.
+Generally, a response will return a json object that shows a message. A successful
+response will have a message of "success" to go along with a 200 or 201 response code,
+while an unsuccessful response will have a message indicating the error, and an error
+code (e.g., 400, 500, etc.). Each reponse will have metadata specific to the endpoint.
 
 .. code-block:: python
 
     {"message": "success", "data" {...}}
 
 
-
-Errors
-------
-
-For all error responses, the server can (OPTIONAL) return in the body a nested structure of errors,
-each including a message and error code. For example:
-
-
-.. code-block:: python
-
-    {
-        "errors": [
-            {
-                "code": "<error code>",
-                "message": "<error message>",
-                "detail": ...
-            },
-            ...
-        ]
-    }
-
-
-Currently we don't have a namespace for errors, but this can be developed if/when needed.
-For now, the code can be a standard server error code.
-
 Timestamps
 ----------
 
-For all fields that return a timestamp, we are tentatively going to use the stringified
+For all fields that will return a timestamp, we are tentatively going to use the stringified
 version of a ``datetime.now()``, which looks like this:
 
 .. code-block:: console
@@ -237,12 +211,12 @@ For each of the above, if the server does not return a Location header, the clie
 should issue an error.
 
 
-New Config
-----------
+New Spec
+--------
 
-``POST /ms1/config/new/``
+``POST /ms1/specs/new/``
 
-If you have a configuration file, you can load it into Python and issue a request
+If you have a spec configuration file, you can load it into Python and issue a request
 to this endpoint. The response can be any of the following:
 
 - `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented
@@ -256,7 +230,7 @@ to this endpoint. The response can be any of the following:
 New Config Created 201
 ''''''''''''''''''''''
 
-If the configuration is created, you'll get a 201 response with data that
+If the set of specs are created from the configuration file, you'll get a 201 response with data that
 includes the configuration id (the full_hash) along with full hashes
 for each package included:
 
@@ -265,34 +239,20 @@ for each package included:
     {
         "message": "success",
         "data": {
-            "full_hash": "hxkll3hd7eb7qp7oos4utjjyjq7v3kek",
+            "full_hash": "xttimnxa2kc4rc33axvrcpzejiil6wbn",
             "packages": {
-                "autoconf": "qobbaw2iiotqd6zllbmckbxacw6h2ivk",
-                "m4": "nhqxxeekukxwmss7juovorh74liclysw",
-                "libsigsegv": "r2wa677ntwzamepabphbhwfyikiyg37j",
-                "perl": "bcivb4krzgesrlcdhsz6k5ul3vlzdd7w",
-                "berkeley-db": "la233dfen54tshpywjqhjq446j7o4hqr",
-                "gdbm": "fjy3imkxjkvqemteo2pysxmuwfb32ely",
-                "readline": "gml7funyikp2tu4ngg4jiexp6otysay4",
-                "ncurses": "zuimpjfdx7gd6o3xhhzqekxazfgdgivh",
-                "pkgconf": "faqkgt22jrp7wnmqal5zsl7olisc22qk",
-                "automake": "y2mlu7ou6wx54i5qwagrviy2foeefaho",
-                "libiconv": "qhvlpedcedmc7akojaftw46i5daybsfr",
-                "libxml2": "o5bqxfuieaf37mc2gdvnfdqqthzpbmis",
-                "xz": "w7qivbfd35zjgjavs6kl36yhl6oev75y",
-                "libtool": "witmr33yv7xogeaxyynobdblkuzwenwr",
-                "openssl": "u3aemyff3aw4nnh3igoyktpwukal3zjv",
-                "zlib": "nfa3orbnlq6az76gfdesjmej62pvjh7x",
-                "hdf5": "hxkll3hd7eb7qp7oos4utjjyjq7v3kek",
-                "util-macros": "yeype6hteniz6bj3ec4dt2evcvslxi63",
-                "libevent": "xcvquzui2mjux3hg2qarpbwv42u6cnfv",
-                "openmpi": "pekjjw3a5qbgwfwktvv3jqie4veeq7m6",
-                "numactl": "bvjlcnxyyumevwp2wvc3ht2uudje7owh",
-                "hwloc": "vifktdoq6zle3rfjplmzxoltht5iral5",
-                "libpciaccess": "rr2nr5f4lxs53onoycnq47j7yhygibg2"
+                "cryptsetup": "4riqvvabzho7qyzxumc7csmtcatnfbqd",
+                "go": "2dhsyo2cvpyft5u2ptza7j7kvk5r6626",
+                "libgpg-error": "5fmyz5bhnsaw5vvtbgt3m6cujrw2ajbc",
+                "libseccomp": "3mmhto5wulorfps33lzkzr5ynyanmefn",
+                "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                "squashfs": "mxfspfx44aforrx6shx6r6nu3th6mca3",
+                "util-linux-uuid": "46cwzqnbfi3xdxlrm76z5gazhvog3n3t"
             }
         }
     }
+
+All of the above are full hashes, which we can use as unique identifiers for the builds.
 
 
 New Config Already Exists 200
@@ -302,3 +262,29 @@ If the configuration in question already exists, you'll get the same data respon
 but a status code of 200 to indicate success (but not create).
 
 
+
+Update Build Task Status
+------------------------
+
+``POST /ms1/tasks/update/``
+
+When Spack is running builds, each spec will either succeed or fail. In each case,
+we need to update Spack Monitor with the status for the spec. The default status for
+a build task is ``NOTRUN``. Once the builds start, given a failure,
+this means that the spec that failed is marked as ``FAILURE``, and the main spec 
+along with the other specs that were not installed are marked as ``CANCELLED``.
+In the case of success for any package, we mark with ``SUCCESS``. If Spack has a setting
+to "rollback" we will need to account for that (not currently implemented).
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented or spec not found
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+
+Build Task Updated 200
+''''''''''''''''''''''
+
+When you want to update the status of a spec build, a successful update will
+return a 200 response.
