@@ -3,14 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from django.db import models, IntegrityError
-
-
+from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
-from django.db.models.signals import m2m_changed
-from django.dispatch import receiver
 
 from .utils import BUILD_STATUS
 
@@ -280,9 +276,19 @@ class Spec(BaseModel):
         related_query_name="dependencies",
     )
 
+    # Dependencies are just other specs
+    envars = models.ManyToManyField(
+        "main.EnvironmentVariable",
+        blank=True,
+        default=None,
+        related_name="envars",
+        related_query_name="envars",
+    )
+
     # Allow for arbitrary storage of output and error
     output = models.TextField(blank=True, null=True)
     error = models.TextField(blank=True, null=True)
+    config_args = models.TextField(blank=True, null=True)
 
     def print(self):
         if self.version:
@@ -304,9 +310,48 @@ class Spec(BaseModel):
         dependencies that aren't already successful.
         """
         for dep in self.dependencies.all():
-            if dep.package.build_status != "SUCCESS":
-                dep.package.build_status = "CANCELLED"
-                dep.package.save()
+            if dep.spec.build_status != "SUCCESS":
+                dep.spec.build_status = "CANCELLED"
+                dep.spec.save()
+
+    def update_envars(self, envars):
+        """Given a dictionary of key value pairs, update the associated
+        environment variables. Since a build can be updated, we first
+        remove any associated environment variables.
+        """
+        # Delete existing environment variables not associated elsewhere
+        self.envars.annotate(num_specs=Count("spec")).filter(num_specs=1).delete()
+        new_envars = []
+        for key, value in envars.items():
+            new_envar, _ = EnvironmentVariable.objects.get_or_create(
+                key=key, value=value
+            )
+            new_envars.append(new_envar)
+
+        # This does bulk save / update to database
+        self.envars.add(new_envars)
+
+    def update_install_files(self, manifest):
+        """Given a spack install manifest, update the spec to include the
+        files. Since files are uniquely associated with a spec, and it could
+        be the case that a package is updated, we remove previous files before
+        adding new ones. We also remove the prefix so the files are relative
+        to the spack installation directory
+        """
+        # Delete existing manifest files
+        InstallFile.objects.filter(spec=self).delete()
+        for filename, attrs in manifest.items():
+
+            # Store path after /spack/opt/spack
+            filename = filename.split("/spack/opt/spack/", 1)
+            InstallFile.objects.get_or_create(
+                spec=self,
+                name=filename,
+                ftype=attrs["type"],
+                mode=attrs["mode"],
+                owner=attrs["owner"],
+                group=attrs["group"],
+            )
 
     def to_dict_ids(self):
         """This function is intended to return a simple json response that
@@ -318,13 +363,6 @@ class Spec(BaseModel):
             "full_hash": self.full_hash,
             "specs": {p.spec.name: p.spec.full_hash for p in self.dependencies.all()},
         }
-
-    def to_dict(self):
-        """return the original configuration object, a list of specs"""
-        specs = []
-        for spec in self.specs.all():
-            specs.append(spec.to_dict())
-        return {"spec": specs}
 
     def list_dependencies(self):
         """Loop through associated dependencies and return a single dictionary,
@@ -409,3 +447,96 @@ class Dependency(BaseModel):
     class Meta:
         app_label = "main"
         unique_together = (("spec", "dependency_type"),)
+
+
+class InstallFile(BaseModel):
+    """An install file holds information about a successfully installed file
+    in the install_manifest.json in the .spack metadata folder of a package.
+    An install file can only point to one spec. Since we want the file
+    to be general (and not specific to the user system) we remove the prefix
+    before opt/spack (and this can be changed if needed).
+    """
+
+    spec = models.ForeignKey(
+        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    name = models.CharField(
+        max_length=500,
+        blank=False,
+        null=False,
+        help_text="The name of the install file, with user prefix removed",
+        unique=True,
+    )
+
+    ftype = models.CharField(
+        max_length=25,
+        blank=True,
+        null=False,
+        help_text="The type of install file",
+    )
+
+    mode = models.PositiveIntegerField(blank=True, null=True)
+    owner = models.PositiveIntegerField(blank=True, null=True)
+    group = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return "[install-file:%s|%s]" % (self.spec.name, self.name)
+
+    def __repr__(self):
+        return str(self)
+
+    def to_dict(self):
+        """If we return a single dependency as a dict, the configuration can
+        combine them into one dict by updating based on the name as key.
+        """
+        return {
+            self.name: {
+                "mode": self.mode,
+                "owner": self.owner,
+                "group": self.group,
+                "type": self.type,
+            }
+        }
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("spec", "name"),)
+
+
+class EnvironmentVariable(BaseModel):
+    """An environment variable is a key value pair that can be associated with
+    one or more spec installs. We parse them from the spack-build-env.txt file,
+    and filter down to only include SPACK_* variables.
+    """
+
+    name = models.CharField(
+        max_length=100,
+        blank=False,
+        null=False,
+        help_text="The name of the environment variable.",
+    )
+    value = models.TextField(
+        blank=False,
+        null=False,
+        help_text="The value of the environment variable",
+    )
+
+    def __str__(self):
+        value = self.value
+        if len(self.value) > 200:
+            value = "%s..." % self.value[:200]
+        return "[envar:%s|%s]" % (self.name, value)
+
+    def __repr__(self):
+        return str(self)
+
+    def to_dict(self):
+        """If we return a single dependency as a dict, the configuration can
+        combine them into one dict by updating based on the name as key.
+        """
+        return {self.name: self.value}
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("name", "value"),)

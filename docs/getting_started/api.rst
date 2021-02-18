@@ -288,3 +288,76 @@ Build Task Updated 200
 
 When you want to update the status of a spec build, a successful update will
 return a 200 response.
+
+
+Package Metadata
+----------------
+
+``POST /ms1/packages/metadata/``
+
+When a package is finished installing, we have a metadata folder, usually within
+the spack root located at ``opt/<system>/<compiler>/<package>/.spack`` 
+with one or more of the following files:
+
+ - spack-configure-args.txt'
+ - spack-build-env.txt'
+ - spec.yaml
+ - archived-files
+ - spack-build-out.txt
+ - install_manifest.json
+ - repos
+ - errors.txt
+ 
+We want to get output and errors from this location, so the client within
+Spack can read in and parse files. The data should be formatted as follows:
+
+.. code-block:: python
+
+    {
+        "environ": {
+            "SPACK_CC": "/usr/bin/gcc",
+            "SPACK_CC_RPATH_ARG": "-Wl,-rpath,",
+            "SPACK_COMPILER_SPEC": "gcc@9.3.0",
+            "SPACK_CXX": "/usr/bin/g++",
+            "SPACK_CXX_RPATH_ARG": "-Wl,-rpath,",
+            ...
+            "SPACK_TARGET_ARGS": "'-march=skylake -mtune=skylake'"
+        },
+        "config": "",
+        "manifest": {
+            "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/diffutils-3.7-2tm6lq6qmyrj6jjiruf7rxb3nzonnq3i/.spack": {
+                "mode": 17901,
+                "owner": 1000,
+                "group": 1000,
+                "type": "dir"
+            },
+            ...
+            "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/diffutils-3.7-2tm6lq6qmyrj6jjiruf7rxb3nzonnq3i": {
+                "mode": 17901,
+                "owner": 1000,
+                "group": 1000,
+                "type": "dir"
+            }
+        },
+        "output": "==> diffutils: Executing phase: 'install'\n==> [2021-02-18-12:35:47.550126] 'make' '-j8' 'install'\nMaking install in...",
+        "errors": null,
+        "full_hash": "5wdhxf5usk7g6gznwhydbwzmdibxqhjp"
+    }
+
+
+As you can see, the output, error, and config args are provided as is (we just
+read in the file for the request), the environment is read in, filtered
+to a list to include only ``SPACK_*`` variables, and split into key value pairs,
+and the package full hash is provided to look up. If any information does not
+exist, it is simply not sent. A full request might look like the following:
+The response can then be any of the following:
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+
+Unlike other endpoints, this one does not check if data is already added for the
+package, it simply re-writes it. This is under the assumption that we might re-do
+a build and update the metadata associated.

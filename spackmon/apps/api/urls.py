@@ -30,6 +30,11 @@ urlpatterns = [
         api_views.UpdateTaskStatus.as_view(),
         name="update_task_status",
     ),
+    path(
+        "%s/packages/metadata/" % cfg.URL_API_PREFIX,
+        api_views.UpdatePackageMetadata.as_view(),
+        name="update_package_metadata",
+    ),
 ]
 
 

@@ -11,7 +11,6 @@ from spackmon.apps.main.models import Spec
 import os
 
 from ratelimit.decorators import ratelimit
-from spackmon.settings import cfg
 from spackmon.settings import (
     VIEW_RATE_LIMIT as rl_rate,
     VIEW_RATE_LIMIT_BLOCK as rl_block,

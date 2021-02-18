@@ -3,8 +3,6 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from django.shortcuts import get_object_or_404
-
 from spackmon.apps.main.models import (
     Spec,
     Architecture,
@@ -16,7 +14,6 @@ from spackmon.apps.main.models import (
 from spackmon.apps.main.utils import read_json
 
 import os
-import re
 
 import logging
 
@@ -24,18 +21,45 @@ logger = logging.getLogger(__name__)
 
 
 def update_task_status(full_hash, status):
-    """Given a full hash to identify a spec and a status, update the status
+    """Given a full hash to identify a spec, and a status, update the status
     for the spec. Given that we are cancelling a spec, this means that all
     dependencies are cancelled too.
     """
-    spec = get_object_or_404(Spec, full_hash=full_hash)
-    if spec:
+    try:
+        spec = Spec.objects.get(full_hash=full_hash)
         spec.build_status = status
         spec.save()
 
         # If we cancel or fail, cancel all dependencies that were not successful
         if status in ["CANCELLED", "FAILED"]:
             spec.cancel_dependencies()
+    except:
+        pass
+
+
+def update_package_metadata(spec, data):
+    """Given a spec, update it with metadata from the package folder where
+    it's installed. We assume that not all data is present.
+    """
+    output = data.get("output")
+    error = data.get("output")
+    config_args = data.get("config")
+    envars = data.get("envars")
+    manifest = data.get("manifest")
+
+    # Update the spec with output
+    if output:
+        spec.output = output
+    if error:
+        spec.error = error
+    if config_args:
+        spec.config_args = config_args
+    if envars:
+        spec.update_envars(envars)
+    if manifest:
+        spec.update_install_files(manifest)
+    spec.save()
+    return spec
 
 
 def get_target(meta):
@@ -123,7 +147,7 @@ def import_configuration(config):
 
     # We are required to have a top level spec
     if "spec" not in config:
-        logging.error("spec key not found in %s" % filename)
+        logging.error("spec key not found in file.")
         return {"spec": None, "created": False, "message": "spec key missing"}
 
     first_spec = None
