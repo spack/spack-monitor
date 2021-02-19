@@ -121,11 +121,13 @@ class SpackMonitorClient:
         response = self.do_request("")
         return response.json()
 
-    def upload_specfile(self, filename):
-        """Given a spec file (must be json) upload to the UploadSpec endpoint"""
+    def upload_specfile(self, filename, spack_version):
+        """Given a spec file (must be json) and the spack version,
+        upload to the UploadSpec endpoint"""
         # We load as json just to validate it
         spec = read_json(filename)
-        return self.do_request("specs/new/", "POST", data=json.dumps(spec))
+        data = {"spec": spec, "spack_version": spack_version}
+        return self.do_request("specs/new/", "POST", data=json.dumps(data))
 
 
 # Helper functions

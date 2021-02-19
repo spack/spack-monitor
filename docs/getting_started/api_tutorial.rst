@@ -16,6 +16,16 @@ The ``api-examples`` folder also includes these examples in script form.
 Before doing this tutorial, you should have already started containers (:ref:`getting-started_install`),
 and created a username and token (:ref:`getting-started_api`).
 
+The only dependency you should need for these examples is to install requests, which
+we use here because it's easier than urllib (in spack we don't want to add a dependency
+so we stick to urllib). You can use the requirements.txt in
+the examples folder to do this.
+
+.. code-block:: console
+
+    $ pip install -r script/api-examples/requirements.txt
+
+
 --------------------
 Service Info Example
 --------------------
@@ -92,6 +102,7 @@ your token and username first:
     $ export SPACKMON_TOKEN=50445263afd8f67e59bd79bff597836ee6c05438
     $ export SPACKMON_USER=vsoch
 
+    
 For this example `upload_config.py <https://github.com/spack/spack-monitor/blob/main/script/api-examples/upload_config.py>`_
 in the repository you'll see that by way of the `spackmon client <https://github.com/spack/spack-monitor/blob/main/script/spackmoncli.py>`_ 
 we find this token in the environment, and add it as a base64 encoded authorization header.
@@ -99,7 +110,17 @@ we find this token in the environment, and add it as a base64 encoded authorizat
 
 .. code-block:: console
 
-    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json $(spack --version)
+
+
+If you run this inside the container, you can grab the version of spack from the host and
+use directly as a string:
+
+
+.. code-block:: console
+
+    $ echo $(spack --version)
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 0.16.0-1379-7a5351d495
 
 
 If you haven't added it yet (the full hash of the first package in the file is the unique id) you'll
@@ -112,18 +133,23 @@ see that it was added:
     {
         "message": "success",
         "data": {
-            "full_hash": "xttimnxa2kc4rc33axvrcpzejiil6wbn",
-            "packages": {
-                "cryptsetup": "4riqvvabzho7qyzxumc7csmtcatnfbqd",
-                "go": "2dhsyo2cvpyft5u2ptza7j7kvk5r6626",
-                "libgpg-error": "5fmyz5bhnsaw5vvtbgt3m6cujrw2ajbc",
-                "libseccomp": "3mmhto5wulorfps33lzkzr5ynyanmefn",
+            "full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+            "name": "singularity",
+            "version": "3.6.4",
+            "spack_version": "0.16.0-1379-7a5351d495",
+            "specs": {
+                "cryptsetup": "tmi4pf6umhalop7mi6zyiv7xjpalyzgb",
+                "go": "dehg3ddu6gacrmnoexbxhjv2i2d76yq6",
+                "libgpg-error": "4cvsg42wxksiup6x74mlabu6un55wjzc",
+                "libseccomp": "kfx6zyjxzudw77e3xk6i73bcgi2cavgh",
+                "pkgconf": "al2hlnux3cchfhwiv2sbejnxvnogibac",
                 "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
-                "squashfs": "mxfspfx44aforrx6shx6r6nu3th6mca3",
-                "util-linux-uuid": "46cwzqnbfi3xdxlrm76z5gazhvog3n3t"
+                "squashfs": "vpemhhpzqqf7mvpzdvcg6szfah6mwt2q",
+                "util-linux-uuid": "g362jjpzlfp3qhfm7gdery6v3xgeh3lg"
             }
         }
     }
+
 
 That's a hint of the metadata that can be returned to a calling client.
 In the context of spack, we actually don't need to pass around this metadata,
@@ -132,7 +158,6 @@ and dependencies. If you've already added the package, you'll see:
 
 .. code-block:: console
 
-    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json 
+    $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json $(spack --version)
     This package already exists in the database.
-
 

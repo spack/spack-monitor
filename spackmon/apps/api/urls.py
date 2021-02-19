@@ -31,6 +31,11 @@ urlpatterns = [
         name="update_task_status",
     ),
     path(
+        "%s/phases/metadata/" % cfg.URL_API_PREFIX,
+        api_views.UpdatePhaseStatus.as_view(),
+        name="update_phase_status",
+    ),
+    path(
         "%s/packages/metadata/" % cfg.URL_API_PREFIX,
         api_views.UpdatePackageMetadata.as_view(),
         name="update_package_metadata",

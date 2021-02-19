@@ -19,6 +19,12 @@ BUILD_STATUS = [
 ]
 
 
+PHASE_STATUS = [
+    ("SUCCESS", "SUCCESS"),
+    ("FAILED", "FAILED"),
+]
+
+
 def read_json(filename):
     with open(filename, "r") as fd:
         content = json.loads(fd.read())

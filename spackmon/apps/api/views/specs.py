@@ -44,7 +44,17 @@ class NewSpec(APIView):
             return response
 
         # Generate the config
-        result = import_configuration(json.loads(request.body))
+        data = json.loads(request.body)
+        spack_version = data.get("spack_version")
+
+        # The spack version is required
+        if not spack_version:
+            return Response(
+                status=400, data={"message": "A spack_version string is required"}
+            )
+
+        # We require the spack version and the spec
+        result = import_configuration(data.get("spec"), spack_version)
         data = {"message": result["message"]}
 
         # Created or already existed

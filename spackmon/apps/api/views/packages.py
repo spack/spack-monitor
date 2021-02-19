@@ -25,8 +25,7 @@ class UpdatePackageMetadata(APIView):
     folder. Any metadata that is missing will expect a None response. Fields
     that we expect to parse include:
 
-     - output: goes into the spec.output field
-     - error: goes into the spec.error field
+     - errors: goes into the spec.errors field
      - manifest: includes a json object with install files. Install files are
                  linked to a spec and go into the ManyToMany install_files
                  field, which points to the InstallFile table.
@@ -57,9 +56,18 @@ class UpdatePackageMetadata(APIView):
 
         # Get the data, including output, error, environ, manifest, config
         data = json.loads(request.body)
+        spack_version = data.get("spack_version")
 
-        # Look up the spec based on the full hash
-        spec = get_object_or_404(Spec, full_hash=data.get("full_hash"))
+        # The spack version is required
+        if not spack_version:
+            return Response(
+                status=400, data={"message": "A spack_version string is required"}
+            )
+
+        # Look up the spec based on the full hash and spack version
+        spec = get_object_or_404(
+            Spec, full_hash=data.get("full_hash"), spack_version=spack_version
+        )
 
         # Update the output, error, install files, config, and environment
         spec = update_package_metadata(spec, data)

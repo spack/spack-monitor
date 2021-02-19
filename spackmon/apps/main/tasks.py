@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spackmon.apps.main.models import (
+    BuildPhase,
     Spec,
     Architecture,
     Target,
@@ -20,13 +21,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_task_status(full_hash, status):
+def update_phase(full_hash, spack_version, phase_name, output, status):
+    """Given a spec hash, spack version, and then a phase name, output, and
+    status, update the phase associated with the spec. Return a json response
+    with a message
+    """
+    try:
+        spec = Spec.objects.get(full_hash=full_hash, spack_version=spack_version)
+        build_phase, _ = BuildPhase.objects.get_or_create(spec=spec, name=phase_name)
+        build_phase.status = status
+        build_phase.output = output
+        build_phase.save()
+        return True, {"message": "Phase %s was successfully updated." % phase_name}
+    except:
+        return False, {"message": "There was an issue with updating the phase."}
+
+
+def update_task_status(full_hash, status, spack_version):
     """Given a full hash to identify a spec, and a status, update the status
     for the spec. Given that we are cancelling a spec, this means that all
     dependencies are cancelled too.
     """
     try:
-        spec = Spec.objects.get(full_hash=full_hash)
+        spec = Spec.objects.get(full_hash=full_hash, spack_version=spack_version)
         spec.build_status = status
         spec.save()
 
@@ -96,8 +113,10 @@ def add_dependencies(spec, dependency_lookup):
     """
     # Create dependencies (other specs) - they will be updated later
     for dep_name, dep in dependency_lookup.items():
+
+        # This assumes the dependencies have the same spack version
         dependency_spec, _ = Spec.objects.get_or_create(
-            name=dep_name, full_hash=dep["hash"]
+            name=dep_name, full_hash=dep["hash"], spack_version=spec.spack_version
         )
         dependency, _ = Dependency.objects.get_or_create(
             spec=dependency_spec, dependency_type=dep["type"]
@@ -108,9 +127,11 @@ def add_dependencies(spec, dependency_lookup):
     return spec
 
 
-def get_spec(name, meta, arch=None, compiler=None):
+def get_spec(name, meta, spack_version, arch=None, compiler=None):
     """Given a spec name and metadata (hash is required) get or create it"""
-    spec, created = Spec.objects.get_or_create(name=name, full_hash=meta["full_hash"])
+    spec, created = Spec.objects.get_or_create(
+        name=name, full_hash=meta["full_hash"], spack_version=spack_version
+    )
     spec.version = meta.get("version")
     spec.arch = arch
     spec.compiler = compiler
@@ -123,7 +144,7 @@ def get_spec(name, meta, arch=None, compiler=None):
     return spec, created
 
 
-def import_configuration_file(filename):
+def import_configuration_file(filename, spack_version):
     """import a configuration from file (intended to be run from the command line)"""
     filename = os.path.abspath(filename)
 
@@ -133,13 +154,13 @@ def import_configuration_file(filename):
         return
 
     config = read_json(filename)
-    return import_configuration(config)
+    return import_configuration(config, spack_version)
 
 
-def import_configuration(config):
-    """Given a post of a spec / configuration, add the configuration and
-    specs to the database. We return a dictionary with three values:
-    a configuration object, a boolean to indicate if it was created or not,
+def import_configuration(config, spack_version):
+    """Given a post of a spec / configuration and a spack version, add the spec
+    and entities within to the database. We return a dictionary with three
+    values: a Spec object, a boolean to indicate if it was created or not,
     and an optional message to return to the user. If None is returned
     for the configuration, this means that the data was malformed or there
     was another issue with creating it.
@@ -173,7 +194,7 @@ def import_configuration(config):
             )
 
         # Create the spec (full hash and name are unique together)
-        spec, created = get_spec(name, meta, arch, compiler)
+        spec, created = get_spec(name, meta, spack_version, arch, compiler)
 
         # Add dependencies if not added yet
         if spec.dependencies.count() == 0:

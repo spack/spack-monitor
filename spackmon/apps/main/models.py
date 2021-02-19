@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
 
-from .utils import BUILD_STATUS
+from .utils import BUILD_STATUS, PHASE_STATUS
 
 import json
 
@@ -206,6 +206,32 @@ class Spec(BaseModel):
     use the full_hash as the identifier.
     """
 
+    # REQUIRED FIELDS: The full hash is used as the unique identifier along with name
+    name = models.CharField(
+        max_length=250,
+        blank=False,
+        null=False,
+        help_text="The spec name (without version)",
+    )
+
+    spack_version = models.CharField(
+        max_length=250,
+        blank=False,
+        null=False,
+        help_text="The version of spack",
+    )
+
+    full_hash = models.CharField(
+        max_length=50, blank=True, null=True, help_text="The full hash"
+    )
+
+    name = models.CharField(
+        max_length=250,
+        blank=False,
+        null=False,
+        help_text="The spec name (without version)",
+    )
+
     # States: succeed, fail, fail because dependency failed (cancelled), not run
     build_status = models.CharField(
         choices=BUILD_STATUS,
@@ -216,17 +242,7 @@ class Spec(BaseModel):
         help_text="The status of the spec build.",
     )
 
-    # REQUIRED FIELDS: The full hash is used as the unique identifier along with name
-    name = models.CharField(
-        max_length=250,
-        blank=False,
-        null=False,
-        help_text="The spec name (without version)",
-    )
-    full_hash = models.CharField(
-        max_length=50, blank=True, null=True, help_text="The full hash", unique=True
-    )
-
+    # OPTIONAL FIELDS: We might not have all these at creation time
     build_hash = models.CharField(
         max_length=50,
         blank=True,
@@ -234,7 +250,6 @@ class Spec(BaseModel):
         help_text="The build hash",
     )
 
-    # OPTIONAL FIELDS: We might not have all these at creation time
     hash = models.CharField(
         max_length=50, blank=False, null=False, help_text="The hash"
     )
@@ -285,9 +300,6 @@ class Spec(BaseModel):
         related_query_name="envars",
     )
 
-    # Allow for arbitrary storage of output and error
-    output = models.TextField(blank=True, null=True)
-    error = models.TextField(blank=True, null=True)
     config_args = models.TextField(blank=True, null=True)
 
     def print(self):
@@ -361,6 +373,9 @@ class Spec(BaseModel):
         """
         return {
             "full_hash": self.full_hash,
+            "name": self.name,
+            "version": self.version,
+            "spack_version": self.spack_version,
             "specs": {p.spec.name: p.spec.full_hash for p in self.dependencies.all()},
         }
 
@@ -409,7 +424,45 @@ class Spec(BaseModel):
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "full_hash"),)
+        unique_together = (("name", "full_hash", "spack_version"),)
+
+
+class BuildPhase(BaseModel):
+    """A build phase stores the name, status, output, and error for a phase"""
+
+    spec = models.ForeignKey(
+        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    # Allow for arbitrary storage of output and error
+    output = models.TextField(blank=True, null=True)
+    error = models.TextField(blank=True, null=True)
+
+    status = models.CharField(
+        choices=PHASE_STATUS,
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="The status of the phase, if run.",
+    )
+
+    name = models.CharField(
+        max_length=500,
+        blank=False,
+        null=False,
+        help_text="The name of the install file, with user prefix removed",
+        unique=True,
+    )
+
+    def __str__(self):
+        return "[build-phase:%s|%s]" % (self.spec.name, self.name)
+
+    def __repr__(self):
+        return str(self)
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("spec", "name"),)
 
 
 class Dependency(BaseModel):

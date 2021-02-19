@@ -109,8 +109,15 @@ as this is what the database uses as a unique identifier for each package.
     spack spec --json --hash-type full_hash singularity
     
 
-Your containers should already be running. Let's now shell into the container, 
-where we can interact directly with the database.
+Your containers should already be running. Before we shell into the container,
+let's grab the spack version, which we will need for the request.
+
+.. code-block:: console
+
+    $ echo $(spack --version)
+    $ 0.16.0-1379-7a5351d495
+
+Let's now shell into the container, where we can interact directly with the database.
 
 .. code-block:: console
    
@@ -131,11 +138,12 @@ container:
     
 
 When the database is setup (the above commands are run, by default)
-we can run a command to do the import:
+we can run a command to do the import. Note that we are including the spec file
+and the spack version (so you should have it on your path):
 
 .. code-block:: console
 
-    $ python manage.py import_package_configuration specs/singularity-3.6.4.json
+    $ python manage.py import_package_configuration specs/singularity-3.6.4.json 0.16.0-1379-7a5351d495
     
     
 The package is printed to the screen, along with it's full hash.
@@ -144,8 +152,9 @@ The package is printed to the screen, along with it's full hash.
 .. code-block:: console
 
     Filename                            specs/singularity-3.6.4.json       
-    Status                              created
-    singularity v3.6.4                  xttimnxa2kc4rc33axvrcpzejiil6wbn   
+    Spack Version                       0.16.0-1379-7a5351d495             
+    Status                              created                            
+    singularity v3.6.4                  p64nmszwer36ly7pnch5fznni4cnmndg 
     
 You could run the same command externally from the container (and this extends to any command) by doing:
 
@@ -159,8 +168,9 @@ We use the ``full_hash`` of the package to determine if it's already there.
 
 .. code-block:: console
 
-    $ docker exec -it spack-monitor_uwsgi_1 python manage.py import_package_configuration specs/singularity-3.6.4.json
+    $ docker exec -it spack-monitor_uwsgi_1 python manage.py import_package_configuration specs/singularity-3.6.4.json $(spack --version)
     Filename                            specs/singularity-3.6.4.json       
+    Spack Version                       0.16.0-1379-7a5351d495             
     Status                              exists                             
     singularity v3.6.4                  xttimnxa2kc4rc33axvrcpzejiil6wbn   
 
