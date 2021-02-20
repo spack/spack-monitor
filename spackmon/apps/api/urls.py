@@ -27,8 +27,8 @@ urlpatterns = [
     ),
     path(
         "%s/specs/metadata/" % cfg.URL_API_PREFIX,
-        api_views.UpdateBuildMetadata.as_view(),
-        name="update_build_metadata",
+        api_views.UpdateSpecMetadata.as_view(),
+        name="update_spec_metadata",
     ),
     path(
         "%s/builds/update/" % cfg.URL_API_PREFIX,
