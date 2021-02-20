@@ -13,15 +13,16 @@ to get started, but keep in mind this is under development. 👇️
 
 ⚠️ *This respository is under development! All is subject to change. Use at your own risk!* ⚠️
 
-## Development Plan
+## Next TODO
 
-1. Develop the base models for a spec
-2. Get a working container orchestration (database and application)
-3. Create endpoint for uploading simple spec (akin to cray's)
-4. Identify locations in spack where we want to ping the server with an update
-5. Create API endpoints for doing so
+1. Update spack to include build environment information
+2. Create endpoint to accept a new spec, and build environment, should return a build ID
+3. Update spack monitor to be able to reference the build id for endpoints instead of spec full_hash
+4. Create simple endpoint to retrieve a build_id based on a spec, spack_version, and environment.
+
+5. Develop separate tool to parse libabigail xml
+6. Somehow get list of files that are objects generated, send them to Spack Monitor (even if we don't have ABI yet)
 
 ## License
 
  * Free software: Apache License 2.0 or MIT. See the LICENSE files and COPYRIGHT notice files in the root folder, and [AUTHORS](AUTHORS) for a list of contributions and maintainers.
-

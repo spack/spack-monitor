@@ -266,7 +266,7 @@ but a status code of 200 to indicate success (but not create).
 Update Build Task Status
 ------------------------
 
-``POST /ms1/tasks/update/``
+``POST /ms1/builds/update/``
 
 When Spack is running builds, each spec will either succeed or fail. In each case,
 we need to update Spack Monitor with the status for the spec. The default status for
@@ -290,10 +290,10 @@ When you want to update the status of a spec build, a successful update will
 return a 200 response.
 
 
-Package Metadata
-----------------
+Specs Metadata
+--------------
 
-``POST /ms1/packages/metadata/``
+``POST /ms1/specs/metadata/``
 
 When a package is finished installing, we have a metadata folder, usually within
 the spack root located at ``opt/<system>/<compiler>/<package>/.spack`` 

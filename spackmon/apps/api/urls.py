@@ -26,21 +26,20 @@ urlpatterns = [
         name="new_spec",
     ),
     path(
-        "%s/tasks/update/" % cfg.URL_API_PREFIX,
-        api_views.UpdateTaskStatus.as_view(),
-        name="update_task_status",
+        "%s/specs/metadata/" % cfg.URL_API_PREFIX,
+        api_views.UpdateBuildMetadata.as_view(),
+        name="update_build_metadata",
     ),
     path(
-        "%s/phases/metadata/" % cfg.URL_API_PREFIX,
+        "%s/builds/update/" % cfg.URL_API_PREFIX,
+        api_views.UpdateBuildStatus.as_view(),
+        name="update_build_status",
+    ),
+    path(
+        "%s/builds/phases/update/" % cfg.URL_API_PREFIX,
         api_views.UpdatePhaseStatus.as_view(),
         name="update_phase_status",
     ),
-    path(
-        "%s/packages/metadata/" % cfg.URL_API_PREFIX,
-        api_views.UpdatePackageMetadata.as_view(),
-        name="update_package_metadata",
-    ),
 ]
-
 
 app_name = "api"

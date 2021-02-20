@@ -54,6 +54,98 @@ class BaseModel(models.Model):
         abstract = True
 
 
+class Attribute(BaseModel):
+    """an attribute can be any key/value pair (e.g., an ABI feature) associated
+    with an object
+    """
+
+    name = models.CharField(
+        max_length=150, blank=False, null=False, help_text="The name of the attribute"
+    )
+    value = models.TextField(blank=False, null=False, help_text="The value")
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("name", "value"),)
+
+
+class Object(BaseModel):
+    """Object"""
+
+    # The object type, e.g., .jar, .so,)
+    object_type = models.CharField(
+        max_length=25, blank=False, null=False, help_text="The type of library"
+    )
+    hash = models.CharField(
+        max_length=250,
+        blank=False,
+        null=False,
+        help_text="The hash of the object",
+        unique=True,
+    )
+
+    # This is where we export ABI features to, via a general attribute that can
+    # accept any name/value
+    attributes = models.ManyToManyField(
+        "main.Attribute",
+        blank=True,
+        default=None,
+        related_name="attributes",
+        related_query_name="attributes",
+    )
+
+    class Meta:
+        app_label = "main"
+
+
+class Build(BaseModel):
+    """A build is the highest level object that enforces uniqueness for a spec,
+    and a build environment (basically the hostname and kernel version).
+    We also have a link to Objects (of type object) that can hold the
+    object type, and a group of features (e.g., ABI features)
+    """
+
+    spec = models.ForeignKey(
+        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    )
+    objects = models.ManyToManyField(
+        "main.Object",
+        blank=True,
+        default=None,
+        related_name="objects",
+        related_query_name="objects",
+    )
+    build_environment = models.ForeignKey(
+        "main.BuildEnvironment", null=False, blank=False, on_delete=models.DO_NOTHING
+    )
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("spec", "build_environment"),)
+
+
+class BuildEnvironment(BaseModel):
+    """A build environment holds information about the hostname and kernel."""
+
+    hostname = models.CharField(
+        max_length=150, blank=False, null=False, help_text="The hostname"
+    )
+    kernel_version = models.CharField(
+        max_length=50, blank=False, null=False, help_text="The kernel version"
+    )
+    host_os = models.CharField(
+        max_length=150, blank=False, null=False, help_text="The hostname"
+    )
+    # host target we can get from archspec inside spack
+    host_target = models.CharField(
+        max_length=150, blank=False, null=False, help_text="The hostname"
+    )
+
+    class Meta:
+        app_label = "main"
+        unique_together = (("hostname", "kernel_version", "host_os", "host_target"),)
+
+
 class Architecture(BaseModel):
     """the architecture for a spec. Each spec only has one."""
 

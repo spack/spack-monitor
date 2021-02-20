@@ -1,6 +1,8 @@
 Django==3.0.8
 django-ratelimit==3.0.0
 django-extensions==3.0.2
+graphviz
+pydotplus
 sendgrid==6.4.3
 # just for postgres
 psycopg2-binary==2.8.5

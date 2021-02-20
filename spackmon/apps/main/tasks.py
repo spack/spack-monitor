@@ -54,7 +54,7 @@ def update_task_status(full_hash, status, spack_version):
         pass
 
 
-def update_package_metadata(spec, data):
+def update_spec_metadata(spec, data):
     """Given a spec, update it with metadata from the package folder where
     it's installed. We assume that not all data is present.
     """
