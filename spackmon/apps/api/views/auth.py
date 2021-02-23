@@ -24,8 +24,8 @@ class GetAuthToken(APIView):
 
     @never_cache
     def get(self, request, *args, **kwargs):
-        """GET /auth/token"""
-        print("GET /auth/token")
+        """GET /auth/token/"""
+        print("GET /auth/token/")
         user = get_user(request)
 
         # No token provided matching a user, no go

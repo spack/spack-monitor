@@ -12,3 +12,4 @@ __pycache__
 static/
 env/
 db.sqlite3
+test-db.sqlite

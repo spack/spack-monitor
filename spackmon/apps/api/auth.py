@@ -210,7 +210,7 @@ def get_challenge(request, scopes=["build"]):
     DOMAIN_NAME = get_server(request)
     if not isinstance(scopes, list):
         scopes = [scopes]
-    auth_server = cfg.AUTH_SERVER or "%s/auth/token" % DOMAIN_NAME
+    auth_server = cfg.AUTH_SERVER or "%s/auth/token/" % DOMAIN_NAME
     return 'realm="%s",service="%s",scope="%s"' % (
         auth_server,
         DOMAIN_NAME,

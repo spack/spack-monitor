@@ -35,8 +35,7 @@ class SpackMonitorClient:
 
     def set_basic_auth(self, username, password):
         """A wrapper to adding basic authentication to the Request"""
-        auth_str = "%s:%s" % (username, password)
-        auth_header = base64.b64encode(auth_str.encode("utf-8"))
+        auth_header = get_basic_auth(username, password)
         self.set_header("Authorization", "Basic %s" % auth_header.decode("utf-8"))
 
     def reset(self):
@@ -131,6 +130,10 @@ class SpackMonitorClient:
 
 
 # Helper functions
+
+def get_basic_auth(username, password):
+    auth_str = "%s:%s" % (username, password)
+    return base64.b64encode(auth_str.encode("utf-8")).decode('utf-8')
 
 
 def parse_auth_header(authHeaderRaw):
