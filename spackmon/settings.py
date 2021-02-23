@@ -82,7 +82,7 @@ if not SECRET_KEY or not JWT_SERVER_SECRET:
         from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
 
 # A record of the server creation date
-if not CREATION_DATE:
+if not SERVER_CREATION_DATE:
     try:
         from .creation_date import SERVER_CREATION_DATE
     except ImportError:
