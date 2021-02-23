@@ -32,9 +32,6 @@ class SimpleTest(TestCase):
             username="dinosaur", email="dinosaur@dinosaur.com", password=self.password
         )
 
-    def authenticate_request(self, url):
-        pass
-
     def test_new_spec(self):
         """Test the new spec endpoint. This also tests the auth workflow"""
 

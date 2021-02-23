@@ -72,7 +72,7 @@ def generate_creation_date(filename):
 # Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
 JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
-CREATION_DATE = os.environ.get("CREATION_DATE")
+SERVER_CREATION_DATE = os.environ.get("CREATION_DATE")
 
 if not SECRET_KEY or not JWT_SERVER_SECRET:
     try:
