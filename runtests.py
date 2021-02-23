@@ -8,6 +8,8 @@ from django.core import management
 from django.conf import settings
 from django.test.utils import get_runner
 
+from datetime import datetime
+
 here = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -21,7 +23,12 @@ def run_tests(*test_args):
     if os.path.exists(testing_db):
         os.remove(testing_db)
 
+    # Set environment variables
     os.environ["DJANGO_SETTINGS_MODULE"] = "spackmon.settings"
+    os.environ["SECRET_KEY"] = "youarethetacomaster"
+    os.environ["JWT_SERVER_SECRET"] = "youarethetacomaster"
+    os.environ["CREATION_DATE"] = str(datetime.now())
+
     django.setup()
     TestRunner = get_runner(settings)
     test_runner = TestRunner()

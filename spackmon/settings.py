@@ -72,6 +72,7 @@ def generate_creation_date(filename):
 # Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
 JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
+CREATION_DATE = os.environ.get("CREATION_DATE")
 
 if not SECRET_KEY or not JWT_SERVER_SECRET:
     try:
@@ -81,11 +82,12 @@ if not SECRET_KEY or not JWT_SERVER_SECRET:
         from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
 
 # A record of the server creation date
-try:
-    from .creation_date import SERVER_CREATION_DATE
-except ImportError:
-    generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
-    from .creation_date import SERVER_CREATION_DATE
+if not CREATION_DATE:
+    try:
+        from .creation_date import SERVER_CREATION_DATE
+    except ImportError:
+        generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
+        from .creation_date import SERVER_CREATION_DATE
 
 # Set the domain name
 DOMAIN_NAME = cfg.DOMAIN_NAME
