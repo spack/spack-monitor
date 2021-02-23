@@ -84,7 +84,9 @@ class SimpleTest(TestCase):
             content_type="application/json",
             **headers
         )
-        assert response.status_code == 200
+
+        # Was created response is 201
+        assert response.status_code == 201
         data = response.json()
 
         # Check the format of the response
@@ -123,27 +125,11 @@ class SimpleTest(TestCase):
         created_hashes = set(Spec.objects.all().values_list("full_hash", flat=True))
         dependency_hashes = created_hashes.difference(hashes)
 
-        return True
-
-        import IPython
-
-        IPython.embed()
-        sys.exit(0)
-
-        assert service_info.status_code == 200
-        data = service_info.json()
-        for field in [
-            "id",
-            "status",
-            "name",
-            "description",
-            "organization",
-            "contactUrl",
-            "documentationUrl",
-            "createdAt",
-            "updatedAt",
-            "environment",
-            "version",
-            "auth_instructions_url",
-        ]:
-            assert field in data
+        # A second response should indicate it already exists (200)
+        response = self.client.post(
+            "/ms1/specs/new/",
+            data={"spec": spec, "spack_version": "1.0.0"},
+            content_type="application/json",
+            **headers
+        )
+        assert response.status_code == 200

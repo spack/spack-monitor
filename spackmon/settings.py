@@ -181,6 +181,7 @@ GRAVATAR_DEFAULT_IMAGE = "retro"
 AUTHENTICATED_VIEWS = [
     "spackmon.apps.api.views.specs.NewSpec",
     "spackmon.apps.api.views.specs.UpdateSpecMetadata",
+    "spackmon.apps.api.views.builds.NewBuild",
     "spackmon.apps.api.views.builds.UpdateBuildStatus",
     "spackmon.apps.api.views.builds.UpdatePhaseStatus",
 ]

@@ -108,6 +108,17 @@ class Build(BaseModel):
     spec = models.ForeignKey(
         "main.Spec", null=False, blank=False, on_delete=models.CASCADE
     )
+
+    # States: succeed, fail, fail because dependency failed (cancelled), not run
+    status = models.CharField(
+        choices=BUILD_STATUS,
+        default="NOTRUN",
+        blank=False,
+        null=False,
+        max_length=25,
+        help_text="The status of the spec build.",
+    )
+
     objects = models.ManyToManyField(
         "main.Object",
         blank=True,
@@ -118,6 +129,73 @@ class Build(BaseModel):
     build_environment = models.ForeignKey(
         "main.BuildEnvironment", null=False, blank=False, on_delete=models.DO_NOTHING
     )
+
+    # Dependencies are just other specs
+    envars = models.ManyToManyField(
+        "main.EnvironmentVariable",
+        blank=True,
+        default=None,
+        related_name="envars",
+        related_query_name="envars",
+    )
+
+    config_args = models.TextField(blank=True, null=True)
+
+    def update_envars(self, envars):
+        """Given a dictionary of key value pairs, update the associated
+        environment variables. Since a build can be updated, we first
+        remove any associated environment variables.
+        """
+        # Delete existing environment variables not associated elsewhere
+        self.envars.annotate(num_builds=Count("build")).filter(num_builds=1).delete()
+        new_envars = []
+        for key, value in envars.items():
+            new_envar, _ = EnvironmentVariable.objects.get_or_create(
+                key=key, value=value
+            )
+            new_envars.append(new_envar)
+
+        # This does bulk save / update to database
+        self.envars.add(new_envars)
+
+    def update_install_files(self, manifest):
+        """Given a spack install manifest, update the spec to include the
+        files. Since files are uniquely associated with a spec, and it could
+        be the case that a package is updated, we remove previous files before
+        adding new ones. We also remove the prefix so the files are relative
+        to the spack installation directory
+        """
+        # Delete existing manifest files
+        InstallFile.objects.filter(build=self).delete()
+        for filename, attrs in manifest.items():
+
+            # Store path after /spack/opt/spack
+            filename = filename.split("/spack/opt/spack/", 1)
+            InstallFile.objects.get_or_create(
+                spec=self,
+                name=filename,
+                ftype=attrs["type"],
+                mode=attrs["mode"],
+                owner=attrs["owner"],
+                group=attrs["group"],
+            )
+
+    def to_dict(self):
+        return {
+            "build_id": self.id,
+            "spec_full_hash": self.spec.full_hash,
+            "spec_name": self.spec.name,
+        }
+
+    def __str__(self):
+        return "[build|%s v%s|%s]" % (
+            self.spec.name,
+            self.spec.version,
+            self.build_environment.arch,
+        )
+
+    def __repr__(self):
+        return str(self)
 
     class Meta:
         app_label = "main"
@@ -130,8 +208,11 @@ class BuildEnvironment(BaseModel):
     hostname = models.CharField(
         max_length=150, blank=False, null=False, help_text="The hostname"
     )
+    platform = models.CharField(
+        max_length=50, blank=False, null=False, help_text="The platform"
+    )
     kernel_version = models.CharField(
-        max_length=50, blank=False, null=False, help_text="The kernel version"
+        max_length=150, blank=False, null=False, help_text="The kernel version"
     )
     host_os = models.CharField(
         max_length=150, blank=False, null=False, help_text="The hostname"
@@ -141,9 +222,21 @@ class BuildEnvironment(BaseModel):
         max_length=150, blank=False, null=False, help_text="The hostname"
     )
 
+    def __str__(self):
+        return "[build-environment|%s]" % self.arch
+
+    def __repr__(self):
+        return str(self)
+
+    @property
+    def arch(self):
+        return "%s %s %s" % (self.platform, self.host_os, self.host_target)
+
     class Meta:
         app_label = "main"
-        unique_together = (("hostname", "kernel_version", "host_os", "host_target"),)
+        unique_together = (
+            ("hostname", "kernel_version", "host_os", "host_target", "platform"),
+        )
 
 
 class Architecture(BaseModel):
@@ -324,16 +417,6 @@ class Spec(BaseModel):
         help_text="The spec name (without version)",
     )
 
-    # States: succeed, fail, fail because dependency failed (cancelled), not run
-    build_status = models.CharField(
-        choices=BUILD_STATUS,
-        default="NOTRUN",
-        blank=False,
-        null=False,
-        max_length=25,
-        help_text="The status of the spec build.",
-    )
-
     # OPTIONAL FIELDS: We might not have all these at creation time
     build_hash = models.CharField(
         max_length=50,
@@ -383,17 +466,6 @@ class Spec(BaseModel):
         related_query_name="dependencies",
     )
 
-    # Dependencies are just other specs
-    envars = models.ManyToManyField(
-        "main.EnvironmentVariable",
-        blank=True,
-        default=None,
-        related_name="envars",
-        related_query_name="envars",
-    )
-
-    config_args = models.TextField(blank=True, null=True)
-
     def print(self):
         if self.version:
             name = "%s v%s" % (self.name, self.version)
@@ -408,54 +480,6 @@ class Spec(BaseModel):
 
     def __repr__(self):
         return str(self)
-
-    def cancel_dependencies(self):
-        """Given that a spec is failed or cancelled, we also cancel any
-        dependencies that aren't already successful.
-        """
-        for dep in self.dependencies.all():
-            if dep.spec.build_status != "SUCCESS":
-                dep.spec.build_status = "CANCELLED"
-                dep.spec.save()
-
-    def update_envars(self, envars):
-        """Given a dictionary of key value pairs, update the associated
-        environment variables. Since a build can be updated, we first
-        remove any associated environment variables.
-        """
-        # Delete existing environment variables not associated elsewhere
-        self.envars.annotate(num_specs=Count("spec")).filter(num_specs=1).delete()
-        new_envars = []
-        for key, value in envars.items():
-            new_envar, _ = EnvironmentVariable.objects.get_or_create(
-                key=key, value=value
-            )
-            new_envars.append(new_envar)
-
-        # This does bulk save / update to database
-        self.envars.add(new_envars)
-
-    def update_install_files(self, manifest):
-        """Given a spack install manifest, update the spec to include the
-        files. Since files are uniquely associated with a spec, and it could
-        be the case that a package is updated, we remove previous files before
-        adding new ones. We also remove the prefix so the files are relative
-        to the spack installation directory
-        """
-        # Delete existing manifest files
-        InstallFile.objects.filter(spec=self).delete()
-        for filename, attrs in manifest.items():
-
-            # Store path after /spack/opt/spack
-            filename = filename.split("/spack/opt/spack/", 1)
-            InstallFile.objects.get_or_create(
-                spec=self,
-                name=filename,
-                ftype=attrs["type"],
-                mode=attrs["mode"],
-                owner=attrs["owner"],
-                group=attrs["group"],
-            )
 
     def to_dict_ids(self):
         """This function is intended to return a simple json response that
@@ -520,10 +544,13 @@ class Spec(BaseModel):
 
 
 class BuildPhase(BaseModel):
-    """A build phase stores the name, status, output, and error for a phase"""
+    """A build phase stores the name, status, output, and error for a phase.
+    We associated it with a Build (and not a Spec) as the same spec can have
+    different builds depending on the environment.
+    """
 
-    spec = models.ForeignKey(
-        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    build = models.ForeignKey(
+        "main.Build", null=False, blank=False, on_delete=models.CASCADE
     )
 
     # Allow for arbitrary storage of output and error
@@ -547,14 +574,14 @@ class BuildPhase(BaseModel):
     )
 
     def __str__(self):
-        return "[build-phase:%s|%s]" % (self.spec.name, self.name)
+        return "[build-phase:%s|%s]" % (self.build.spec.name, self.name)
 
     def __repr__(self):
         return str(self)
 
     class Meta:
         app_label = "main"
-        unique_together = (("spec", "name"),)
+        unique_together = (("build", "name"),)
 
 
 class Dependency(BaseModel):
@@ -602,8 +629,8 @@ class InstallFile(BaseModel):
     before opt/spack (and this can be changed if needed).
     """
 
-    spec = models.ForeignKey(
-        "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    build = models.ForeignKey(
+        "main.Build", null=False, blank=False, on_delete=models.CASCADE
     )
 
     name = models.CharField(
@@ -646,7 +673,7 @@ class InstallFile(BaseModel):
 
     class Meta:
         app_label = "main"
-        unique_together = (("spec", "name"),)
+        unique_together = (("build", "name"),)
 
 
 class EnvironmentVariable(BaseModel):

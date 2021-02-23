@@ -262,14 +262,45 @@ If the configuration in question already exists, you'll get the same data respon
 but a status code of 200 to indicate success (but not create).
 
 
+New Build
+---------
 
-Update Build Task Status
-------------------------
+``POST /ms1/builds/new/``
+
+A new build means that we have a spec, an environment, and we are starting a build!
+The ``Build`` object created on the server will hold a reference to the spec,
+the host build environment, build phases, and (if the build is successful)
+a list of objects associated (e.g., libraries and other binaries produced).
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented or spec not found
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+- `201 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201>`_: success
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+
+New Build Created 201
+'''''''''''''''''''''
+
+When a new build is created, the status will be 201 to indicate that.
+
+New Build Success 200
+'''''''''''''''''''''
+
+If a build is re-run, it may already have been created. The status will be 200
+to indicate this.
+
+
+
+Update Build Status
+-------------------
 
 ``POST /ms1/builds/update/``
 
-When Spack is running builds, each spec will either succeed or fail. In each case,
-we need to update Spack Monitor with the status for the spec. The default status for
+When Spack is running builds, each build task associated with a spec and host
+environment can either succeed or fail, or something else. In each case,
+we need to update Spack Monitor with this status. The default status for
 a build task is ``NOTRUN``. Once the builds start, given a failure,
 this means that the spec that failed is marked as ``FAILURE``, and the main spec 
 along with the other specs that were not installed are marked as ``CANCELLED``.
@@ -290,12 +321,12 @@ When you want to update the status of a spec build, a successful update will
 return a 200 response.
 
 
-Specs Metadata
---------------
+Builds Metadata
+---------------
 
-``POST /ms1/specs/metadata/``
+``POST /ms1/builds/metadata/``
 
-When a package is finished installing, we have a metadata folder, usually within
+When a spec is finished installing, we have a metadata folder, usually within
 the spack root located at ``opt/<system>/<compiler>/<package>/.spack`` 
 with one or more of the following files:
 
@@ -308,8 +339,8 @@ with one or more of the following files:
  - repos
  - errors.txt
  
-We want to get output and errors from this location, so the client within
-Spack can read in and parse files. The data should be formatted as follows:
+We want to send build environment and install files from this location, so
+the client within spack can read and parse files. The data should be formatted as follows:
 
 .. code-block:: python
 
@@ -339,14 +370,12 @@ Spack can read in and parse files. The data should be formatted as follows:
                 "type": "dir"
             }
         },
-        "output": "==> diffutils: Executing phase: 'install'\n==> [2021-02-18-12:35:47.550126] 'make' '-j8' 'install'\nMaking install in...",
-        "errors": null,
         "full_hash": "5wdhxf5usk7g6gznwhydbwzmdibxqhjp"
     }
 
 
-As you can see, the output, error, and config args are provided as is (we just
-read in the file for the request), the environment is read in, filtered
+We don't represent output here, as it's captured and stored with ``BuildPhase`` objects.
+The environment is read in, filtered
 to a list to include only ``SPACK_*`` variables, and split into key value pairs,
 and the package full hash is provided to look up. If any information does not
 exist, it is simply not sent. A full request might look like the following:
@@ -359,5 +388,5 @@ The response can then be any of the following:
 - `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
 
 Unlike other endpoints, this one does not check if data is already added for the
-package, it simply re-writes it. This is under the assumption that we might re-do
+build, it simply re-writes it. This is under the assumption that we might re-do
 a build and update the metadata associated.
