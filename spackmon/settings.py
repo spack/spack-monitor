@@ -188,7 +188,7 @@ AUTHENTICATED_VIEWS = [
 
 
 # Always use sqlite for testing
-running_tests = 'tests' in sys.argv or 'runtests.py' in sys.argv
+running_tests = "tests" in sys.argv or "runtests.py" in sys.argv
 if running_tests or cfg.USE_SQLITE:
 
     dbfile = "test-db.sqlite" if running_tests else os.path.join(BASE_DIR, "db.sqlite3")
@@ -200,7 +200,7 @@ if running_tests or cfg.USE_SQLITE:
             "NAME": dbfile,
         }
     }
-    
+
 # Database local development uses DATABASE_* variables
 elif os.getenv("DATABASE_HOST") is not None:
     # Make sure to export all of these in your .env file

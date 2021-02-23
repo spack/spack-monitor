@@ -131,9 +131,10 @@ class SpackMonitorClient:
 
 # Helper functions
 
+
 def get_basic_auth(username, password):
     auth_str = "%s:%s" % (username, password)
-    return base64.b64encode(auth_str.encode("utf-8")).decode('utf-8')
+    return base64.b64encode(auth_str.encode("utf-8")).decode("utf-8")
 
 
 def parse_auth_header(authHeaderRaw):
