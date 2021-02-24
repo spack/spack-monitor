@@ -340,7 +340,7 @@ In either case of success (200 or 201) the response data is formatted as follows
             }
         },
         "code": 201
-}
+    }
 
 
 New Build Created 201
