@@ -1,4 +1,4 @@
 from .auth import GetAuthToken
 from .base import ServiceInfo
-from .specs import NewSpec, UpdateSpecMetadata
-from .builds import UpdateBuildStatus, UpdatePhaseStatus
+from .specs import NewSpec
+from .builds import UpdateBuildStatus, UpdatePhaseStatus, NewBuild, UpdateBuildMetadata

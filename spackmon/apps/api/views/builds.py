@@ -4,13 +4,20 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from ratelimit.decorators import ratelimit
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
-from spackmon.apps.main.tasks import update_task_status, update_phase
+from spackmon.apps.main.tasks import (
+    update_build_status,
+    update_build_phase,
+    get_build,
+    update_build_metadata,
+)
 from spackmon.apps.main.utils import BUILD_STATUS
+from spackmon.apps.main.models import Build
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -19,6 +26,30 @@ from ..auth import is_authenticated
 import json
 
 BUILD_STATUSES = [x[0] for x in BUILD_STATUS]
+
+
+def get_build_environment(data):
+    """Given a request, get the build environment. Return None if we are missing
+    something. Since we require a spec to always get a Build, for now it makes
+    sense to also include the full_hash and spack_version. If in the future
+    we just need a build environment, this can be removed.
+    """
+    build_environment = {}
+    # Ensure we have required fields
+    for field in [
+        "host_os",
+        "platform",
+        "host_target",
+        "hostname",
+        "kernel_version",
+        "spack_version",
+        "full_hash",
+    ]:
+        value = data.get(field)
+        if not value:
+            return
+        build_environment[field] = data.get(field)
+    return build_environment
 
 
 class UpdateBuildStatus(APIView):
@@ -46,18 +77,15 @@ class UpdateBuildStatus(APIView):
 
         # Get the task id and status to cancel
         data = json.loads(request.body)
-        tasks = data.get("tasks", {})
-        spack_version = data.get("spack_version")
+        status = data.get("status")
+        build_id = data.get("build_id")
 
-        # The spack version is required
-        if not spack_version:
-            return Response(
-                status=400, data={"message": "A spack_version string is required"}
-            )
+        # Build environment should be provided alongside tasks
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build id."})
 
         # All statuses must be valid
-        statuses = list(tasks.values())
-        if any([x for x in statuses if x not in BUILD_STATUSES]):
+        if status not in BUILD_STATUSES:
             return Response(
                 status=400,
                 data={
@@ -66,11 +94,49 @@ class UpdateBuildStatus(APIView):
                 },
             )
 
-        # Update each task
-        for full_hash, status in tasks.items():
-            update_task_status(full_hash, status, spack_version)
+        build = get_object_or_404(Build, pk=build_id)
+        result = update_build_status(build, status)
+        return Response(status=result["code"], data=result)
 
-        return Response(status=200, data=tasks)
+
+class NewBuild(APIView):
+    """Given a spec and environment information, create a new Build.
+    If the build already exists, we return the build_id with it.
+    """
+
+    permission_classes = []
+    allowed_methods = ("POST",)
+
+    @never_cache
+    @method_decorator(
+        ratelimit(
+            key="ip",
+            rate=settings.VIEW_RATE_LIMIT,
+            method="POST",
+            block=settings.VIEW_RATE_LIMIT_BLOCK,
+        )
+    )
+    def post(self, request, *args, **kwargs):
+        """POST /ms1/builds/new/ to start a new build"""
+
+        # If allow_continue False, return response
+        allow_continue, response, _ = is_authenticated(request)
+        if not allow_continue:
+            return response
+
+        # Get the complete build environment
+        data = json.loads(request.body)
+        build_environment = get_build_environment(data)
+        if not build_environment:
+            return Response(
+                status=400, data={"message": "Missing required build environment data."}
+            )
+
+        # Create the new build
+        result = get_build(**build_environment)
+
+        # Prepare data with
+        return Response(status=result["code"], data=result)
 
 
 class UpdatePhaseStatus(APIView):
@@ -91,34 +157,83 @@ class UpdatePhaseStatus(APIView):
     def post(self, request, *args, **kwargs):
         """POST /ms1/phases/metadata/ to update one or more tasks"""
 
+        print("POST /ms1/builds/phases/update/")
+
         # If allow_continue False, return response
         allow_continue, response, _ = is_authenticated(request)
         if not allow_continue:
             return response
 
-        # Get the task id and status to cancel
+        # Extra data here includes output, phase_name, and status
         data = json.loads(request.body)
-        full_hash = data.get("full_hash")
+        build_id = data.get("build_id")
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build_id."})
+
         output = data.get("output")
         phase_name = data.get("phase_name")
         status = data.get("status")
-        spack_version = data.get("spack_version")
-
-        # The spack version is required
-        if not spack_version:
-            return Response(
-                status=400, data={"message": "A spack_version string is required"}
-            )
 
         # All of the above are required!
-        if not full_hash or not phase_name or not status:
+        if not phase_name or not status:
             return Response(
                 status=400,
-                data={"message": "full_hash, phase_name, and status are required."},
+                data={"message": "phase_name, and status are required."},
             )
 
+        build = get_object_or_404(Build, pk=build_id)
+
         # Update the phase
-        success, data = update_phase(full_hash, spack_version, output, status)
-        if not success:
-            return Response(status=400, data=data)
-        return Response(status=200, data=data)
+        data = update_build_phase(build, phase_name, status, output)
+        return Response(status=data["code"], data=data)
+
+
+class UpdateBuildMetadata(APIView):
+    """Given a finished build for a spec, receive content from the metadata
+    folder. Any metadata that is missing will expect a None response. Fields
+    that we expect to parse include:
+
+     - errors: goes into the spec.errors field
+     - manifest: includes a json object with install files. Install files are
+                 linked to a spec and go into the ManyToMany install_files
+                 field, which points to the InstallFile table.
+     - environ: should be a list of parsed environment variables, which go
+                into the spec.envars field, pointing to EnvironmentVariable.
+     - config: text of config arguments.
+
+    We don't include output files, as they are included with build phases.
+    """
+
+    permission_classes = []
+    allowed_methods = ("POST",)
+
+    @never_cache
+    @method_decorator(
+        ratelimit(
+            key="ip",
+            rate=settings.VIEW_RATE_LIMIT,
+            method="POST",
+            block=settings.VIEW_RATE_LIMIT_BLOCK,
+        )
+    )
+    def post(self, request, *args, **kwargs):
+        """POST /ms1/builds/metadata/ to add or update a package metadata"""
+
+        print("POST /ms1/builds/metadata/")
+
+        # If allow_continue False, return response
+        allow_continue, response, _ = is_authenticated(request)
+        if not allow_continue:
+            return response
+
+        # Get the data, including output, error, environ, manifest, config
+        data = json.loads(request.body)
+        metadata = data.get("metadata", {})
+
+        build_id = data.get("build_id")
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build_id."})
+
+        build = get_object_or_404(Build, pk=build_id)
+        result = update_build_metadata(build, metadata)
+        return Response(status=result["code"], data=result)

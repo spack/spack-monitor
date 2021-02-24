@@ -9,15 +9,15 @@ RUN /bin/bash -c "curl -L https://repo.continuum.io/miniconda/Miniconda3-latest-
     bash miniconda.sh -b -p /opt/conda && \
     rm miniconda.sh"
 RUN /bin/bash -c "conda install -y -c conda-forge mamba && \
-    mamba create -q -y -c conda-forge -n shub && \
-    source activate shub && \
+    mamba create -q -y -c conda-forge -n sm && \
+    source activate sm && \
     conda install -c conda-forge uwsgi xmlsec && \
     pip install --upgrade pip wheel && \
     pip install -r requirements.txt && \
     conda clean --all -y && \
     which python"
-RUN echo "source activate shub" > ~/.bashrc
-ENV PATH /opt/conda/envs/shub/bin:${PATH}
+RUN echo "source activate sm" > ~/.bashrc
+ENV PATH /opt/conda/envs/sm/bin:${PATH}
 
 RUN apt-get autoremove -y && apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

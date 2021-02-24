@@ -72,6 +72,7 @@ def generate_creation_date(filename):
 # Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
 JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
+SERVER_CREATION_DATE = os.environ.get("CREATION_DATE")
 
 if not SECRET_KEY or not JWT_SERVER_SECRET:
     try:
@@ -81,11 +82,12 @@ if not SECRET_KEY or not JWT_SERVER_SECRET:
         from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
 
 # A record of the server creation date
-try:
-    from .creation_date import SERVER_CREATION_DATE
-except ImportError:
-    generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
-    from .creation_date import SERVER_CREATION_DATE
+if not SERVER_CREATION_DATE:
+    try:
+        from .creation_date import SERVER_CREATION_DATE
+    except ImportError:
+        generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
+        from .creation_date import SERVER_CREATION_DATE
 
 # Set the domain name
 DOMAIN_NAME = cfg.DOMAIN_NAME
@@ -177,15 +179,33 @@ GRAVATAR_DEFAULT_IMAGE = "retro"
 
 # TODO: add authenticated views here
 AUTHENTICATED_VIEWS = [
-    "spackmon.apps.api.views.configs.NewConfig",
+    "spackmon.apps.api.views.specs.NewSpec",
+    "spackmon.apps.api.views.specs.UpdateSpecMetadata",
+    "spackmon.apps.api.views.builds.NewBuild",
+    "spackmon.apps.api.views.builds.UpdateBuildStatus",
+    "spackmon.apps.api.views.builds.UpdatePhaseStatus",
 ]
-
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-# Case 1: Database local development uses DATABASE_* variables
-if os.getenv("DATABASE_HOST") is not None:
+
+# Always use sqlite for testing
+running_tests = "tests" in sys.argv or "runtests.py" in sys.argv
+if running_tests or cfg.USE_SQLITE:
+
+    dbfile = "test-db.sqlite" if running_tests else os.path.join(BASE_DIR, "db.sqlite3")
+    print("Using sqlite for database: %s" % dbfile)
+    # A user might want to use sqlite instead
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": dbfile,
+        }
+    }
+
+# Database local development uses DATABASE_* variables
+elif os.getenv("DATABASE_HOST") is not None:
     # Make sure to export all of these in your .env file
     DATABASES = {
         "default": {
@@ -196,17 +216,6 @@ if os.getenv("DATABASE_HOST") is not None:
             "NAME": os.environ.get("DATABASE_NAME"),
         }
     }
-
-elif cfg.USE_SQLITE:
-
-    # A user might want to use sqlite instead
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
-    }
-
 
 else:
 

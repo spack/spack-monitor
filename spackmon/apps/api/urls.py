@@ -26,9 +26,15 @@ urlpatterns = [
         name="new_spec",
     ),
     path(
-        "%s/specs/metadata/" % cfg.URL_API_PREFIX,
-        api_views.UpdateSpecMetadata.as_view(),
-        name="update_spec_metadata",
+        "%s/builds/metadata/" % cfg.URL_API_PREFIX,
+        api_views.UpdateBuildMetadata.as_view(),
+        name="update_build_metadata",
+    ),
+    # The build can already exist (e.g., if being re-run)
+    path(
+        "%s/builds/new/" % cfg.URL_API_PREFIX,
+        api_views.NewBuild.as_view(),
+        name="new_build",
     ),
     path(
         "%s/builds/update/" % cfg.URL_API_PREFIX,

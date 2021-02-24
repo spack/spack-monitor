@@ -87,16 +87,48 @@ must provide the following endpoints:
 Response Details
 ================
 
-Generally, a response will return a json object that shows a message. A successful
-response will have a message of "success" to go along with a 200 or 201 response code,
+Generally, a response will return a json object that shows a message, and a return code. 
+For example, a successful response will have a message of "success" to go along with a 200 or 201 response code,
 while an unsuccessful response will have a message indicating the error, and an error
-code (e.g., 400, 500, etc.). Each reponse will have metadata specific to the endpoint.
+code (e.g., 400, 500, etc.). Error responses may not have data. Successful reponses 
+will have metadata specific to the endpoint.
 
 .. code-block:: python
 
-    {"message": "success", "data" {...}}
+    {"message": "success", "data" {...}, "code": 201}
 
 
+Generally, endpoint data will return a lookup of objects updated or created based on the type.
+For example, the new configuration endpoint has metadata about the spec created under a ``spec``
+attribute of the data:
+
+.. code-block:: python
+
+    {
+        "message": "success",
+        "data": {
+            "spec": {
+                "full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "name": "singularity",
+                "version": "3.6.4",
+                "spack_version": "1.0.0",
+                "specs": {
+                    "cryptsetup": "tmi4pf6umhalop7mi6zyiv7xjpalyzgb",
+                    "go": "dehg3ddu6gacrmnoexbxhjv2i2d76yq6",
+                    "libgpg-error": "4cvsg42wxksiup6x74mlabu6un55wjzc",
+                    "libseccomp": "kfx6zyjxzudw77e3xk6i73bcgi2cavgh",
+                    "pkgconf": "al2hlnux3cchfhwiv2sbejnxvnogibac",
+                    "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                    "squashfs": "vpemhhpzqqf7mvpzdvcg6szfah6mwt2q",
+                    "util-linux-uuid": "g362jjpzlfp3qhfm7gdery6v3xgeh3lg"
+                }
+            },
+            "created": true
+        },
+        "code": 201
+    }
+    
+    
 Timestamps
 ----------
 
@@ -239,18 +271,27 @@ for each package included:
     {
         "message": "success",
         "data": {
-            "full_hash": "xttimnxa2kc4rc33axvrcpzejiil6wbn",
-            "packages": {
-                "cryptsetup": "4riqvvabzho7qyzxumc7csmtcatnfbqd",
-                "go": "2dhsyo2cvpyft5u2ptza7j7kvk5r6626",
-                "libgpg-error": "5fmyz5bhnsaw5vvtbgt3m6cujrw2ajbc",
-                "libseccomp": "3mmhto5wulorfps33lzkzr5ynyanmefn",
-                "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
-                "squashfs": "mxfspfx44aforrx6shx6r6nu3th6mca3",
-                "util-linux-uuid": "46cwzqnbfi3xdxlrm76z5gazhvog3n3t"
-            }
-        }
+            "spec": {
+                "full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "name": "singularity",
+                "version": "3.6.4",
+                "spack_version": "1.0.0",
+                "specs": {
+                    "cryptsetup": "tmi4pf6umhalop7mi6zyiv7xjpalyzgb",
+                    "go": "dehg3ddu6gacrmnoexbxhjv2i2d76yq6",
+                    "libgpg-error": "4cvsg42wxksiup6x74mlabu6un55wjzc",
+                    "libseccomp": "kfx6zyjxzudw77e3xk6i73bcgi2cavgh",
+                    "pkgconf": "al2hlnux3cchfhwiv2sbejnxvnogibac",
+                    "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                    "squashfs": "vpemhhpzqqf7mvpzdvcg6szfah6mwt2q",
+                    "util-linux-uuid": "g362jjpzlfp3qhfm7gdery6v3xgeh3lg"
+                }
+            },
+            "created": true
+        },
+        "code": 201
     }
+
 
 All of the above are full hashes, which we can use as unique identifiers for the builds.
 
@@ -262,14 +303,66 @@ If the configuration in question already exists, you'll get the same data respon
 but a status code of 200 to indicate success (but not create).
 
 
+New Build
+---------
 
-Update Build Task Status
-------------------------
+``POST /ms1/builds/new/``
+
+This is the endpoint to use to get or lookup a previously done build, and retrieve
+a build id that can be used for further requests.
+A new build means that we have a spec, an environment, and we are starting a build!
+The ``Build`` object can be either created or retrieved (if the comibination already
+exists), and it will hold a reference to the spec,
+the host build environment, build phases, and (if the build is successful)
+a list of objects associated (e.g., libraries and other binaries produced).
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented or spec not found
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+- `201 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201>`_: success
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+
+In either case of success (200 or 201) the response data is formatted as follows:
+
+.. code-block:: python
+
+    {
+        "message": "Build get or create was successful.",
+        "data": {
+            "build_created": true,
+            "build_environment_created": true,
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 201
+    }
+
+
+New Build Created 201
+'''''''''''''''''''''
+
+When a new build is created, the status will be 201 to indicate that.
+
+New Build Success 200
+'''''''''''''''''''''
+
+If a build is re-run, it may already have been created. The status will be 200
+to indicate this.
+
+
+Update Build Status
+-------------------
 
 ``POST /ms1/builds/update/``
 
-When Spack is running builds, each spec will either succeed or fail. In each case,
-we need to update Spack Monitor with the status for the spec. The default status for
+When Spack is running builds, each build task associated with a spec and host
+environment can either succeed or fail, or something else. In each case,
+we need to update Spack Monitor with this status. The default status for
 a build task is ``NOTRUN``. Once the builds start, given a failure,
 this means that the spec that failed is marked as ``FAILURE``, and the main spec 
 along with the other specs that were not installed are marked as ``CANCELLED``.
@@ -290,12 +383,77 @@ When you want to update the status of a spec build, a successful update will
 return a 200 response.
 
 
-Specs Metadata
---------------
+.. code-block:: python
 
-``POST /ms1/specs/metadata/``
+    {
+        "message": "Status updated",
+        "data": {
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 200
+    }
 
-When a package is finished installing, we have a metadata folder, usually within
+
+Update Build Phase
+------------------
+
+``POST /ms1/builds/phases/update/``
+
+Build Phases are associated with builds, and this is when we have output and error
+files. The following responses re valid:
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented or spec not found
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+The request to update the phase should look like the following - we include
+the build id (created or retrieved from the get build endpoint) along with simple
+metadata about the phase, and a status.
+
+.. code-block:: python
+
+    {
+        "build_id": 47,
+        "status": "SUCCESS",
+        "output": null,
+        "phase_name": "autoreconf"
+    }
+
+
+
+Update Build Phase 200
+''''''''''''''''''''''
+
+When a build phase is successfully updated, the response data looks like the following:
+
+
+.. code-block:: python
+
+    {
+        "message": "Phase autoconf was successfully updated.",
+        "code": 200,
+        "data": {
+            "build_phase": {
+                "id": 1,
+                "status": "SUCCESS",
+                "name": "autoconf"
+            }
+        }
+    }
+
+
+Builds Metadata
+---------------
+
+``POST /ms1/builds/metadata/``
+
+When a spec is finished installing, we have a metadata folder, usually within
 the spack root located at ``opt/<system>/<compiler>/<package>/.spack`` 
 with one or more of the following files:
 
@@ -308,8 +466,8 @@ with one or more of the following files:
  - repos
  - errors.txt
  
-We want to get output and errors from this location, so the client within
-Spack can read in and parse files. The data should be formatted as follows:
+We want to send build environment and install files from this location, so
+the client within spack can read and parse files. The data should be formatted as follows:
 
 .. code-block:: python
 
@@ -339,14 +497,12 @@ Spack can read in and parse files. The data should be formatted as follows:
                 "type": "dir"
             }
         },
-        "output": "==> diffutils: Executing phase: 'install'\n==> [2021-02-18-12:35:47.550126] 'make' '-j8' 'install'\nMaking install in...",
-        "errors": null,
         "full_hash": "5wdhxf5usk7g6gznwhydbwzmdibxqhjp"
     }
 
 
-As you can see, the output, error, and config args are provided as is (we just
-read in the file for the request), the environment is read in, filtered
+We don't represent output here, as it's captured and stored with ``BuildPhase`` objects.
+The environment is read in, filtered
 to a list to include only ``SPACK_*`` variables, and split into key value pairs,
 and the package full hash is provided to look up. If any information does not
 exist, it is simply not sent. A full request might look like the following:
@@ -359,5 +515,20 @@ The response can then be any of the following:
 - `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
 
 Unlike other endpoints, this one does not check if data is already added for the
-package, it simply re-writes it. This is under the assumption that we might re-do
-a build and update the metadata associated.
+build, it simply re-writes it. This is under the assumption that we might re-do
+a build and update the metadata associated. The response is brief and tells the 
+user that the metadata for the build has been updated:
+
+.. code-block:: python
+
+    {
+        "message": "Metadata updated",
+        "data": {
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 200
+    }

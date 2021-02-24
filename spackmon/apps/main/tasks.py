@@ -5,6 +5,8 @@
 
 from spackmon.apps.main.models import (
     BuildPhase,
+    BuildEnvironment,
+    Build,
     Spec,
     Architecture,
     Target,
@@ -15,68 +17,113 @@ from spackmon.apps.main.models import (
 from spackmon.apps.main.utils import read_json
 
 import os
+import platform
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def update_phase(full_hash, spack_version, phase_name, output, status):
-    """Given a spec hash, spack version, and then a phase name, output, and
-    status, update the phase associated with the spec. Return a json response
+def update_build_phase(build, phase_name, status, output, **kwargs):
+    """Given a build, and then a phase name, output, and
+    status, update the phase associated with the build. Return a json response
     with a message
     """
     try:
-        spec = Spec.objects.get(full_hash=full_hash, spack_version=spack_version)
-        build_phase, _ = BuildPhase.objects.get_or_create(spec=spec, name=phase_name)
+        build_phase, _ = BuildPhase.objects.get_or_create(build=build, name=phase_name)
         build_phase.status = status
         build_phase.output = output
         build_phase.save()
-        return True, {"message": "Phase %s was successfully updated." % phase_name}
+        data = {"build_phase": build_phase.to_dict()}
+        return {
+            "message": "Phase %s was successfully updated." % phase_name,
+            "code": 200,
+            "data": data,
+        }
     except:
-        return False, {"message": "There was an issue with updating the phase."}
+        return {"message": "There was an issue updating this phase.", "code": 400}
 
 
-def update_task_status(full_hash, status, spack_version):
-    """Given a full hash to identify a spec, and a status, update the status
-    for the spec. Given that we are cancelling a spec, this means that all
-    dependencies are cancelled too.
+def get_build(
+    full_hash, spack_version, hostname, kernel_version, host_os, host_target, platform
+):
+    """A shared function to first retrieve a spec, then the environment, then the build.
+    This could be made much more efficient if we create a build id to return to the client
+    to store first.
     """
     try:
         spec = Spec.objects.get(full_hash=full_hash, spack_version=spack_version)
-        spec.build_status = status
-        spec.save()
+    except Spec.DoesNotExist:
+        return {
+            "message": "The spec with full hash %s and spack version %s does not exist."
+            % (full_hash, spack_version),
+            "data": {"build_created": False, "build_environment_created": False},
+            "code": 400,
+        }
 
-        # If we cancel or fail, cancel all dependencies that were not successful
-        if status in ["CANCELLED", "FAILED"]:
-            spec.cancel_dependencies()
-    except:
-        pass
+    # Get or create the BuildEnvironment
+    build_environment, created = BuildEnvironment.objects.get_or_create(
+        hostname=hostname,
+        kernel_version=kernel_version,
+        host_target=host_target,
+        host_os=host_os,
+        platform=platform,
+    )
+
+    build, build_created = Build.objects.get_or_create(
+        spec=spec, build_environment=build_environment
+    )
+
+    return {
+        "message": "Build get or create was successful.",
+        "data": {
+            "build_created": build_created,
+            "build_environment_created": created,
+            "build": build.to_dict(),
+        },
+        "code": 201 if build_created else 200,
+    }
 
 
-def update_spec_metadata(spec, data):
+def update_build_status(build, status):
+    """Given the metadata (environment and hashes) for a build, retrieve the build based
+    on finding the spec and environment
+    """
+    # Update the build status
+    build.status = status
+    build.save()
+    data = {"build": build.to_dict()}
+
+    # If the build's spec has other specs with builds, mark them as cancelled
+    for dep in build.spec.dependencies.all():
+        if dep.spec.build_set.count() > 0:
+            dep_build = dep.spec.build_set.first()
+            if dep_build.status != "SUCCESS":
+                dep_build.status = "CANCELLED"
+                dep_build.save()
+
+    return {"message": "Status updated", "data": data, "code": 200}
+
+
+def update_build_metadata(build, metadata, **kwargs):
     """Given a spec, update it with metadata from the package folder where
     it's installed. We assume that not all data is present.
     """
-    output = data.get("output")
-    error = data.get("output")
-    config_args = data.get("config")
-    envars = data.get("envars")
-    manifest = data.get("manifest")
+    config_args = metadata.get("config")
+    envars = metadata.get("environ")
+    manifest = metadata.get("manifest")
 
     # Update the spec with output
-    if output:
-        spec.output = output
-    if error:
-        spec.error = error
     if config_args:
-        spec.config_args = config_args
+        build.config_args = config_args
     if envars:
-        spec.update_envars(envars)
+        build.update_envars(envars)
     if manifest:
-        spec.update_install_files(manifest)
-    spec.save()
-    return spec
+        build.update_install_files(manifest)
+    build.save()
+
+    data = {"build": build.to_dict()}
+    return {"message": "Metadata updated", "data": data, "code": 200}
 
 
 def get_target(meta):
@@ -169,9 +216,15 @@ def import_configuration(config, spack_version):
     # We are required to have a top level spec
     if "spec" not in config:
         logging.error("spec key not found in file.")
-        return {"spec": None, "created": False, "message": "spec key missing"}
+        return {
+            "spec": None,
+            "created": False,
+            "message": "spec key missing",
+            "code": 400,
+        }
 
     first_spec = None
+    was_created = False
     for i, metadata in enumerate(config["spec"]):
         name = list(metadata.keys())[0]
         meta = metadata[name]
@@ -203,6 +256,8 @@ def import_configuration(config, spack_version):
 
         # Keep a handle on the first spec
         if i == 0:
+            was_created = created
             first_spec = spec
 
-    return {"spec": first_spec, "created": created, "message": "success"}
+    data = {"spec": first_spec, "created": was_created}
+    return {"message": "success", "data": data, "code": 201 if was_created else 200}

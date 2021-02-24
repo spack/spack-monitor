@@ -24,8 +24,8 @@ class GetAuthToken(APIView):
 
     @never_cache
     def get(self, request, *args, **kwargs):
-        """GET /auth/token"""
-        print("GET /auth/token")
+        """GET /auth/token/"""
+        print("GET /auth/token/")
         user = get_user(request)
 
         # No token provided matching a user, no go
@@ -38,7 +38,7 @@ class GetAuthToken(APIView):
 
         # Generate domain name for auth server
         DOMAIN_NAME = get_server(request)
-        auth_server = cfg.AUTH_SERVER or "%s/auth/token" % DOMAIN_NAME
+        auth_server = cfg.AUTH_SERVER or "%s/auth/token/" % DOMAIN_NAME
 
         # Generate the token data, a dict with token, expires_in, and issued_at
         data = generate_jwt(
