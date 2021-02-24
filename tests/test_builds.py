@@ -92,7 +92,9 @@ class SimpleTest(TestCase):
         )
         assert response.status_code == 201
         data = response.json()
-        full_hash = data.get("data", {}).get("full_hash")
+        assert data.get("code") == 201
+        data = data.get("data", {}).get("spec")
+        full_hash = data.get("full_hash")
         singularity = Spec.objects.get(full_hash=full_hash)
 
         # Assert we don't have any builds
@@ -105,12 +107,17 @@ class SimpleTest(TestCase):
             content_type="application/json",
             **self.headers
         )
-        assert response.status_code == 200
+
+        assert response.status_code == 201
         data = response.json()
+        assert data.get("code") == 201
+        data = data.get("data", {}).get("build")
+        assert data
         assert data.get("build_created", True)
         assert data.get("build_environment_created", True)
         assert data.get("spec_full_hash", full_hash)
         assert data.get("spec_name", singularity.name)
+        assert data.get("build_id")
 
         # Assert we now have a build
         assert Build.objects.count() == 1
@@ -118,54 +125,49 @@ class SimpleTest(TestCase):
         assert build.status == "NOTRUN"
 
         # Now let's update the build to be failed - this should cancel deps
-        failed = {
-            "full_hash": full_hash,
-            "spack_version": "1.0.0",
-            "status": "FAILED",
-            **fake_environment,
-        }
         response = self.client.post(
             "/ms1/builds/update/",
-            data=failed,
+            data={"build_id": data.get("build_id"), "status": "FAILED"},
             content_type="application/json",
             **self.headers
         )
         assert response.status_code == 200
+        data = response.json()
+        assert data.get("code") == 200
+        assert "build" in data.get("data")
+
         build = Build.objects.first()
         assert build.status == "FAILED"
 
-        # TODO: need to test update phase step here
-        # Go through dependencies, they should be cancelled now
-        # singularity = Spec.objects.get(full_hash=full_hash)
-        # assert singularity.build_status == "FAILED"
-        # for dep in singularity.dependencies.all():
-        #    assert dep.spec.build_status == "CANCELLED"
+        # Next, let's emulate updating package phases
+        phases = ["autoconf", "build", "install"]
+        for i, phase in enumerate(phases):
+            output = "%s-output" % phase
+            status = "SUCCESS"
+            phase_data = {
+                "status": status,
+                "output": output,
+                "build_id": build.id,
+                "phase_name": phase,
+            }
 
-        # Next, let's emulate a re-run, where the package build phases are successful
-        # phases = ["autoconf", "build", "install"]
-        # for i, phase in enumerate(phases):
-        #    output = "%s-output" % phase
-        #    status = "SUCCESS"
-        #    phase_data = {
-        #        "status": status,
-        #        "output": output,
-        #        "full_hash": full_hash,
-        #        "phase_name": phase,
-        #        "spack_version": "1.0.0",
-        #    }
-        #    response = self.client.post(
-        #        "/ms1/builds/phases/update/",
-        #        data=phase_data,
-        #        content_type="application/json",
-        #        **self.headers
-        #    )
-        #    assert response.status_code == 200
-        #    assert BuildPhase.objects.count() == 1
-        #    assert singularity.buildphase_set.count() == 1
-        #    build_phase = singularity.buildphase_set.get(name=phase)
+            response = self.client.post(
+                "/ms1/builds/phases/update/",
+                data=phase_data,
+                content_type="application/json",
+                **self.headers
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data.get("code") == 200
 
-        # Check that metadata was set successfully
-        #    assert build_phase.name == phase
-        #    assert build_phase.output == output
-        #    assert build_phase.status == status
-        #    assert build_phase.spec.name == singularity.name
+            assert BuildPhase.objects.count() == i+1
+            assert build.buildphase_set.count() == i+1
+            build_phase = build.buildphase_set.get(name=phase)
+
+            # Check that metadata was set successfully
+            assert build_phase.name == phase
+            assert build_phase.output == output
+            assert build_phase.status == status
+
+        # TODO: add metadata (install directory) upload, after testing with spakc

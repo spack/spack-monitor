@@ -87,16 +87,48 @@ must provide the following endpoints:
 Response Details
 ================
 
-Generally, a response will return a json object that shows a message. A successful
-response will have a message of "success" to go along with a 200 or 201 response code,
+Generally, a response will return a json object that shows a message, and a return code. 
+For example, a successful response will have a message of "success" to go along with a 200 or 201 response code,
 while an unsuccessful response will have a message indicating the error, and an error
-code (e.g., 400, 500, etc.). Each reponse will have metadata specific to the endpoint.
+code (e.g., 400, 500, etc.). Error responses may not have data. Successful reponses 
+will have metadata specific to the endpoint.
 
 .. code-block:: python
 
-    {"message": "success", "data" {...}}
+    {"message": "success", "data" {...}, "code": 201}
 
 
+Generally, endpoint data will return a lookup of objects updated or created based on the type.
+For example, the new configuration endpoint has metadata about the spec created under a ``spec``
+attribute of the data:
+
+.. code-block:: python
+
+    {
+        "message": "success",
+        "data": {
+            "spec": {
+                "full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "name": "singularity",
+                "version": "3.6.4",
+                "spack_version": "1.0.0",
+                "specs": {
+                    "cryptsetup": "tmi4pf6umhalop7mi6zyiv7xjpalyzgb",
+                    "go": "dehg3ddu6gacrmnoexbxhjv2i2d76yq6",
+                    "libgpg-error": "4cvsg42wxksiup6x74mlabu6un55wjzc",
+                    "libseccomp": "kfx6zyjxzudw77e3xk6i73bcgi2cavgh",
+                    "pkgconf": "al2hlnux3cchfhwiv2sbejnxvnogibac",
+                    "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                    "squashfs": "vpemhhpzqqf7mvpzdvcg6szfah6mwt2q",
+                    "util-linux-uuid": "g362jjpzlfp3qhfm7gdery6v3xgeh3lg"
+                }
+            },
+            "created": true
+        },
+        "code": 201
+    }
+    
+    
 Timestamps
 ----------
 
@@ -239,18 +271,27 @@ for each package included:
     {
         "message": "success",
         "data": {
-            "full_hash": "xttimnxa2kc4rc33axvrcpzejiil6wbn",
-            "packages": {
-                "cryptsetup": "4riqvvabzho7qyzxumc7csmtcatnfbqd",
-                "go": "2dhsyo2cvpyft5u2ptza7j7kvk5r6626",
-                "libgpg-error": "5fmyz5bhnsaw5vvtbgt3m6cujrw2ajbc",
-                "libseccomp": "3mmhto5wulorfps33lzkzr5ynyanmefn",
-                "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
-                "squashfs": "mxfspfx44aforrx6shx6r6nu3th6mca3",
-                "util-linux-uuid": "46cwzqnbfi3xdxlrm76z5gazhvog3n3t"
-            }
-        }
+            "spec": {
+                "full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "name": "singularity",
+                "version": "3.6.4",
+                "spack_version": "1.0.0",
+                "specs": {
+                    "cryptsetup": "tmi4pf6umhalop7mi6zyiv7xjpalyzgb",
+                    "go": "dehg3ddu6gacrmnoexbxhjv2i2d76yq6",
+                    "libgpg-error": "4cvsg42wxksiup6x74mlabu6un55wjzc",
+                    "libseccomp": "kfx6zyjxzudw77e3xk6i73bcgi2cavgh",
+                    "pkgconf": "al2hlnux3cchfhwiv2sbejnxvnogibac",
+                    "shadow": "aozeq6ybtsnrs5phtonutwes7fe6yhcy",
+                    "squashfs": "vpemhhpzqqf7mvpzdvcg6szfah6mwt2q",
+                    "util-linux-uuid": "g362jjpzlfp3qhfm7gdery6v3xgeh3lg"
+                }
+            },
+            "created": true
+        },
+        "code": 201
     }
+
 
 All of the above are full hashes, which we can use as unique identifiers for the builds.
 
@@ -267,8 +308,11 @@ New Build
 
 ``POST /ms1/builds/new/``
 
+This is the endpoint to use to get or lookup a previously done build, and retrieve
+a build id that can be used for further requests.
 A new build means that we have a spec, an environment, and we are starting a build!
-The ``Build`` object created on the server will hold a reference to the spec,
+The ``Build`` object can be either created or retrieved (if the comibination already
+exists), and it will hold a reference to the spec,
 the host build environment, build phases, and (if the build is successful)
 a list of objects associated (e.g., libraries and other binaries produced).
 
@@ -278,6 +322,25 @@ a list of objects associated (e.g., libraries and other binaries produced).
 - `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
 - `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
 - `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+
+In either case of success (200 or 201) the response data is formatted as follows:
+
+.. code-block:: python
+
+    {
+        "message": "Build get or create was successful.",
+        "data": {
+            "build_created": true,
+            "build_environment_created": true,
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 201
+}
 
 
 New Build Created 201
@@ -290,7 +353,6 @@ New Build Success 200
 
 If a build is re-run, it may already have been created. The status will be 200
 to indicate this.
-
 
 
 Update Build Status
@@ -319,6 +381,57 @@ Build Task Updated 200
 
 When you want to update the status of a spec build, a successful update will
 return a 200 response.
+
+
+.. code-block:: python
+
+    {
+        "message": "Status updated",
+        "data": {
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 200
+    }
+
+
+Update Build Phase
+------------------
+
+``POST /ms1/builds/phases/update/``
+
+Build Phases are associated with builds, and this is when we have output and error
+files. The following responses re valid:
+
+- `404 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>`_: not implemented or spec not found
+- `200 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200>`_: success
+- `503 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503>`_: service not available
+- `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
+- `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
+
+
+Update Build Phase 200
+''''''''''''''''''''''
+
+When a build phase is successfully updated, the response data looks like the following:
+
+
+.. code-block:: python
+
+    {
+        "message": "Phase autoconf was successfully updated.",
+        "code": 200,
+        "data": {
+            "build_phase": {
+                "id": 1,
+                "status": "SUCCESS",
+                "name": "autoconf"
+            }
+        }
+    }
 
 
 Builds Metadata

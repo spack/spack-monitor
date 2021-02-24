@@ -579,6 +579,9 @@ class BuildPhase(BaseModel):
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        return {"id": self.id, "status": self.status, "name": self.name}
+
     class Meta:
         app_label = "main"
         unique_together = (("build", "name"),)

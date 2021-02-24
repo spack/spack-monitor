@@ -91,7 +91,13 @@ class SimpleTest(TestCase):
 
         # Check the format of the response
         assert data.get("message") == "success"
+        assert data.get("code") == 201
+
         data = data.get("data")
+        assert data.get("created") == True
+
+        # The spec is a field of the data
+        data = data.get("spec")
         assert data
 
         # Check the response object

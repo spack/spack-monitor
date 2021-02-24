@@ -55,20 +55,11 @@ class NewSpec(APIView):
 
         # We require the spack version and the spec
         result = import_configuration(data.get("spec"), spack_version)
-        data = {"message": result["message"]}
 
         # Created or already existed
-        if result["spec"]:
+        if result["data"].get("spec"):
 
             # Full data includes message, id and serialized list of package ids
-            data["data"] = result["spec"].to_dict_ids()
+            result["data"]["spec"] = result["data"]["spec"].to_dict_ids()
 
-            # Tell the user that it was created, and didn't exist
-            if result["created"]:
-                return Response(status=201, data=data)
-
-            # 200 is success, but already exists
-            return Response(status=200, data=data)
-
-        # 400 Bad request, there was an error parsing the data
-        return Response(status=400, data=data)
+        return Response(status=result["code"], data=result)

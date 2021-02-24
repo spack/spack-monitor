@@ -24,21 +24,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_build_phase(phase_name, status, output, **kwargs):
-    """Given a spec hash, spack version, and then a phase name, output, and
-    status, update the phase associated with the spec. Return a json response
+def update_build_phase(build, phase_name, status, output, **kwargs):
+    """Given a build, and then a phase name, output, and
+    status, update the phase associated with the build. Return a json response
     with a message
     """
-    success, result = get_build(**kwargs)
-    if not success:
-        return success, {"message": "There was an issue with updating the phase."}
-
-    build = result["build"]
-    build_phase, _ = BuildPhase.objects.get_or_create(build=build, name=phase_name)
-    build_phase.status = status
-    build_phase.output = output
-    build_phase.save()
-    return True, {"message": "Phase %s was successfully updated." % phase_name}
+    try:
+        build_phase, _ = BuildPhase.objects.get_or_create(build=build, name=phase_name)
+        build_phase.status = status
+        build_phase.output = output
+        build_phase.save()
+        data = {"build_phase": build_phase.to_dict()}
+        return {
+            "message": "Phase %s was successfully updated." % phase_name,
+            "code": 200,
+            "data": data,
+        }
+    except:
+        return {"message": "There was an issue updating this phase.", "code": 400}
 
 
 def get_build(
@@ -51,11 +54,11 @@ def get_build(
     try:
         spec = Spec.objects.get(full_hash=full_hash, spack_version=spack_version)
     except Spec.DoesNotExist:
-        return False, {
+        return {
             "message": "The spec with full hash %s and spack version %s does not exist."
             % (full_hash, spack_version),
-            "build_created": False,
-            "build_environment_created": False,
+            "data": {"build_created": False, "build_environment_created": False},
+            "code": 400,
         }
 
     # Get or create the BuildEnvironment
@@ -70,51 +73,26 @@ def get_build(
     build, build_created = Build.objects.get_or_create(
         spec=spec, build_environment=build_environment
     )
-    return True, {
+
+    return {
         "message": "Build get or create was successful.",
-        "build_created": build_created,
-        "build_environment_created": created,
-        "build": build,
-        "build_environment": build_environment,
-        "spec": spec,
+        "data": {
+            "build_created": build_created,
+            "build_environment_created": created,
+            "build": build.to_dict(),
+        },
+        "code": 201 if build_created else 200,
     }
 
 
-def prepare_build_result(result):
-    """Once we are done with using the build result, remove everything
-    except for a dict with build information
-    """
-    if "build" in result:
-        result["build"] = result["build"].to_dict()
-
-    # For a new build, we only need to return the build identifier
-    for key in ["spec", "build_environment"]:
-        if key in result:
-            del result[key]
-    return result
-
-
-def new_build(**kwargs):
-    """given the full hash and spack version to retrieve a spec, upon successful
-    retrieval, generate (or get) a Build object. We require all variables about
-    the host environment.
-    """
-    _, result = get_build(**kwargs)
-    return prepare_build_result(result)
-
-
-def update_build_status(status, **kwargs):
+def update_build_status(build, status):
     """Given the metadata (environment and hashes) for a build, retrieve the build based
     on finding the spec and environment
     """
-    success, result = get_build(**kwargs)
-    if not success:
-        return result
-
     # Update the build status
-    build = result["build"]
     build.status = status
     build.save()
+    data = {"build": build.to_dict()}
 
     # If the build's spec has other specs with builds, mark them as cancelled
     for dep in build.spec.dependencies.all():
@@ -124,18 +102,13 @@ def update_build_status(status, **kwargs):
                 dep_build.status = "CANCELLED"
                 dep_build.save()
 
-    return prepare_build_result(result)
+    return {"message": "Status updated", "data": data, "code": 200}
 
 
-def update_build_metadata(metadata, **kwargs):
+def update_build_metadata(build, metadata, **kwargs):
     """Given a spec, update it with metadata from the package folder where
     it's installed. We assume that not all data is present.
     """
-    success, result = get_build(**kwargs)
-    if not success:
-        return result
-
-    build = result["build"]
     config_args = metadata.get("config")
     envars = metadata.get("envars")
     manifest = metadata.get("manifest")
@@ -148,7 +121,9 @@ def update_build_metadata(metadata, **kwargs):
     if manifest:
         build.update_install_files(manifest)
     build.save()
-    return build
+
+    data = {"build": build.to_dict()}
+    return {"message": "Status updated", "data": data, "code": 200}
 
 
 def get_target(meta):
@@ -241,7 +216,12 @@ def import_configuration(config, spack_version):
     # We are required to have a top level spec
     if "spec" not in config:
         logging.error("spec key not found in file.")
-        return {"spec": None, "created": False, "message": "spec key missing"}
+        return {
+            "spec": None,
+            "created": False,
+            "message": "spec key missing",
+            "code": 400,
+        }
 
     first_spec = None
     was_created = False
@@ -279,4 +259,5 @@ def import_configuration(config, spack_version):
             was_created = created
             first_spec = spec
 
-    return {"spec": first_spec, "created": was_created, "message": "success"}
+    data = {"spec": first_spec, "created": was_created}
+    return {"message": "success", "data": data, "code": 201 if was_created else 200}

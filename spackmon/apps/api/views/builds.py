@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from ratelimit.decorators import ratelimit
 from django.views.decorators.cache import never_cache
@@ -12,10 +13,11 @@ from django.utils.decorators import method_decorator
 from spackmon.apps.main.tasks import (
     update_build_status,
     update_build_phase,
-    new_build,
+    get_build,
     update_build_metadata,
 )
 from spackmon.apps.main.utils import BUILD_STATUS
+from spackmon.apps.main.models import Build
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -76,13 +78,11 @@ class UpdateBuildStatus(APIView):
         # Get the task id and status to cancel
         data = json.loads(request.body)
         status = data.get("status")
+        build_id = data.get("build_id")
 
         # Build environment should be provided alongside tasks
-        build_environment = get_build_environment(data)
-        if not build_environment or not status:
-            return Response(
-                status=400, data={"message": "Missing required build environment data."}
-            )
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build id."})
 
         # All statuses must be valid
         if status not in BUILD_STATUSES:
@@ -94,12 +94,15 @@ class UpdateBuildStatus(APIView):
                 },
             )
 
-        result = update_build_status(status, **build_environment)
-        return Response(status=200, data=result)
+        build = get_object_or_404(Build, pk=build_id)
+        result = update_build_status(build, status)
+        return Response(status=result["code"], data=result)
 
 
 class NewBuild(APIView):
-    """Given a spec and environment information, create a new Build."""
+    """Given a spec and environment information, create a new Build.
+    If the build already exists, we return the build_id with it.
+    """
 
     permission_classes = []
     allowed_methods = ("POST",)
@@ -130,9 +133,10 @@ class NewBuild(APIView):
             )
 
         # Create the new build
-        result = new_build(**build_environment)
+        result = get_build(**build_environment)
 
-        return Response(status=200, data=result)
+        # Prepare data with
+        return Response(status=result["code"], data=result)
 
 
 class UpdatePhaseStatus(APIView):
@@ -162,30 +166,26 @@ class UpdatePhaseStatus(APIView):
 
         # Extra data here includes output, phase_name, and status
         data = json.loads(request.body)
-        build_environment = get_build_environment(data)
-        if not build_environment:
-            return Response(
-                status=400, data={"message": "Missing required build environment data."}
-            )
+        build_id = data.get("build_id")
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build_id."})
 
         output = data.get("output")
         phase_name = data.get("phase_name")
         status = data.get("status")
 
         # All of the above are required!
-        if not phase_name or status:
+        if not phase_name or not status:
             return Response(
                 status=400,
                 data={"message": "phase_name, and status are required."},
             )
 
+        build = get_object_or_404(Build, pk=build_id)
+
         # Update the phase
-        success, data = update_build_phase(
-            phase_name, status, output, **build_environment
-        )
-        if not success:
-            return Response(status=400, data=data)
-        return Response(status=200, data=data)
+        data = update_build_phase(build, phase_name, status, output)
+        return Response(status=data["code"], data=data)
 
 
 class UpdateBuildMetadata(APIView):
@@ -230,13 +230,10 @@ class UpdateBuildMetadata(APIView):
         data = json.loads(request.body)
         metadata = data.get("metadata", {})
 
-        # Includes spack version and full_hash
-        build_environment = get_build_environment(data)
-        if not build_environment or not metadata:
-            return Response(
-                status=400,
-                data={"message": "Missing required build environment or metadata."},
-            )
+        build_id = data.get("build_id")
+        if not build_id:
+            return Response(status=400, data={"message": "Missing required build_id."})
 
-        build = update_build_metadata(metadata, **build_environment)
-        return Response(status=200, data={"build_id": build.id})
+        build = get_object_or_404(Build, pk=build_id)
+        result = update_build_metadata(build, metadata)
+        return Response(status=result["code"], data=result)
