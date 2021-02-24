@@ -2,11 +2,18 @@
 test spackmon specs endpoints
 """
 
-from spackmon.apps.main.models import Spec, Dependency, BuildPhase, Build
+from spackmon.apps.main.models import (
+    Spec,
+    InstallFile,
+    BuildPhase,
+    Build,
+    EnvironmentVariable,
+)
 from spackmon.apps.users.models import User
 from django.test import TestCase
 
 import os
+import re
 import sys
 
 # Add spackmoncli to the path
@@ -17,7 +24,7 @@ sys.path.insert(0, spackmon_dir)
 
 
 try:
-    from spackmoncli import read_json, parse_auth_header, get_basic_auth
+    from spackmoncli import read_json, parse_auth_header, get_basic_auth, read_file
 except ImportError:
     sys.exit(
         "Cannot import functions from spackmoncli, "
@@ -31,6 +38,17 @@ fake_environment = {
     "hostname": "hostyhosthost",
     "kernel_version": "#73-Ubuntu SMP Mon Jan 18 17:25:17 UTC 2021",
 }
+
+
+def read_environment_file(filename):
+    if not os.path.exists(filename):
+        return
+    content = read_file(filename)
+    lines = re.split("(;|\n)", content)
+    lines = [x for x in lines if x not in ["", "\n", ";"] and "SPACK_" in x]
+    lines = [x.strip() for x in lines if "export " not in x]
+    lines = [x.strip() for x in lines if "export " not in x]
+    return {x.split("=", 1)[0]: x.split("=", 1)[1] for x in lines}
 
 
 class SimpleTest(TestCase):
@@ -161,8 +179,8 @@ class SimpleTest(TestCase):
             data = response.json()
             assert data.get("code") == 200
 
-            assert BuildPhase.objects.count() == i+1
-            assert build.buildphase_set.count() == i+1
+            assert BuildPhase.objects.count() == i + 1
+            assert build.buildphase_set.count() == i + 1
             build_phase = build.buildphase_set.get(name=phase)
 
             # Check that metadata was set successfully
@@ -170,4 +188,32 @@ class SimpleTest(TestCase):
             assert build_phase.output == output
             assert build_phase.status == status
 
-        # TODO: add metadata (install directory) upload, after testing with spakc
+        # Prepare build environment data (including spack version)
+        data = {"build_id": build.id}
+
+        # Test upload of faux install directory
+        meta_dir = os.path.join(base, "tests", "dummy-tar", ".spack")
+        env_file = os.path.join(meta_dir, "spack-build-env.txt")
+        config_file = os.path.join(meta_dir, "spack-configure-args.txt")
+        manifest_file = os.path.join(meta_dir, "install_manifest.json")
+
+        metadata = {
+            "environ": read_environment_file(env_file),
+            "config": read_file(config_file),
+            "manifest": read_json(manifest_file),
+        }
+
+        data["metadata"] = metadata
+        response = self.client.post(
+            "/ms1/builds/metadata/",
+            data=data,
+            content_type="application/json",
+            **self.headers
+        )
+        assert response.status_code == 200
+        response = response.json()
+        assert response.get("code") == 200
+
+        # We should have created an exact number of install files
+        assert len(data["metadata"]["manifest"]) == InstallFile.objects.count()
+        assert len(data["metadata"]["environ"]) == EnvironmentVariable.objects.count()

@@ -1,0 +1,1118 @@
+{
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/bin": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/libexec": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/archived-files": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/spack-configure-args.txt": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6ZDZ56A7P422QR32OGELDEXF4AZAAOBY",
+  "time": 1613602412.7220376,
+  "size": 148
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/spack-build-env.txt": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "OUYZRN6LBTZIQS6N73PWUJZFURLJJYX7",
+  "time": 1613602412.7180374,
+  "size": 7792
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/spec.yaml": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "IPMO7HTUHCAYJOM742UTIWM6BGHQWDBL",
+  "time": 1613598777.6385813,
+  "size": 1883
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/spack-build-out.txt": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "U4ISZCW2GIBT34XTNKXRB6MWZ654EGYW",
+  "time": 1613602412.7180374,
+  "size": 50317
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/archived-files/spack-src": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/archived-files/spack-src/removed_la_files.txt": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ",
+  "time": 1613602412.7260377,
+  "size": 0
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/archived-files/spack-src/config.log": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "XY3LBLKDDKDD7E36EXLRQTWMAQZIR2EL",
+  "time": 1613602412.7220376,
+  "size": 678183
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/repo.yaml": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "SYEJ465DCBLME3XIEFD67JI7A5COYDEO",
+  "time": 1613602412.7260377,
+  "size": 29
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/libiconv": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/libiconv/package.py": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "XDTP25F3UKJDUTR7AIIFTZ2BBDU7GAMU",
+  "time": 1612739553.6737115,
+  "size": 1276
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/libiconv/gets.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "4RQOBWIW7AEKGXUFGEOZIJ6OSDBSFWI6",
+  "time": 1612739553.6737115,
+  "size": 400
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/nvhpc.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "WQT23OZPIJBNI7Z4G6L7NWC2DXM5N6SL",
+  "time": 1613602412.734038,
+  "size": 1472
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/se-selinux.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "HA2ACZO34XJS6NEQF46ESYU7IZUPH4V5",
+  "time": 1613602412.730038,
+  "size": 1739
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/package.py": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "2OAVVOVJWEYVULG6QD6EFVWCX5RDSDH2",
+  "time": 1613602412.734038,
+  "size": 1669
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/argp-pgi.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "GUTJMOGD32QKN7TF67A2YKOFX6F3IWXN",
+  "time": 1613602412.730038,
+  "size": 761
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/gnutar-configure-xattrs.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "OWK4WK7NC2UU4JFYK7C5SXFJBJ47UQE2",
+  "time": 1613602412.734038,
+  "size": 15021
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/config-pgi.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "VB7ZG4BUSK4DFTJA2RLAEF32B6FRHLEK",
+  "time": 1613602412.730038,
+  "size": 354
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/.spack/repos/builtin/packages/tar/tar-pgi.patch": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "47QYVTASUGRSSJY2NH2ZCEFTZW7DU67X",
+  "time": 1613602412.730038,
+  "size": 1879
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/bin/tar": {
+  "mode": 33261,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "F7VQSJFAPKADSUN5RTFJZBLUMXUNYF6X",
+  "time": 1613598807.758524,
+  "size": 2732416
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/libexec/rmt": {
+  "mode": 33261,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "OJ42QIL3IMEECKGGQ2DQMIFPIPFSJFE6",
+  "time": 1613598807.7025242,
+  "size": 303280
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/info": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/man": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/info/dir": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "KHMAPP53QU3RGO64IQNZMN7U532TRMJX",
+  "time": 1613598807.4825244,
+  "size": 706
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/info/tar.info-1": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "NZIZ4B7ZTSYBW2E2CUW5Q2CJDLLPMWAX",
+  "time": 1613598807.4785244,
+  "size": 302074
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/info/tar.info-2": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "AUWBH42FJTYGZYYQLEJP52P5WU6ZN5BG",
+  "time": 1613598807.4785244,
+  "size": 341709
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/info/tar.info": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "QSTADAQUXCX3AMWFPHNIKVT37G7MZOVE",
+  "time": 1613598807.4785244,
+  "size": 13144
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/man/man8": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/man/man1": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/man/man8/rmt.8": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6SUGQXJM2LX7U6G4ZPQQUU2AS5IZKAYZ",
+  "time": 1613598807.4785244,
+  "size": 5355
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/man/man1/tar.1": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "FB7DCZSTZQIDPW6736SC6I45LPWIPL62",
+  "time": 1613598807.4785244,
+  "size": 42158
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hr": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ky": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ja": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eo": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fi": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nl": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eu": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hu": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ca": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sr": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/es": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt_BR": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ru": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/el": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/et": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/uk": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nb": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/tr": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/cs": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fr": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/de": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sl": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/da": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/vi": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ga": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/it": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pl": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ro": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_CN": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_TW": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/gl": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/bg": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/id": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sv": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ms": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ko": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sk": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hr/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hr/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "4XK3VQIIECSA3XB6JK76Z7NEUQK3LKKK",
+  "time": 1613598807.806524,
+  "size": 64216
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ky/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ky/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "BUZE4P5PEZZBBX5XPHUQVKYGAMBARTHP",
+  "time": 1613598807.8225238,
+  "size": 55118
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ja/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ja/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "MY6DWZA66WKDFSDN7BBGPLRDQNNZEGAA",
+  "time": 1613598807.818524,
+  "size": 59565
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eo/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eo/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "N2PLAVSSVCLQQ2GA4662RBFMHS76IPTA",
+  "time": 1613598807.786524,
+  "size": 61556
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fi/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fi/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "DB2T7QRS3WMHNDWWFSCH46XCKNK4BO5M",
+  "time": 1613598807.798524,
+  "size": 54573
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nl/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nl/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "LCZUODIEPKCCODSIV2P6WBORHINARFQW",
+  "time": 1613598807.830524,
+  "size": 64189
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eu/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/eu/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6A2PX2W6XYQACL452AUS2WU4DFR5K77A",
+  "time": 1613598807.794524,
+  "size": 32368
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hu/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/hu/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "4YZAJHYSJARFUCCHV7SGOJIAOLPQTVXT",
+  "time": 1613598807.810524,
+  "size": 67835
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ca/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ca/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "JRW6JFPCCUX42OQWXQQVPENNYHVJZ7ZZ",
+  "time": 1613598807.774524,
+  "size": 64892
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sr/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sr/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "YVSGWMQZ5GZFL6I4LEMXGQQUMJV4IK7G",
+  "time": 1613598807.850524,
+  "size": 79489
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/es/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/es/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "QU37QMFRGHRTAYWAYRWUKKAQDY4R4KOT",
+  "time": 1613598807.790524,
+  "size": 65476
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt_BR/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt_BR/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "TIWOQ5T4CNPP4LHLN66MHOGETNXFIKMI",
+  "time": 1613598807.8385239,
+  "size": 64315
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ru/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ru/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "4Z7SGCZZIXQOJQRW7GGLZYOWHCGDACNU",
+  "time": 1613598807.8425238,
+  "size": 83692
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/el/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/el/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6KBNRGMRKN4L5JUR3Q2HS7HZPZISZXPP",
+  "time": 1613598807.782524,
+  "size": 14467
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/et/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/et/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "FD72WIRVCWPFRYG4UL5OV7XL6BEGNV3F",
+  "time": 1613598807.790524,
+  "size": 57843
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/uk/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/uk/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "5T4QGLRVHPOXNIKP6R2HGGU543AA42AP",
+  "time": 1613598807.854524,
+  "size": 84643
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nb/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/nb/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "M42SI4IHNK4NTGRLOERYLMPHYDAGBCEA",
+  "time": 1613598807.826524,
+  "size": 61227
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/tr/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/tr/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "GVCMEPORFQ7KBLRTP3LGXR5GNDAT7JOC",
+  "time": 1613598807.854524,
+  "size": 61180
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/cs/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/cs/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "HZS72AP55HYBQTRQXJEHBORW4NXP32UM",
+  "time": 1613598807.774524,
+  "size": 65322
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fr/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/fr/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "WBKIJWW3P5ZU4HOYC345P323MJWZUVPX",
+  "time": 1613598807.798524,
+  "size": 65242
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/de/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/de/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "O6PND7LXREKAHAYGMCCX5P56MJ5QZOPH",
+  "time": 1613598807.782524,
+  "size": 65138
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sl/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sl/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "PGDSNEBCPGCIJB57THZ3BCYPOSUCUOHT",
+  "time": 1613598807.846524,
+  "size": 59701
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/da/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/da/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "34YEURVBWFQZWDS4BRXZ4OJ6X66KCT5A",
+  "time": 1613598807.778524,
+  "size": 60955
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/vi/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/vi/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "4H73XHAGPCHV4O3ZAH7Q7ZJMAYZP4ALN",
+  "time": 1613598807.8585238,
+  "size": 69417
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pt/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "TADRRW4D5LHPJQDFIPONZNYJ57EBREBC",
+  "time": 1613598807.834524,
+  "size": 62757
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ga/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ga/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6PQYQMWYH3ALHFIEF43OXPY5KNC2S2VQ",
+  "time": 1613598807.802524,
+  "size": 66621
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/it/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/it/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "HFINJITYIPDS4JLWECDFFHB34NTAGJ3A",
+  "time": 1613598807.814524,
+  "size": 64063
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pl/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/pl/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "OREEGSB4FJXQNXNPGHIETCMKTNZGGF45",
+  "time": 1613598807.830524,
+  "size": 65482
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ro/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ro/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "JPYB75KTWKHZG4YPES7IE6X2WO4X3XHB",
+  "time": 1613598807.8385239,
+  "size": 22883
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_CN/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_CN/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "HVD6E5OKV2PYTXG5MYHMR5N3RQ3W32RL",
+  "time": 1613598807.8625238,
+  "size": 58021
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_TW/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/zh_TW/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "7VKWFZZ2UNKLUD34AOA3CVW3CQ325KLK",
+  "time": 1613598807.8625238,
+  "size": 58535
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/gl/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/gl/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6OYTIA2HHJWOY4NAT4UAHBBNLF4BVAMC",
+  "time": 1613598807.806524,
+  "size": 10693
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/bg/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/bg/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "2WFTM3ODEWJTFQKKAQQ463HII4CLVARD",
+  "time": 1613598807.770524,
+  "size": 87513
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/id/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/id/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "F2BCLQC3GBGGNEKBU2ZJXJLN4NTRSZUX",
+  "time": 1613598807.814524,
+  "size": 58434
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sv/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sv/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "5XKEVHRLPOFDBZVBUP764WOYAQWCTFDL",
+  "time": 1613598807.850524,
+  "size": 62185
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ms/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ms/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "VNTGRZOJD7VRRSKBQEOVETIKO3ZT7C6U",
+  "time": 1613598807.826524,
+  "size": 9658
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ko/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/ko/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "6OLOLDNC5MLN652PXIE3UUPDG6MTGRWL",
+  "time": 1613598807.818524,
+  "size": 63883
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sk/LC_MESSAGES": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5/share/locale/sk/LC_MESSAGES/tar.mo": {
+  "mode": 33188,
+  "owner": 1000,
+  "group": 1000,
+  "type": "file",
+  "hash": "HDSONIKW2XIN6DJ5L43HSOJZE6FWQ4WF",
+  "time": 1613598807.8425238,
+  "size": 10303
+ },
+ "/home/vanessa/Desktop/Code/spack/opt/spack/linux-ubuntu20.04-skylake/gcc-9.3.0/tar-1.32-v2t5umv3cgfsc3fbzuzm7u7ig7gxdqq5": {
+  "mode": 17901,
+  "owner": 1000,
+  "group": 1000,
+  "type": "dir"
+ }
+}

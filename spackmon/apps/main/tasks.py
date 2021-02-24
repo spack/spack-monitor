@@ -110,7 +110,7 @@ def update_build_metadata(build, metadata, **kwargs):
     it's installed. We assume that not all data is present.
     """
     config_args = metadata.get("config")
-    envars = metadata.get("envars")
+    envars = metadata.get("environ")
     manifest = metadata.get("manifest")
 
     # Update the spec with output
@@ -123,7 +123,7 @@ def update_build_metadata(build, metadata, **kwargs):
     build.save()
 
     data = {"build": build.to_dict()}
-    return {"message": "Status updated", "data": data, "code": 200}
+    return {"message": "Metadata updated", "data": data, "code": 200}
 
 
 def get_target(meta):

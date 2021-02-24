@@ -412,6 +412,20 @@ files. The following responses re valid:
 - `400 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400>`_: bad request
 - `403 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403>`_: permission denied
 
+The request to update the phase should look like the following - we include
+the build id (created or retrieved from the get build endpoint) along with simple
+metadata about the phase, and a status.
+
+.. code-block:: python
+
+    {
+        "build_id": 47,
+        "status": "SUCCESS",
+        "output": null,
+        "phase_name": "autoreconf"
+    }
+
+
 
 Update Build Phase 200
 ''''''''''''''''''''''
@@ -502,4 +516,19 @@ The response can then be any of the following:
 
 Unlike other endpoints, this one does not check if data is already added for the
 build, it simply re-writes it. This is under the assumption that we might re-do
-a build and update the metadata associated.
+a build and update the metadata associated. The response is brief and tells the 
+user that the metadata for the build has been updated:
+
+.. code-block:: python
+
+    {
+        "message": "Metadata updated",
+        "data": {
+            "build": {
+                "build_id": 1,
+                "spec_full_hash": "p64nmszwer36ly7pnch5fznni4cnmndg",
+                "spec_name": "singularity"
+            }
+        },
+        "code": 200
+    }

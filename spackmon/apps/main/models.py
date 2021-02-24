@@ -90,8 +90,8 @@ class Object(BaseModel):
         "main.Attribute",
         blank=True,
         default=None,
-        related_name="attributes",
-        related_query_name="attributes",
+        related_name="object",
+        related_query_name="object",
     )
 
     class Meta:
@@ -119,12 +119,12 @@ class Build(BaseModel):
         help_text="The status of the spec build.",
     )
 
-    objects = models.ManyToManyField(
+    objects_installed = models.ManyToManyField(
         "main.Object",
         blank=True,
         default=None,
-        related_name="objects",
-        related_query_name="objects",
+        related_name="build_for_object",
+        related_query_name="build_for_object",
     )
     build_environment = models.ForeignKey(
         "main.BuildEnvironment", null=False, blank=False, on_delete=models.DO_NOTHING
@@ -135,8 +135,8 @@ class Build(BaseModel):
         "main.EnvironmentVariable",
         blank=True,
         default=None,
-        related_name="envars",
-        related_query_name="envars",
+        related_name="build_for_environment",
+        related_query_name="build_for_environment",
     )
 
     config_args = models.TextField(blank=True, null=True)
@@ -147,16 +147,19 @@ class Build(BaseModel):
         remove any associated environment variables.
         """
         # Delete existing environment variables not associated elsewhere
-        self.envars.annotate(num_builds=Count("build")).filter(num_builds=1).delete()
+        self.envars.annotate(build_count=Count("build_for_environment")).filter(
+            build_count=1
+        ).delete()
+
         new_envars = []
         for key, value in envars.items():
             new_envar, _ = EnvironmentVariable.objects.get_or_create(
-                key=key, value=value
+                name=key, value=value
             )
             new_envars.append(new_envar)
 
         # This does bulk save / update to database
-        self.envars.add(new_envars)
+        self.envars.add(*new_envars)
 
     def update_install_files(self, manifest):
         """Given a spack install manifest, update the spec to include the
@@ -172,7 +175,7 @@ class Build(BaseModel):
             # Store path after /spack/opt/spack
             filename = filename.split("/spack/opt/spack/", 1)
             InstallFile.objects.get_or_create(
-                spec=self,
+                build=self,
                 name=filename,
                 ftype=attrs["type"],
                 mode=attrs["mode"],
@@ -293,8 +296,8 @@ class Target(BaseModel):
         "main.Feature",
         blank=True,
         default=None,
-        related_name="features",
-        related_query_name="features",
+        related_name="target_features",
+        related_query_name="target_features",
     )
     generation = models.PositiveIntegerField(blank=True, null=True)
     parents = models.ManyToManyField(
@@ -462,8 +465,8 @@ class Spec(BaseModel):
         "main.Dependency",
         blank=True,
         default=None,
-        related_name="dependencies",
-        related_query_name="dependencies",
+        related_name="dependencies_for_spec",
+        related_query_name="dependencies_for_spec",
     )
 
     def print(self):
