@@ -127,6 +127,7 @@ class NewBuild(APIView):
         # Get the complete build environment
         data = json.loads(request.body)
         build_environment = get_build_environment(data)
+        print(build_environment)
         if not build_environment:
             return Response(
                 status=400, data={"message": "Missing required build environment data."}
@@ -134,7 +135,7 @@ class NewBuild(APIView):
 
         # Create the new build
         result = get_build(**build_environment)
-
+        print(result)
         # Prepare data with
         return Response(status=result["code"], data=result)
 

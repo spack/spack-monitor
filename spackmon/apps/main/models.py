@@ -107,7 +107,6 @@ class InstallFile(BaseModel):
         blank=False,
         null=False,
         help_text="The hash of the object",
-        unique=True,
     )
 
     # This is where we export ABI features to, via a general attribute that can
@@ -235,14 +234,14 @@ class Build(BaseModel):
 
             # Store path after /spack/opt/spack
             filename = filename.split("/spack/opt/spack/", 1)
-            InstallFile.objects.get_or_create(
+            install_file, _ = InstallFile.objects.get_or_create(
                 build=self,
                 name=filename,
-                ftype=attrs["type"],
-                mode=attrs["mode"],
-                owner=attrs["owner"],
-                group=attrs["group"],
             )
+            install_file.ftype = attrs["type"]
+            install_file.mode = attrs["mode"]
+            install_file.owner = attrs["owner"]
+            install_file.group = attrs["group"]
 
     def to_dict(self):
         return {

@@ -1,11 +1,13 @@
 """
-test spackmon specs endpoints
+test spackmon analyze endpoints
 """
 
 from spackmon.apps.main.models import (
     Spec,
+    InstallFile,
     BuildPhase,
     Build,
+    EnvironmentVariable,
 )
 from spackmon.apps.users.models import User
 from django.test import TestCase
@@ -36,6 +38,17 @@ fake_environment = {
     "hostname": "hostyhosthost",
     "kernel_version": "#73-Ubuntu SMP Mon Jan 18 17:25:17 UTC 2021",
 }
+
+
+def read_environment_file(filename):
+    if not os.path.exists(filename):
+        return
+    content = read_file(filename)
+    lines = re.split("(;|\n)", content)
+    lines = [x for x in lines if x not in ["", "\n", ";"] and "SPACK_" in x]
+    lines = [x.strip() for x in lines if "export " not in x]
+    lines = [x.strip() for x in lines if "export " not in x]
+    return {x.split("=", 1)[0]: x.split("=", 1)[1] for x in lines}
 
 
 class SimpleTest(TestCase):
@@ -71,10 +84,9 @@ class SimpleTest(TestCase):
         # Update authorization headers
         self.headers["HTTP_AUTHORIZATION"] = "Bearer %s" % token
 
-    def test_build_metadata(self):
-        """Test the build endpoints, meaning updating a build, and then
-        a build phase. A build generally references an entire Spec, while
-        a BuildPhase is a portion of it (e.g., install).
+    def test_analyze(self):
+        """Test the analyze endpoints, meaning uploading metadata files
+        from a package directory.
         """
 
         # We have to add a spec file first to do an associated build
@@ -102,75 +114,49 @@ class SimpleTest(TestCase):
         full_hash = data.get("full_hash")
         singularity = Spec.objects.get(full_hash=full_hash)
 
-        # Assert we don't have any builds
-        assert Build.objects.count() == 0
-
-        # Create the build
+        # Create the build (it can be not run)
         response = self.client.post(
             "/ms1/builds/new/",
             data={"full_hash": full_hash, "spack_version": "1.0.0", **fake_environment},
             content_type="application/json",
             **self.headers
         )
-
-        assert response.status_code == 201
-        data = response.json()
-        assert data.get("code") == 201
-        data = data.get("data", {}).get("build")
-        assert data
-        assert data.get("build_created", True)
-        assert data.get("build_environment_created", True)
-        assert data.get("spec_full_hash", full_hash)
-        assert data.get("spec_name", singularity.name)
-        assert data.get("build_id")
-
-        # Assert we now have a build
-        assert Build.objects.count() == 1
         build = Build.objects.first()
         assert build.status == "NOTRUN"
 
-        # Now let's update the build to be failed - this should cancel deps
+        # We next want to emulate reading in environment, manifest, and
+        # other data, and uploading to analyze endpoint
+        # Prepare build environment data (including spack version)
+        data = {"build_id": build.id}
+
+        # Test upload of faux install directory
+        meta_dir = os.path.join(base, "tests", "dummy-tar", ".spack")
+        env_file = os.path.join(meta_dir, "spack-build-env.txt")
+        config_file = os.path.join(meta_dir, "spack-configure-args.txt")
+        manifest_file = os.path.join(meta_dir, "install_manifest.json")
+
+        metadata = {
+            "environment_variables": read_environment_file(env_file),
+            "config_args": read_file(config_file),
+            "install_files": read_json(manifest_file),
+        }
+
+        data["metadata"] = metadata
         response = self.client.post(
-            "/ms1/builds/update/",
-            data={"build_id": data.get("build_id"), "status": "FAILED"},
+            "/ms1/analyze/builds/",
+            data=data,
             content_type="application/json",
             **self.headers
         )
         assert response.status_code == 200
-        data = response.json()
-        assert data.get("code") == 200
-        assert "build" in data.get("data")
+        response = response.json()
+        assert response.get("code") == 200
+        assert "build" in response.get("data", {})
 
-        build = Build.objects.first()
-        assert build.status == "FAILED"
-
-        # Next, let's emulate updating package phases
-        phases = ["autoconf", "build", "install"]
-        for i, phase in enumerate(phases):
-            output = "%s-output" % phase
-            status = "SUCCESS"
-            phase_data = {
-                "status": status,
-                "output": output,
-                "build_id": build.id,
-                "phase_name": phase,
-            }
-
-            response = self.client.post(
-                "/ms1/builds/phases/update/",
-                data=phase_data,
-                content_type="application/json",
-                **self.headers
-            )
-            assert response.status_code == 200
-            data = response.json()
-            assert data.get("code") == 200
-
-            assert BuildPhase.objects.count() == i + 1
-            assert build.buildphase_set.count() == i + 1
-            build_phase = build.buildphase_set.get(name=phase)
-
-            # Check that metadata was set successfully
-            assert build_phase.name == phase
-            assert build_phase.output == output
-            assert build_phase.status == status
+        # We should have created an exact number of install files
+        assert len(data["metadata"]["install_files"]) == InstallFile.objects.count()
+        assert (
+            len(data["metadata"]["environment_variables"])
+            == EnvironmentVariable.objects.count()
+        )
+        assert InstallFile.objects.first().build == build

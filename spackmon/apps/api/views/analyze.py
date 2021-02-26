@@ -66,18 +66,7 @@ class UpdateBuildMetadata(APIView):
 
         # Get the data, including output, error, environ, manifest, config
         data = json.loads(request.body)
-        build_environment = get_build_environment(data)
-        if not build_environment:
-            return Response(
-                status=400, data={"message": "Missing required build environment data."}
-            )
-
-        # Get or create a representation of the build
-        result = get_build(**build_environment)
-        if result["code"] not in [200, 201]:
-            return Response(status=result["code"], data=result)
-
-        build_id = result.get("data", {}).get("build", {}).get("id", {})
+        build_id = data.get("build_id")
         if not build_id:
             return Response(status=400, data={"message": "Missing required build_id."})
 
