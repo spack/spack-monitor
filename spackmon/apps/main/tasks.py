@@ -109,17 +109,19 @@ def update_build_metadata(build, metadata, **kwargs):
     """Given a spec, update it with metadata from the package folder where
     it's installed. We assume that not all data is present.
     """
-    config_args = metadata.get("config")
-    envars = metadata.get("environ")
-    manifest = metadata.get("manifest")
+    for analyzer_name, results in metadata.items():
 
-    # Update the spec with output
-    if config_args:
-        build.config_args = config_args
-    if envars:
-        build.update_envars(envars)
-    if manifest:
-        build.update_install_files(manifest)
+        if analyzer_name == "config_args":
+            build.config_args = results
+        elif analyzer_name == "install_files":
+            build.update_install_files(results)
+        elif analyzer_name == "environment_variables":
+            build.update_envars(results)
+
+        # A generic analyzer is updating features for objects (e.g., libabigail)
+        else:
+            build.update_install_files_attributes(results)
+
     build.save()
 
     data = {"build": build.to_dict()}

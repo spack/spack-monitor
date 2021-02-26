@@ -448,14 +448,16 @@ When a build phase is successfully updated, the response data looks like the fol
     }
 
 
-Builds Metadata
----------------
+Analyze Builds Metadata
+-----------------------
 
-``POST /ms1/builds/metadata/``
+``POST /ms1/analyze/builds/``
 
-When a spec is finished installing, we have a metadata folder, usually within
-the spack root located at ``opt/<system>/<compiler>/<package>/.spack`` 
-with one or more of the following files:
+Analyze endpoints correspond with running ``spack analyze``, and are generally for
+taking some metadata (environment, install files, etc.) from the installed package
+directory and adding them to the server. When a spec is finished installing, 
+we have a metadata folder, usually within the spack root located at 
+``opt/<system>/<compiler>/<package>/.spack``  with one or more of the following files:
 
  - spack-configure-args.txt'
  - spack-build-env.txt'
@@ -463,12 +465,27 @@ with one or more of the following files:
  - archived-files
  - spack-build-out.txt
  - install_manifest.json
+ - install_environment.json
  - repos
  - errors.txt
  
-We want to send build environment and install files from this location, so
-the client within spack can read and parse files. The data should be formatted as follows:
+The ``install_environment.json`` can easily be used to look up the build id, and
+then any kind of metadata can be added. The data keys that you send will correspond
+to where the metadata is added:
 
+ - environment_variables: indicates a list of environment variables to link to a build
+ - install_files: indicates a list of install files to be created as objects
+ - config_args: the content of ``spack-configure-args.txt``
+ 
+
+Any other attribute is assumed to be a lookup of key value pairs, indexed
+by an object.
+ 
+As a user, you are allowed to send as many of these keys and data to the server
+as you see fit, meaning you can do multiple kinds of analyses at once and then
+update the monitor server. A complete example of sending a build environment
+and install files is shown below:
+ 
 .. code-block:: python
 
     {
@@ -501,7 +518,6 @@ the client within spack can read and parse files. The data should be formatted a
     }
 
 
-We don't represent output here, as it's captured and stored with ``BuildPhase`` objects.
 The environment is read in, filtered
 to a list to include only ``SPACK_*`` variables, and split into key value pairs,
 and the package full hash is provided to look up. If any information does not
@@ -516,7 +532,7 @@ The response can then be any of the following:
 
 Unlike other endpoints, this one does not check if data is already added for the
 build, it simply re-writes it. This is under the assumption that we might re-do
-a build and update the metadata associated. The response is brief and tells the 
+an analysis and update the metadata associated. The response is brief and tells the 
 user that the metadata for the build has been updated:
 
 .. code-block:: python

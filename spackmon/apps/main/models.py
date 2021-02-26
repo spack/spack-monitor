@@ -69,8 +69,34 @@ class Attribute(BaseModel):
         unique_together = (("name", "value"),)
 
 
-class Object(BaseModel):
-    """Object"""
+class InstallFile(BaseModel):
+    """An Install File is associated with a spec package install.
+    An install file can be an object, in which case it will have an object_type.
+    Each can optionally have attributes (features extracted for it)
+    """
+
+    build = models.ForeignKey(
+        "main.Build", null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    name = models.CharField(
+        max_length=500,
+        blank=False,
+        null=False,
+        help_text="The name of the install file, with user prefix removed",
+        unique=True,
+    )
+
+    ftype = models.CharField(
+        max_length=25,
+        blank=True,
+        null=False,
+        help_text="The type of install file",
+    )
+
+    mode = models.PositiveIntegerField(blank=True, null=True)
+    owner = models.PositiveIntegerField(blank=True, null=True)
+    group = models.PositiveIntegerField(blank=True, null=True)
 
     # The object type, e.g., .jar, .so,)
     object_type = models.CharField(
@@ -81,7 +107,6 @@ class Object(BaseModel):
         blank=False,
         null=False,
         help_text="The hash of the object",
-        unique=True,
     )
 
     # This is where we export ABI features to, via a general attribute that can
@@ -94,8 +119,31 @@ class Object(BaseModel):
         related_query_name="object",
     )
 
+    def to_manifest(self):
+        """If we return a single dependency as a dict, the configuration can
+        combine them into one dict by updating based on the name as key.
+        """
+        manifest = {
+            self.name: {
+                "mode": self.mode,
+                "owner": self.owner,
+                "group": self.group,
+                "type": self.type,
+            }
+        }
+        if self.hash:
+            manifest[self.name]["hash"] = self.hash
+        return manifest
+
+    def to_dict(self):
+        """An extended manifest with the object type and hash."""
+        manifest = self.to_manifest()
+        manifest["object_type"] = self.object_type
+        manifest["build"] = self.build.to_dict()
+
     class Meta:
         app_label = "main"
+        unique_together = (("build", "name"),)
 
 
 class Build(BaseModel):
@@ -119,12 +167,12 @@ class Build(BaseModel):
         help_text="The status of the spec build.",
     )
 
-    objects_installed = models.ManyToManyField(
-        "main.Object",
+    files_installed = models.ManyToManyField(
+        "main.InstallFile",
         blank=True,
         default=None,
-        related_name="build_for_object",
-        related_query_name="build_for_object",
+        related_name="build_for_files",
+        related_query_name="build_for_files",
     )
     build_environment = models.ForeignKey(
         "main.BuildEnvironment", null=False, blank=False, on_delete=models.DO_NOTHING
@@ -161,27 +209,39 @@ class Build(BaseModel):
         # This does bulk save / update to database
         self.envars.add(*new_envars)
 
+    def update_install_files_attributes(self, files):
+        """Given install files that have one or more attributes, update them
+        The data should have install files as keys in a dictionary, with
+        each having another dictionary of key, value paired attributes.
+        """
+        for file_name, attributes in files.items():
+            obj = InstallFile.objects.get_or_create(
+                build=self,
+                name=file_name,
+            )
+            for attr_name, attr_value in attributes.items():
+                attr, _ = Attribute.objects.get_or_create(
+                    name=attr_name, value=attr_value
+                )
+                obj.attributes.add(attr)
+
     def update_install_files(self, manifest):
         """Given a spack install manifest, update the spec to include the
-        files. Since files are uniquely associated with a spec, and it could
-        be the case that a package is updated, we remove previous files before
-        adding new ones. We also remove the prefix so the files are relative
+        files. We remove the prefix so the files are relative
         to the spack installation directory
         """
-        # Delete existing manifest files
-        InstallFile.objects.filter(build=self).delete()
         for filename, attrs in manifest.items():
 
             # Store path after /spack/opt/spack
             filename = filename.split("/spack/opt/spack/", 1)
-            InstallFile.objects.get_or_create(
+            install_file, _ = InstallFile.objects.get_or_create(
                 build=self,
                 name=filename,
-                ftype=attrs["type"],
-                mode=attrs["mode"],
-                owner=attrs["owner"],
-                group=attrs["group"],
             )
+            install_file.ftype = attrs["type"]
+            install_file.mode = attrs["mode"]
+            install_file.owner = attrs["owner"]
+            install_file.group = attrs["group"]
 
     def to_dict(self):
         return {
@@ -625,61 +685,6 @@ class Dependency(BaseModel):
     class Meta:
         app_label = "main"
         unique_together = (("spec", "dependency_type"),)
-
-
-class InstallFile(BaseModel):
-    """An install file holds information about a successfully installed file
-    in the install_manifest.json in the .spack metadata folder of a package.
-    An install file can only point to one spec. Since we want the file
-    to be general (and not specific to the user system) we remove the prefix
-    before opt/spack (and this can be changed if needed).
-    """
-
-    build = models.ForeignKey(
-        "main.Build", null=False, blank=False, on_delete=models.CASCADE
-    )
-
-    name = models.CharField(
-        max_length=500,
-        blank=False,
-        null=False,
-        help_text="The name of the install file, with user prefix removed",
-        unique=True,
-    )
-
-    ftype = models.CharField(
-        max_length=25,
-        blank=True,
-        null=False,
-        help_text="The type of install file",
-    )
-
-    mode = models.PositiveIntegerField(blank=True, null=True)
-    owner = models.PositiveIntegerField(blank=True, null=True)
-    group = models.PositiveIntegerField(blank=True, null=True)
-
-    def __str__(self):
-        return "[install-file:%s|%s]" % (self.spec.name, self.name)
-
-    def __repr__(self):
-        return str(self)
-
-    def to_dict(self):
-        """If we return a single dependency as a dict, the configuration can
-        combine them into one dict by updating based on the name as key.
-        """
-        return {
-            self.name: {
-                "mode": self.mode,
-                "owner": self.owner,
-                "group": self.group,
-                "type": self.type,
-            }
-        }
-
-    class Meta:
-        app_label = "main"
-        unique_together = (("build", "name"),)
 
 
 class EnvironmentVariable(BaseModel):

@@ -1,0 +1,8 @@
+{
+ "host_os": "ubuntu20.04",
+ "platform": "linux",
+ "host_target": "skylake",
+ "hostname": "vanessa-ThinkPad-T490s",
+ "spack_version": "0.16.1-1455-52d5b55b65",
+ "kernel_version": "#73-Ubuntu SMP Mon Jan 18 17:25:17 UTC 2021"
+}
