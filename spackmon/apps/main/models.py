@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
 
-from .utils import BUILD_STATUS, PHASE_STATUS
+from .utils import BUILD_STATUS, PHASE_STATUS, FILE_CATEGORIES
 
 import json
 
@@ -98,10 +98,16 @@ class InstallFile(BaseModel):
     owner = models.PositiveIntegerField(blank=True, null=True)
     group = models.PositiveIntegerField(blank=True, null=True)
 
-    # The object type, e.g., .jar, .so,)
-    object_type = models.CharField(
-        max_length=25, blank=False, null=False, help_text="The type of library"
+    # Given an object, the kind of file (category)
+    category = models.CharField(
+        max_length=25,
+        blank=True,
+        null=True,
+        help_text="The type of file",
+        choices=FILE_CATEGORIES,
+        default=None,
     )
+
     hash = models.CharField(
         max_length=250,
         blank=False,
