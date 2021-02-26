@@ -135,7 +135,7 @@ class NewBuild(APIView):
 
         # Create the new build
         result = get_build(**build_environment)
-        print(result)
+
         # Prepare data with
         return Response(status=result["code"], data=result)
 
