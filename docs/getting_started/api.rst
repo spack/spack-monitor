@@ -473,10 +473,13 @@ The ``install_environment.json`` can easily be used to look up the build id, and
 then any kind of metadata can be added. The data keys that you send will correspond
 to where the metadata is added:
 
- - environ: indicates a list of environment variables to link to a build
+ - environment_variables: indicates a list of environment variables to link to a build
  - install_files: indicates a list of install files to be created as objects
- - attributes: indicates one or more attributes (key/value pairs) that can be associated with an object. If the object does not already exist, it's created.
- - config: the content of ``spack-configure-args.txt``
+ - config_args: the content of ``spack-configure-args.txt``
+ 
+
+Any other attribute is assumed to be a lookup of key value pairs, indexed
+by an object.
  
 As a user, you are allowed to send as many of these keys and data to the server
 as you see fit, meaning you can do multiple kinds of analyses at once and then
@@ -515,7 +518,6 @@ and install files is shown below:
     }
 
 
-We don't represent output here, as it's captured and stored with ``BuildPhase`` objects.
 The environment is read in, filtered
 to a list to include only ``SPACK_*`` variables, and split into key value pairs,
 and the package full hash is provided to look up. If any information does not
