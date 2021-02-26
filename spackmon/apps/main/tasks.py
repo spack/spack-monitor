@@ -109,9 +109,11 @@ def update_build_metadata(build, metadata, **kwargs):
     """Given a spec, update it with metadata from the package folder where
     it's installed. We assume that not all data is present.
     """
+    # Each key corresponds to some kind of data to be updated
     config_args = metadata.get("config")
     envars = metadata.get("environ")
     manifest = metadata.get("manifest")
+    objects = metadat.get("objects")
 
     # Update the spec with output
     if config_args:
@@ -120,6 +122,8 @@ def update_build_metadata(build, metadata, **kwargs):
         build.update_envars(envars)
     if manifest:
         build.update_install_files(manifest)
+    if objects:
+        build.update_objects(objects)
     build.save()
 
     data = {"build": build.to_dict()}

@@ -4,7 +4,6 @@ test spackmon specs endpoints
 
 from spackmon.apps.main.models import (
     Spec,
-    InstallFile,
     BuildPhase,
     Build,
     EnvironmentVariable,
@@ -187,33 +186,3 @@ class SimpleTest(TestCase):
             assert build_phase.name == phase
             assert build_phase.output == output
             assert build_phase.status == status
-
-        # Prepare build environment data (including spack version)
-        data = {"build_id": build.id}
-
-        # Test upload of faux install directory
-        meta_dir = os.path.join(base, "tests", "dummy-tar", ".spack")
-        env_file = os.path.join(meta_dir, "spack-build-env.txt")
-        config_file = os.path.join(meta_dir, "spack-configure-args.txt")
-        manifest_file = os.path.join(meta_dir, "install_manifest.json")
-
-        metadata = {
-            "environ": read_environment_file(env_file),
-            "config": read_file(config_file),
-            "manifest": read_json(manifest_file),
-        }
-
-        data["metadata"] = metadata
-        response = self.client.post(
-            "/ms1/builds/metadata/",
-            data=data,
-            content_type="application/json",
-            **self.headers
-        )
-        assert response.status_code == 200
-        response = response.json()
-        assert response.get("code") == 200
-
-        # We should have created an exact number of install files
-        assert len(data["metadata"]["manifest"]) == InstallFile.objects.count()
-        assert len(data["metadata"]["environ"]) == EnvironmentVariable.objects.count()
