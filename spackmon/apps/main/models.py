@@ -63,6 +63,11 @@ class Attribute(BaseModel):
     name = models.CharField(
         max_length=150, blank=False, null=False, help_text="The name of the attribute"
     )
+
+    install_file = models.ForeignKey(
+        "main.InstallFile", null=False, blank=False, on_delete=models.CASCADE
+    )
+
     analyzer = models.CharField(
         max_length=150,
         blank=False,
@@ -74,13 +79,12 @@ class Attribute(BaseModel):
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "analyzer"),)
+        unique_together = (("name", "analyzer", "install_file"),)
 
 
 class InstallFile(BaseModel):
     """An Install File is associated with a spec package install.
     An install file can be an object, in which case it will have an object_type.
-    Each can optionally have attributes (features extracted for it)
     """
 
     build = models.ForeignKey(
@@ -121,16 +125,6 @@ class InstallFile(BaseModel):
         blank=False,
         null=False,
         help_text="The hash of the object",
-    )
-
-    # This is where we export ABI features to, via a general attribute that can
-    # accept any name/value
-    attributes = models.ManyToManyField(
-        "main.Attribute",
-        blank=True,
-        default=None,
-        related_name="object",
-        related_query_name="object",
     )
 
     def to_manifest(self):
@@ -254,14 +248,15 @@ class Build(BaseModel):
                         name=result["name"],
                         value=result["value"],
                         analyzer=analyzer_name,
+                        install_file=obj,
                     )
                 elif "binary_value" in result:
                     attr, _ = Attribute.objects.get_or_create(
                         name=result["name"],
                         binary_value=result["binary_value"],
                         analyzer=analyzer_name,
+                        install_file=obj,
                     )
-                obj.attributes.add(attr)
 
     def update_install_files(self, manifest):
         """Given a spack install manifest, update the spec to include the
@@ -579,6 +574,11 @@ class Spec(BaseModel):
             return "[spec:%s|%s|%s]" % (self.name, self.version, self.full_hash)
         return "[spec:%s|%s]" % (self.name, self.full_hash)
 
+    def pretty_print(self):
+        if self.version:
+            return "%s v%s spack v%s" % (self.name, self.version, self.spack_version)
+        return "%s spack v%s" % (self.name, self.spack_version)
+
     def __repr__(self):
         return str(self)
 
@@ -671,7 +671,6 @@ class BuildPhase(BaseModel):
         blank=False,
         null=False,
         help_text="The name of the install file, with user prefix removed",
-        unique=True,
     )
 
     def __str__(self):
