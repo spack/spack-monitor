@@ -48,7 +48,6 @@ def get_build_environment(data):
     ]:
         value = data.get(field)
         if not value:
-            print(field)
             return
         build_environment[field] = data.get(field)
     return build_environment

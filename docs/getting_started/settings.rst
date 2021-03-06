@@ -54,7 +54,7 @@ into Spack Monitor.
      - None
    * - DISABLE_CACHE
      - Don't cache front end views
-     - false
+     - true
    * - API_URL_PREFIX
      - The prefix to use for the API
      - ms1
