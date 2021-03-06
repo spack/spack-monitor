@@ -24,6 +24,14 @@ PHASE_STATUS = [
     ("FAILED", "FAILED"),
 ]
 
+FILE_CATEGORIES = [
+    ("text", "text"),
+    ("elf shared object", "elf shared object"),
+    ("static library", "static library"),
+    ("script with shebang", "scrip with shebang"),
+    ("other", "other"),
+]
+
 
 def read_json(filename):
     with open(filename, "r") as fd:

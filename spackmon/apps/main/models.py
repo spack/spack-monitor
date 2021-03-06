@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
 
-from .utils import BUILD_STATUS, PHASE_STATUS
+from .utils import BUILD_STATUS, PHASE_STATUS, FILE_CATEGORIES
 
 import json
 
@@ -56,23 +56,35 @@ class BaseModel(models.Model):
 
 class Attribute(BaseModel):
     """an attribute can be any key/value pair (e.g., an ABI feature) associated
-    with an object
+    with an object. We allow the value to be text based (value) or binary
+    (binary_value).
     """
 
     name = models.CharField(
         max_length=150, blank=False, null=False, help_text="The name of the attribute"
     )
-    value = models.TextField(blank=False, null=False, help_text="The value")
+
+    install_file = models.ForeignKey(
+        "main.InstallFile", null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    analyzer = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="The name of the analyzer generating the result",
+    )
+    value = models.TextField(blank=True, null=True, help_text="A text based value")
+    binary_value = models.BinaryField(blank=True, null=True, help_text="A binary value")
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "value"),)
+        unique_together = (("name", "analyzer", "install_file"),)
 
 
 class InstallFile(BaseModel):
     """An Install File is associated with a spec package install.
     An install file can be an object, in which case it will have an object_type.
-    Each can optionally have attributes (features extracted for it)
     """
 
     build = models.ForeignKey(
@@ -98,25 +110,21 @@ class InstallFile(BaseModel):
     owner = models.PositiveIntegerField(blank=True, null=True)
     group = models.PositiveIntegerField(blank=True, null=True)
 
-    # The object type, e.g., .jar, .so,)
-    object_type = models.CharField(
-        max_length=25, blank=False, null=False, help_text="The type of library"
+    # Given an object, the kind of file (category)
+    category = models.CharField(
+        max_length=25,
+        blank=True,
+        null=True,
+        help_text="The type of file",
+        choices=FILE_CATEGORIES,
+        default=None,
     )
+
     hash = models.CharField(
         max_length=250,
         blank=False,
         null=False,
         help_text="The hash of the object",
-    )
-
-    # This is where we export ABI features to, via a general attribute that can
-    # accept any name/value
-    attributes = models.ManyToManyField(
-        "main.Attribute",
-        blank=True,
-        default=None,
-        related_name="object",
-        related_query_name="object",
     )
 
     def to_manifest(self):
@@ -209,21 +217,46 @@ class Build(BaseModel):
         # This does bulk save / update to database
         self.envars.add(*new_envars)
 
-    def update_install_files_attributes(self, files):
-        """Given install files that have one or more attributes, update them
-        The data should have install files as keys in a dictionary, with
-        each having another dictionary of key, value paired attributes.
+    def update_install_files_attributes(self, analyzer_name, results):
+        """Given install files that have one or more attributes, update them.
+        The data should be a list, and each entry should have the
+        object name (for lookup or creation) and then we provide either
+        a value or a binary_value. E.g.:
+            [{"value": content, "install_file": rel_path}]
         """
-        for file_name, attributes in files.items():
-            obj = InstallFile.objects.get_or_create(
-                build=self,
-                name=file_name,
-            )
-            for attr_name, attr_value in attributes.items():
-                attr, _ = Attribute.objects.get_or_create(
-                    name=attr_name, value=attr_value
+        for result in results:
+
+            # We currently only support adding attributes to install files
+            file_name = result.get("install_file")
+            if file_name:
+
+                if "name" not in result or (
+                    "value" not in result and "binary_value" not in result
+                ):
+                    print(
+                        "Result for %s is malformed, missing name or one of value/binary_value"
+                        % file_name
+                    )
+                    continue
+
+                obj, _ = InstallFile.objects.get_or_create(
+                    build=self,
+                    name=file_name,
                 )
-                obj.attributes.add(attr)
+                if "value" in result:
+                    attr, _ = Attribute.objects.get_or_create(
+                        name=result["name"],
+                        value=result["value"],
+                        analyzer=analyzer_name,
+                        install_file=obj,
+                    )
+                elif "binary_value" in result:
+                    attr, _ = Attribute.objects.get_or_create(
+                        name=result["name"],
+                        binary_value=result["binary_value"],
+                        analyzer=analyzer_name,
+                        install_file=obj,
+                    )
 
     def update_install_files(self, manifest):
         """Given a spack install manifest, update the spec to include the
@@ -541,6 +574,11 @@ class Spec(BaseModel):
             return "[spec:%s|%s|%s]" % (self.name, self.version, self.full_hash)
         return "[spec:%s|%s]" % (self.name, self.full_hash)
 
+    def pretty_print(self):
+        if self.version:
+            return "%s v%s spack v%s" % (self.name, self.version, self.spack_version)
+        return "%s spack v%s" % (self.name, self.spack_version)
+
     def __repr__(self):
         return str(self)
 
@@ -633,7 +671,6 @@ class BuildPhase(BaseModel):
         blank=False,
         null=False,
         help_text="The name of the install file, with user prefix removed",
-        unique=True,
     )
 
     def __str__(self):

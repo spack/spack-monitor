@@ -52,6 +52,9 @@ into Spack Monitor.
    * - CACHE_DIR
      - Path to directory to use for cache, defaults to "cache" in root of directory
      - None
+   * - DISABLE_CACHE
+     - Don't cache front end views
+     - true
    * - API_URL_PREFIX
      - The prefix to use for the API
      - ms1

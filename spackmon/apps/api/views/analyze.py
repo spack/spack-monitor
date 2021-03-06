@@ -28,16 +28,8 @@ import json
 
 class UpdateBuildMetadata(APIView):
     """Given a finished build for a spec, receive content from the metadata
-    folder. Any metadata that is missing will expect a None response. Fields
-    that we expect to parse include:
-
-     - errors: goes into the spec.errors field
-     - manifest: includes a json object with install files. Install files are
-                 linked to a spec and go into the ManyToMany install_files
-                 field, which points to the InstallFile table.
-     - environ: should be a list of parsed environment variables, which go
-                into the spec.envars field, pointing to EnvironmentVariable.
-     - config: text of config arguments.
+    folder. Any metadata that is missing will expect a None response. This
+    endpoint works with results produced from spack analyze.
 
     We don't include output files, as they are included with build phases.
     """

@@ -114,8 +114,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    # base will eventually have the home to the interfaces
-    #    "spackmon.apps.base",
+    "spackmon.apps.base",
     # api includes all api endpoints for spack to interact with
     "spackmon.apps.api",
     # main includes the main application models
@@ -277,19 +276,28 @@ MEDIA_URL = "/data/"
 
 # Cache to tmp
 # The default cache is for views, likely not used until we have them
-CACHE_LOCATION = os.path.join(tempfile.gettempdir(), "spackmon-cache")
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": CACHE_LOCATION,
+CACHES = {}
+
+if cfg.DISABLE_CACHE:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
     }
-}
+else:
+    CACHE_LOCATION = os.path.join(tempfile.gettempdir(), "spackmon-cache")
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": CACHE_LOCATION,
+        }
+    }
+    if not os.path.exists(CACHE_LOCATION):
+        os.mkdir(CACHE_LOCATION)
+
 
 CACHE_MIDDLEWARE_ALIAS = "default"
 CACHE_MIDDLEWARE_SECONDS = 86400  # one day
-
-if not os.path.exists(CACHE_LOCATION):
-    os.mkdir(CACHE_LOCATION)
 
 # Add cache middleware
 for entry in [
