@@ -15,6 +15,7 @@ from spackmon.apps.main.tasks import (
     update_build_phase,
     get_build,
     update_build_metadata,
+    import_configuration,
 )
 from spackmon.apps.main.utils import BUILD_STATUS
 from spackmon.apps.main.models import Build
@@ -47,6 +48,7 @@ def get_build_environment(data):
     ]:
         value = data.get(field)
         if not value:
+            print(field)
             return
         build_environment[field] = data.get(field)
     return build_environment
@@ -127,7 +129,6 @@ class NewBuild(APIView):
         # Get the complete build environment
         data = json.loads(request.body)
         build_environment = get_build_environment(data)
-        print(build_environment)
         if not build_environment:
             return Response(
                 status=400, data={"message": "Missing required build environment data."}
@@ -135,6 +136,13 @@ class NewBuild(APIView):
 
         # Create the new build
         result = get_build(**build_environment)
+
+        # If a spec is included in the build, the requester is okay to create
+        # it given that it does not exist.
+        if "spec" in data and "spack_version" in data:
+            spack_version = data.get("spack_version")
+            result = import_configuration(data["spec"], data["spack_version"])
+            result = get_build(**build_environment)
 
         # Prepare data with
         return Response(status=result["code"], data=result)

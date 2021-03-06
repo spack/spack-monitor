@@ -38,6 +38,7 @@ DISABLE_AUTHENTICATION: null
 # Caching
 # Will default to local "cache" folder in repository root
 CACHE_DIR: null
+DISABLE_CACHE: true
 
 # API
 # The prefix for the spack monitor API (ms == monitor spec)

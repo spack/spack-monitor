@@ -56,17 +56,25 @@ class BaseModel(models.Model):
 
 class Attribute(BaseModel):
     """an attribute can be any key/value pair (e.g., an ABI feature) associated
-    with an object
+    with an object. We allow the value to be text based (value) or binary
+    (binary_value).
     """
 
     name = models.CharField(
         max_length=150, blank=False, null=False, help_text="The name of the attribute"
     )
-    value = models.TextField(blank=False, null=False, help_text="The value")
+    analyzer = models.CharField(
+        max_length=150,
+        blank=False,
+        null=False,
+        help_text="The name of the analyzer generating the result",
+    )
+    value = models.TextField(blank=True, null=True, help_text="A text based value")
+    binary_value = models.BinaryField(blank=True, null=True, help_text="A binary value")
 
     class Meta:
         app_label = "main"
-        unique_together = (("name", "value"),)
+        unique_together = (("name", "analyzer"),)
 
 
 class InstallFile(BaseModel):
@@ -215,20 +223,44 @@ class Build(BaseModel):
         # This does bulk save / update to database
         self.envars.add(*new_envars)
 
-    def update_install_files_attributes(self, files):
-        """Given install files that have one or more attributes, update them
-        The data should have install files as keys in a dictionary, with
-        each having another dictionary of key, value paired attributes.
+    def update_install_files_attributes(self, analyzer_name, results):
+        """Given install files that have one or more attributes, update them.
+        The data should be a list, and each entry should have the
+        object name (for lookup or creation) and then we provide either
+        a value or a binary_value. E.g.:
+            [{"value": content, "install_file": rel_path}]
         """
-        for file_name, attributes in files.items():
-            obj = InstallFile.objects.get_or_create(
-                build=self,
-                name=file_name,
-            )
-            for attr_name, attr_value in attributes.items():
-                attr, _ = Attribute.objects.get_or_create(
-                    name=attr_name, value=attr_value
+        for result in results:
+
+            # We currently only support adding attributes to install files
+            file_name = result.get("install_file")
+            if file_name:
+
+                if "name" not in result or (
+                    "value" not in result and "binary_value" not in result
+                ):
+                    print(
+                        "Result for %s is malformed, missing name or one of value/binary_value"
+                        % file_name
+                    )
+                    continue
+
+                obj, _ = InstallFile.objects.get_or_create(
+                    build=self,
+                    name=file_name,
                 )
+                if "value" in result:
+                    attr, _ = Attribute.objects.get_or_create(
+                        name=result["name"],
+                        value=result["value"],
+                        analyzer=analyzer_name,
+                    )
+                elif "binary_value" in result:
+                    attr, _ = Attribute.objects.get_or_create(
+                        name=result["name"],
+                        binary_value=result["binary_value"],
+                        analyzer=analyzer_name,
+                    )
                 obj.attributes.add(attr)
 
     def update_install_files(self, manifest):

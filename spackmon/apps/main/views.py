@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden, JsonResponse
-from spackmon.apps.main.models import Spec
+from spackmon.apps.main.models import Spec, Build
 import os
 
 from ratelimit.decorators import ratelimit
@@ -20,9 +20,8 @@ from spackmon.settings import (
 # Dashboard
 
 
-@login_required
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def index(request):
     # All users can see all specs
-    specs = Spec.objects.all()
-    return render(request, "main/index.html", {"specs": specs})
+    builds = Build.objects.all()
+    return render(request, "main/index.html", {"builds": builds})
