@@ -19,4 +19,5 @@ specifics for starting with containers.
    auth
    api
    api_tutorial
+   interfaces
    settings

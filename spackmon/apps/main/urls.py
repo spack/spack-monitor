@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="dashboard"),
+    path("builds/<int:bid>/", views.build_detail, name="build_detail"),
 ]
 
 app_name = "main"

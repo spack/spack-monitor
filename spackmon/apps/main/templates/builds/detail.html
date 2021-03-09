@@ -1,0 +1,58 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Build > {{ build }}{% endblock %}
+{% block css %}
+{% endblock %}
+{% block content %}
+
+<div class="row">
+   <div class="col-md-4">
+      <h4>Summary</h4>
+
+      <b>Spec: </b> {{ build.spec.pretty_print }}
+      <br>
+
+      <b>Environment: </b>{{ build.build_environment.arch }}
+      <br>
+      <b>Created At: </b>{{ build.add_date }}
+      <br>
+
+      <b>Updated At: </b>{{ build.modify_date }}
+      <br>
+    </div>
+    <div class="col-md-4">
+      <h4>Build Environment</h4>
+
+      <b>Hostname: </b>{{ build.build_environment.hostname }}
+      <br>
+      <b>Host OS: </b>{{ build.build_environment.host_os }}
+      <br>
+      <b>Host Target: </b>{{ build.build_environment.host_target }}
+      <br>
+      <b>Platform: </b>{{ build.build_environment.platform }}
+      <br>
+      <b>Kernel Version: </b>{{ build.build_environment.kernel_version }}
+      <br>
+    </div>
+    <div class="col-md-4">
+        {% include "builds/phase_table.html" %}
+    </div>
+</div>
+
+{% for phase in build.buildphase_set.all %}
+<div class="title-divider" id="phase-{{ phase.name }}">
+    {{ phase.name }}
+</div>
+{% if phase.output %}<b>Output: </b>
+      <br>
+      <pre>{{ phase.output }}</pre>{% else %}<p class="alert alert-secondary">This phase does not have any output</p>{% endif %}
+{% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function() {
+});
+</script>
+{% endblock %}

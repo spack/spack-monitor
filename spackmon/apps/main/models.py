@@ -175,13 +175,6 @@ class Build(BaseModel):
         help_text="The status of the spec build.",
     )
 
-    files_installed = models.ManyToManyField(
-        "main.InstallFile",
-        blank=True,
-        default=None,
-        related_name="build_for_files",
-        related_query_name="build_for_files",
-    )
     build_environment = models.ForeignKey(
         "main.BuildEnvironment", null=False, blank=False, on_delete=models.DO_NOTHING
     )
@@ -196,6 +189,22 @@ class Build(BaseModel):
     )
 
     config_args = models.TextField(blank=True, null=True)
+
+    @property
+    def phase_success_count(self):
+        return self.buildphase_set.filter(status="SUCCESS").count()
+
+    @property
+    def phase_error_count(self):
+        return self.buildphase_set.filter(status="ERROR").count()
+
+    @property
+    def has_analysis(self):
+        return (
+            self.installfile_set.count() > 0
+            or self.envars.count() > 0
+            or self.config_args
+        )
 
     def update_envars(self, envars):
         """Given a dictionary of key value pairs, update the associated
