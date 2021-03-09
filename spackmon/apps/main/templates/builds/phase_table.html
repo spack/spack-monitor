@@ -1,0 +1,24 @@
+{% if build.buildphase_set.count > 0 %}<table>
+    <tbody class="table">
+          <td>
+            <table class="dart">
+              <tbody><tr class="table-heading">
+                <th colspan="3">Build Phases</th>
+              </tr>
+              <tr class="table-heading">
+                <th>Stage</th>
+                <th>Status</th>
+              </tr>
+              {% for phase in build.buildphase_set.all %}<tr class="tr-odd">
+                <td>
+                    <b>{{ phase.name }}</b>
+                </td>
+                <td class="normal" align="right">
+                  <b>{{ phase.status }}  
+                  </b>
+                </td>
+              </tr>{% endfor %}
+            </tbody></table>
+      </tbody></table>
+      <br>{% endif %}
+

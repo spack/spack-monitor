@@ -1,0 +1,125 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block page_title %}Spack Monitor Dashboard{% endblock %}
+{% block css %}
+<style>
+code {
+    color: rgb(0, 123, 255);
+    display: inline-block;
+    max-width: 1400px;
+    padding: 10px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background-color: transparent !important;
+  background: none !important;
+  border: none !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  padding: 0px !important;
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- TODO when this table gets large, do server side rendering -->
+<div class="buildgroup">
+<h3 class="buildgroupname">
+  <a href="#" class="grouptrigger">
+    Spack Monitor Builds
+  </a>
+  <span class="buildnums" align="right">{{ builds.count }}</span>
+</h3>
+<table class="tabb compact" id="builds_table" width="100%" cellspacing="0" cellpadding="4" border="0">
+  <thead>
+    <tr class="table-heading">
+      <th rowspan="2" class="column-header" style="">
+        Spec
+        <span class="glyphicon glyphicon-none"></span>
+      </th>
+      <th rowspan="2" class="column-header">
+        Environment
+        <span class="glyphicon glyphicon-none"></span>
+      </th>
+    </tr>
+    <tr class="table-heading">
+      <th class="column-header" style="">
+        Status
+        <span class="glyphicon glyphicon-none"></span>
+      </th>
+      <th class="column-header">
+        Success
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+      <th class="column-header">
+        Error
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+
+      <th class="column-header">
+        Analysis?
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+      <th class="column-header">
+        Install Files
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+      <th class="column-header">
+        Envars
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+      <th class="column-header">
+        Updated At
+        <span class="glyphicon glyphicon-chevron-down"></span>
+      </th>
+   </tr>
+  </thead>
+
+  <tbody>{% for build in builds %}
+    <tr class="odd" valign="middle">
+       <td class="paddt" style="" align="left">
+           <a href="{% url 'main:build_detail' build.id %}">{{ build.spec.pretty_print }}</a>
+       </td>
+       <td style="" align="left">
+           <div style="float: left; margin: 0px 4px;">{{ build.build_environment.arch }}</div>
+       </td>
+       <td class="{% if build.status == 'SUCCESS' %}normal{% endif %}{% if build.status == 'ERRPR' %}error{% endif %}{% if build.status == 'CANCELLED' %}warning{% endif %}" style="" align="center">
+             {{ build.status }}
+       </td>
+       <td class="normal" style="" align="center">
+             {{ build.phase_success_count }}
+       </td>
+       <td class="error" align="center">{{ build.phase_error_count }}</td>
+       <td align="center">{% if build.has_analysis %}✔️{% endif %}</td>
+       <td align="center">{{ build.installfile_set.count }}</td>
+       <td align="center">{{ build.envars.count }}</td>
+       <td align="center">{{ build.modify_date }}</td>
+      </tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div>
+  <label>Builds per page</label>
+  <select>
+    <option value="10" selected="selected">10</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="-1">All</option>
+  </select>
+  <br>
+  <br>
+</div>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $("#builds_table").DataTable({"order": [[ 3, "desc" ]]});
+    $("#builds_table").prepend('<thead><tr class="table-heading1"><td colspan="2" rowspan="1" class="nob"></td><td colspan="1" rowspan="1" class="center-text">Build</td><td colspan="2" rowspan="1" class="center-text">Phases</td><td colspan="3" rowspan="1" class="center-text">Analyze</td><td class="nob" align="right"></td></tr></thead>')
+});
+</script>
+{% endblock %}
