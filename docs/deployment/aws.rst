@@ -9,11 +9,11 @@ This tutorial requires an AWS account. You'll need the following dependencies on
  - `Docker <https://docs.docker.com/get-docker/>`_
  - `docker-compose <https://docs.docker.com/compose/install/>`_
 
-Setting up EC2
+Setting up AWS
 ==============
 
 Amazon allows you to run instances on a service called `EC2 <https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:>`_
-or `lightsail <https://lightsail.aws.amazon.com/ls/webapp/us-east-1/instances/spack-monitor-dev/connect>`_.
+or `lightsail <https://lightsail.aws.amazon.com/>`_.
 
 Lightsail
 ---------
