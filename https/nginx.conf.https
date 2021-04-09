@@ -35,14 +35,13 @@ server {
 
 server {
 
-    listen 443;
+    listen 443 ssl;
     server_name localhost;
 
     root html;
     client_max_body_size 10024M;
     client_body_buffer_size 10024M;
 
-    ssl on;
     ssl_certificate /etc/ssl/certs/chained.pem;
     ssl_certificate_key /etc/ssl/private/domain.key;
     ssl_session_timeout 5m;
