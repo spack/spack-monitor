@@ -57,3 +57,11 @@ Resources
   :maxdepth: 3
 
   development/index
+
+.. toctree::
+  :caption: Deployment
+  :name: deployment
+  :hidden:
+  :maxdepth: 3
+
+  deployment/index

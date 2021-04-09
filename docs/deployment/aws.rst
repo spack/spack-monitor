@@ -1,0 +1,93 @@
+.. _development-setup:
+
+=========================
+Amazon Web Services (AWS)
+=========================
+
+This tutorial requires an AWS account. You'll need the following dependencies on the instance:
+
+ - `Docker <https://docs.docker.com/get-docker/>`_
+ - `docker-compose <https://docs.docker.com/compose/install/>`_
+
+Setting up EC2
+==============
+
+Amazon allows you to run instances on a service called `EC2 <https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:>`_.
+
+Launch your Instance
+--------------------
+
+You'll want to navigate in your cloud console to Compute -> EC2 and then select "Launch Instance."
+
+- Select a base OS that you are comfortable with. I selected "Ubuntu Server 20.04 LTS (HVM), SSD Volume Type - ami-042e8287309f5df03 (64-bit x86) / ami-0b75998a97c952252 (64-bit Arm)"
+- For size I selected t2.xlarge. 
+- Select Step 3. Configure Instance Details. In this screen everything is okay, and I selected to enable termination protection. Under tenancy I first had wanted "Dedicated - Run a Dedicated Instance" but ultimately chose the default (Shared) as Dedicated was not an allowed configuration at the time.
+- Select Step 4. Add Storage. For this I just increased the root filesystem to 100 GB. This instruction is for a test instance so I didn't think we needed to add additional filesystems.
+- IAM roles: I created a new one with the role that was for an llnl admin, with access to EC2.
+- Under Step 5. Tags - you can add tags that you think are useful! I usually add service:spack-monitor and creator (my name).
+- Step 6. Configure Security group: give the group a name that will be easy to associate (e.g., spack-monitor-security-group). Make sure to add rules for exposing ports 80 and 443 for the web interface.
+
+When you click "Review and Launch" there will be a popup generated about a keypair. If you don't have one, you should
+generate it and save to your local machine. You will need this key pair to access the instance with ssh.
+I typically move the pem keys to my ~/.ssh folder.
+
+Connect to your Instance
+------------------------
+
+The easiest thing to do is click "View Instances," and then search for your instance by metadata or tags (e.g., I searched for "spack-monitor"). You can also
+rename your instance to call it something more meaningful (e.g., spack-monitor-dev). If you then click the instance ID, it will take you
+to a details page, and you can click "Connect" and then the tab for SSH. First, you will be instructed to change the permissions
+of your key:
+
+.. code-block:: console
+
+    $ chmod 400 ~/.ssh/myusername-spack-monitor.pem
+
+**Important** if you are on VPN, you wil need to request a firewall exception to connect via ssh. Otherwise, you can
+ follow the instructions on `this page <https://aws.amazon.com/premiumsupport/knowledge-center/ec2-linux-resolve-ssh-connection-errors/>`_ to:
+
+1. stop the instance
+2. edit user data to reset the ssh service
+3. start the instance
+4. connect via a session
+
+Sessions are in the browser instead of a terminal, but can work if you are absolutely desparate! Otherwise, if you
+are off VPN or have an exception, you can do:
+
+.. code-block:: console
+
+    $ ssh -v -i "~/.ssh/username-spack-monitor.pem" ubuntu@ec2-XX-XXX-XXX-X.compute-1.amazonaws.com
+
+Install Dependencies
+--------------------
+
+Once connected to the instance, `here is a basic script <https://github.com/spack/spack-monitor/tree/main/script/prepare_instance.sh>`_ to 
+t your dependencies installed. If you log in via ssh, you should be able to exit and connect again and not need sudo.
+
+
+Build and Start Spack Monitor
+-----------------------------
+
+It looks like nginx is installed on the instance by default, so you will need to stop it.
+
+.. code-block:: console
+
+    $ sudo service nginx stop
+
+And then build and bring up spack monitor:
+
+.. code-block:: console
+
+    $ sudo docker-compose up -d
+    $ docker-compose up -d
+
+If you need an interactive shell:
+
+.. code-block:: console
+
+    $ sudo docker exec -it spack-monitor_uwsgi_1 bash
+
+You can then check that the instance interface is live (without https). When that is done, use `this script <https://github.com/spack/spack-monitor/tree/main/script/generate_cert.sh>`_ to set up https.
+
+You can reference :ref:`getting-started_install` for more details.
+
