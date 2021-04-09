@@ -6,7 +6,7 @@
 
 # This was developed on Ubuntu 20.04 LTS on AWS
 
-INSTALL_ROOT=/opt
+INSTALL_ROOT=$HOME
 
 # Prepare instance (or machine) with Docker, docker-compose, python
 
@@ -14,11 +14,11 @@ sudo apt-get update > /dev/null
 sudo apt-get install -y git \
                         build-essential \
                         nginx \
-                        python-dev
+                        python3-dev
 
 # Needed module for system python
 wget https://bootstrap.pypa.io/get-pip.py
-sudo /usr/bin/python get-pip.py
+sudo /usr/bin/python3 get-pip.py
 sudo pip install ipaddress
 sudo pip install oauth2client
 
@@ -60,13 +60,10 @@ sudo apt -y install docker-compose
 
 if [ ! -d "$INSTALL_ROOT"/spack-monitor ]; then
     cd "$INSTALL_ROOT"
-
-    # otherwise production
-    sudo git clone https://github.com/spack/spack-monitor.git
-    sudo chmod o+x -R spack-monitor
-
     cd spack-monitor
 
+    # we have to stop local nginx for containers to work!
+    sudo service nginx stop 
     # If you are connected via ssh you should not need sudo
-    sudo docker-compose up -d
+    docker-compose up -d
 fi

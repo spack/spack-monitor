@@ -6,7 +6,7 @@
 
 EMAIL=${1}
 DOMAIN=${2}
-INSTALL_ROOT=/opt
+INSTALL_ROOT=$HOME
 
 # Install certbot (if not already done)
 sudo snap install --classic certbot
@@ -14,6 +14,7 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
 # Get certificates (might need sudo)
 certbot certonly --nginx -d "$DOMAIN" -d "www.$DOMAIN" --email "$EMAIL" --agree-tos --redirect
+
 
 # The prompt is interactive, and will show the locations of certificates
 
