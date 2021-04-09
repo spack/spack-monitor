@@ -31,6 +31,7 @@ And then follow the instruction to ssh to it (the username is ubuntu)
     $ ssh -v -i "~/.ssh/Lightsail-<keyhname>.pem" ubuntu@<ipaddress>
 
 You'll want to register a static IP, from the Networking tab, otherwise we cannot associate a domain.
+You'll also want to add an HTTPS rule to networking, unless you don't plan on setting up https.
 You can now jump down to the Install Dependencies section.
 
 
@@ -100,17 +101,22 @@ And then build and bring up spack monitor:
 
 .. code-block:: console
 
-    $ sudo docker-compose up -d
     $ docker-compose up -d
 
-If you need an interactive shell:
+After creation, if you need an interactive shell:
 
 .. code-block:: console
 
-    $ sudo docker exec -it spack-monitor_uwsgi_1 bash
+    $ docker exec -it spack-monitor_uwsgi_1 bash
+
+or to see logs
+
+.. code-block:: console
+
+    $ docker-compose logs uwsgi
 
 You can then check that the instance interface is live (without https). When that is done, use `this script <https://github.com/spack/spack-monitor/tree/main/script/generate_cert.sh>`_ to set up https. This means that you've registered a static IP, have a domain somewhere where you've associated it, and then
-are able to generate certificates for it.
+are able to generate certificates for it. After generating the certificates, you will want to use the docker-compose.yml and nginx.conf in the https folder.
 
 You can reference :ref:`getting-started_install` for more details.
 
