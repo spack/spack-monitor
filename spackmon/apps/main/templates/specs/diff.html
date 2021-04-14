@@ -1,0 +1,82 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Build > {{ build }}{% endblock %}
+{% block css %}
+   <style type="text/css">
+        table.diff {font-family:Courier; border:medium;}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+   <div class="col-md-12">
+      <h2 style="align:center">Spec Diff</h2>
+      <p>Select two specs in the database to diff.</p>
+      <p style="display:none" id="message" class="alert alert-info"></p>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-md-3">
+     <select style="width:100%" id="spec1-select" class="form-select" aria-label="spec1">
+      {% for spec in specs %}<option value="{{ spec.id }}" {% if spec1 and spec1.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-3">
+     <select style="width:100%" id="spec2-select" class="form-select" aria-label="spec1">
+         {% for spec in specs %}<option value="{{ spec.id }}" {% if spec2 and spec2.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-2">
+     <a href="#" type="button" id="diff-button" class="btn btn-primary" style="padding:5px">Calculate Diff</a>
+    </div>
+</div>
+
+{% if diff %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">
+     {{ diff | safe }}
+
+    <table style="margin-top:20px" class="diff" summary="Legends">
+        <tr> <th colspan="2"> Legends </th> </tr>
+        <tr> <td> <table border="" summary="Colors">
+                      <tr><th> Colors </th> </tr>
+                      <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
+                      <tr><td class="diff_chg">Changed</td> </tr>
+                      <tr><td class="diff_sub">Deleted</td> </tr>
+                  </table></td>
+             <td> <table border="" summary="Links">
+                      <tr><th colspan="2"> Links </th> </tr>
+                      <tr><td>(f)irst change</td> </tr>
+                      <tr><td>(n)ext change</td> </tr>
+                      <tr><td>(t)op</td> </tr>
+                  </table></td> </tr>
+    </table>
+   </div>
+</div>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function() {
+
+  $("#diff-button").click(function(){
+      spec1 = $( "#spec1-select option:selected" ).val();
+      spec2 = $( "#spec2-select option:selected" ).val();
+      if (spec1 == spec2) {
+           $("#message").html("These specs are the same! Choose two different specs.")
+           $("#message").show()
+      } else {
+          document.location = "/specs/diff/" + spec1 + "/" + spec2 + "/"  
+          
+      }
+  })
+});
+</script>
+{% endblock %}

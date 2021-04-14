@@ -41,6 +41,10 @@ code {
         Environment
         <span class="glyphicon glyphicon-none"></span>
       </th>
+      <th rowspan="2" class="column-header">
+        Compiler
+        <span class="glyphicon glyphicon-none"></span>
+      </th>
     </tr>
     <tr class="table-heading">
       <th class="column-header" style="">
@@ -83,6 +87,9 @@ code {
        <td style="" align="left">
            <div style="float: left; margin: 0px 4px;">{{ build.build_environment.arch }}</div>
        </td>
+       <td style="" align="left">
+           <div style="float: left; margin: 0px 4px;">{{ build.spec.compiler }}</div>
+       </td>
        <td class="{% if build.status == 'SUCCESS' %}normal{% endif %}{% if build.status == 'ERRPR' %}error{% endif %}{% if build.status == 'CANCELLED' %}warning{% endif %}" style="" align="center">
              {{ build.status }}
        </td>
@@ -119,7 +126,7 @@ code {
 <script>
 $(document).ready(function(){
     $("#builds_table").DataTable({"order": [[ 3, "desc" ]]});
-    $("#builds_table").prepend('<thead><tr class="table-heading1"><td colspan="2" rowspan="1" class="nob"></td><td colspan="1" rowspan="1" class="center-text">Build</td><td colspan="2" rowspan="1" class="center-text">Phases</td><td colspan="3" rowspan="1" class="center-text">Analyze</td><td class="nob" align="right"></td></tr></thead>')
+    $("#builds_table").prepend('<thead><tr class="table-heading1"><td colspan="3" rowspan="1" class="nob"></td><td colspan="1" rowspan="1" class="center-text">Build</td><td colspan="2" rowspan="1" class="center-text">Phases</td><td colspan="3" rowspan="1" class="center-text">Analyze</td><td class="nob" align="right"></td></tr></thead>')
 });
 </script>
 {% endblock %}

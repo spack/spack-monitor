@@ -453,7 +453,7 @@ class Compiler(BaseModel):
     )
 
     def __str__(self):
-        return "[compiler:%s|%s]" % (self.name, self.version)
+        return "%s %s" % (self.name, self.version)
 
     def __repr__(self):
         return str(self)

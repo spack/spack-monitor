@@ -9,6 +9,8 @@ from . import views
 urlpatterns = [
     path("", views.index, name="dashboard"),
     path("builds/<int:bid>/", views.build_detail, name="build_detail"),
+    path("specs/diff/<int:spec1>/<int:spec2>/", views.spec_diff, name="spec-diff"),
+    path("specs/diff/", views.spec_diff, name="spec-diff"),
 ]
 
 app_name = "main"
