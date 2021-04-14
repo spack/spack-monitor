@@ -34,6 +34,7 @@ def build_detail(request, bid):
     return render(request, "builds/detail.html", {"build": build})
 
 
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def spec_diff(request, spec1=None, spec2=None):
     """Allow the user to select two specs to diff."""
     specs = Spec.objects.all().order_by("name")
@@ -49,4 +50,15 @@ def spec_diff(request, spec1=None, spec2=None):
         request,
         "specs/diff.html",
         {"specs": specs, "diff": diff, "spec1": spec1, "spec2": spec2},
+    )
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
+def spec_detail(request, specid):
+    """Show detail for a spec."""
+    spec = get_object_or_404(Spec, pk=specid)
+    return render(
+        request,
+        "specs/detail.html",
+        {"spec": spec},
     )

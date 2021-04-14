@@ -82,7 +82,7 @@ code {
   <tbody>{% for build in builds %}
     <tr class="odd" valign="middle">
        <td class="paddt" style="" align="left">
-           <a href="{% url 'main:build_detail' build.id %}">{{ build.spec.pretty_print }}</a>
+           <a href="{% url 'main:spec_detail' build.spec.id %}">{{ build.spec.pretty_print }}</a> <a href="{% url 'main:build_detail' build.id %}"><span style="float:right" class="badge badge-primary">build details</span></a>
        </td>
        <td style="" align="left">
            <div style="float: left; margin: 0px 4px;">{{ build.build_environment.arch }}</div>

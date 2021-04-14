@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Spec > {{ spec }}{% endblock %}
+{% block css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-coy.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block content %}
+
+<div class="row" style="padding-bottom:25px">
+   <div class="col-md-8">
+      <h4>{{ spec.pretty_print }}</h4>
+
+<pre><code class="language-javascript">{{ spec.to_json }}</code></pre>
+</code></pre>
+    </div>
+   <div class="col-md-4">
+      <h4></h4>
+    <a href="{% url 'main:build_detail' spec.build_set.first.id %}"><span class="badge badge-primary">build details</span></a>
+   </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+<script>
+$(document).ready(function() {
+});
+</script>
+{% endblock %}

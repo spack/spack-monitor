@@ -648,6 +648,9 @@ class Spec(BaseModel):
 
         return result
 
+    def to_json(self, include_deps=True):
+        return json.dumps(self.to_dict(include_deps), indent=4).lstrip()
+
     class Meta:
         app_label = "main"
         unique_together = (("name", "full_hash", "spack_version"),)
