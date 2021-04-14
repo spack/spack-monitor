@@ -120,3 +120,16 @@ are able to generate certificates for it. After generating the certificates, you
 
 You can reference :ref:`getting-started_install` for more details.
 
+Update Settings
+---------------
+
+Finally, you'll want to ensure that you update the list of allowed hosts to
+include localhost and your custom domain, turn the application on debug mode,
+ensure https only is used, and (if you want) enable timezone support to the ``settings.py`` file.
+
+.. code-block:: python
+
+    ALLOWED_HOSTS = [“localhost”, “127.0.0.1", “monitor.spack.io”]
+    USE_TZ = True
+    SECURE_SSL_REDIRECT = True
+    DEBUG = False

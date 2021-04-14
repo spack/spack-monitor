@@ -4,6 +4,7 @@
 {% load static %}
 {% block page_title %}Build > {{ build }}{% endblock %}
 {% block css %}
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
    <style type="text/css">
         table.diff {font-family:Courier; border:medium;}
         .diff_header {background-color:#e0e0e0}
@@ -26,13 +27,13 @@
 
 <div class="row">
    <div class="col-md-3">
-     <select style="width:100%" id="spec1-select" class="form-select" aria-label="spec1">
-      {% for spec in specs %}<option value="{{ spec.id }}" {% if spec1 and spec1.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
+     <select class="autocomplete" style="width:100%" id="spec1-select" class="form-select" aria-label="spec1">
+      {% for spec in specs %}<option value="{{ spec.id }}" {% if spec1 and spec1.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }} {{ spec.compiler }}</option>{% endfor %}
       </select>
     </div>
    <div class="col-md-3">
-     <select style="width:100%" id="spec2-select" class="form-select" aria-label="spec1">
-         {% for spec in specs %}<option value="{{ spec.id }}" {% if spec2 and spec2.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
+     <select class="autocomplete" style="width:100%" id="spec2-select" class="form-select" aria-label="spec1">
+         {% for spec in specs %}<option value="{{ spec.id }}" {% if spec2 and spec2.id == spec.id %}selected{% endif %}>{{ spec.pretty_print }} {{ spec.compiler }}</option>{% endfor %}
       </select>
     </div>
    <div class="col-md-2">
@@ -63,9 +64,13 @@
 </div>{% endif %}
 {% endblock %}
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
 
+  $('.autocomplete').select2();
+
+  // Calculate the diff when the user clicks, unless it's the same spec
   $("#diff-button").click(function(){
       spec1 = $( "#spec1-select option:selected" ).val();
       spec2 = $( "#spec2-select option:selected" ).val();
@@ -74,7 +79,6 @@ $(document).ready(function() {
            $("#message").show()
       } else {
           document.location = "/specs/diff/" + spec1 + "/" + spec2 + "/"  
-          
       }
   })
 });
