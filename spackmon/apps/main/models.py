@@ -586,8 +586,8 @@ class Spec(BaseModel):
     def pretty_print(self):
         full_hash = self.full_hash[0:8]
         if self.version:
-            return "%s v%s spack v%s" % (self.name, self.version, full_hash)
-        return "%s spack v%s" % (self.name, full_hash)
+            return "%s v%s %s" % (self.name, self.version, full_hash)
+        return "%s %s" % (self.name, full_hash)
 
     def __repr__(self):
         return str(self)
