@@ -17,7 +17,62 @@
     </div>
    <div class="col-md-4">
       <h4></h4>
-    <a href="{% url 'main:build_detail' spec.build_set.first.id %}"><span class="badge badge-primary">build details</span></a>
+    {% if spec.build_set.count > 0 %}<a href="{% url 'main:build_detail' spec.build_set.first.id %}"><span class="badge badge-primary">build details</span></a>{% else %}<p style="padding:10px; radius:3px" class="alert-info">This spec build was not attempted.</p>{% endif %}
+      <div class="row">
+          <div class="col-md-6">
+          {% if spec.dependencies.count > 0 %}
+          <table><tbody class="table">
+          <td>
+            <table class="dart">
+              <tbody><tr class="table-heading">
+                <th colspan="2">Dependencies</th>
+              </tr>
+              <tr class="table-heading">
+                <th>Name</th>
+                <th>Status</th>
+              </tr>
+              {% for dep in spec.dependencies.all %}<tr class="tr-odd">
+                <td>
+                    <b><a href="{% url 'main:spec_detail' dep.spec.id %}">{{ dep.spec.name }}</a></b>
+                </td>
+                <td class="normal" align="right">{% if dep.spec.build_set.count == 0 %}<span title="NOT RUN means there were no build phases sent for this spec." class="badge badge-secondary">NOT RUN</span>{% else %}
+                  <b>{% for phase in dep.spec.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "FAILED" %}error{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
+                  </b>{% endif %}
+                </td>
+              </tr>{% endfor %}
+            </tbody></table>
+      </tbody></table>
+      <br>{% endif %}
+      
+          </div>
+          <div class="col-md-6">
+          {% with deps=spec.get_needed_by %}
+          {% if deps|length > 0 %}
+          <table><tbody class="table">
+          <td>
+            <table class="dart">
+              <tbody><tr class="table-heading">
+                <th colspan="2">Needed By</th>
+              </tr>
+              <tr class="table-heading">
+                <th>Name</th>
+                <th>Status</th>
+              </tr>
+              {% for dep in deps %}<tr class="tr-odd">
+                <td>
+                    <b><a href="{% url 'main:spec_detail' dep.id %}">{{ dep.name }}</a></b>
+                </td>
+                <td class="normal" align="right">{% if dep.build_set.count == 0 %}<span title="NOT RUN means there were no build phases sent for this spec." class="badge badge-secondary">NOT RUN</span>{% else %}
+                  <b>{% for phase in dep.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "FAILED" %}danger{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
+                  </b>{% endif %}
+                </td>
+              </tr>{% endfor %}
+            </tbody></table>
+      </tbody></table>
+      <br>{% endif %}{% endwith %}
+          </div>
+      </div>
+
    </div>
 </div>
 {% endblock %}
