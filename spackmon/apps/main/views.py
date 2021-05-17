@@ -30,6 +30,12 @@ def index(request):
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
+def builds_by_tag(request, tag):
+    builds = Build.objects.filter(tags__name=tag)
+    return render(request, "main/index.html", {"builds": builds, "tag": tag})
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def build_detail(request, bid):
     build = get_object_or_404(Build, pk=bid)
 

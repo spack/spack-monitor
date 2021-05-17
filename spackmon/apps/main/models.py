@@ -7,6 +7,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
+from taggit.managers import TaggableManager
 from itertools import chain
 
 from .utils import BUILD_STATUS, PHASE_STATUS, FILE_CATEGORIES
@@ -205,6 +206,9 @@ class Build(BaseModel):
     spec = models.ForeignKey(
         "main.Spec", null=False, blank=False, on_delete=models.CASCADE
     )
+
+    # Tags for the build to identify the experiment
+    tags = TaggableManager()
 
     # States: succeed, fail, fail because dependency failed (cancelled), not run
     status = models.CharField(

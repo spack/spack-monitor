@@ -26,7 +26,7 @@ code {
 <div class="buildgroup">
 <h3 class="buildgroupname">
   <a href="#" class="grouptrigger">
-    Spack Monitor Builds
+    Spack Monitor Builds{% if tag %}: {{ tag }}{% endif %}
   </a>
   <span class="buildnums" align="right">{{ builds.count }}</span>
 </h3>
@@ -61,7 +61,7 @@ code {
       </th>
 
       <th class="column-header">
-        Analysis?
+        Tags
         <span class="glyphicon glyphicon-chevron-down"></span>
       </th>
       <th class="column-header">
@@ -97,7 +97,7 @@ code {
              {{ build.phase_success_count }}
        </td>
        <td class="error" align="center">{{ build.phase_error_count }}</td>
-       <td align="center">{% if build.has_analysis %}✔️{% endif %}</td>
+       <td align="center">{% for tag in build.tags.all %}<a style="color:white" href="{% url 'main:builds_by_tag' tag %}"><span class="badge badge-info">{{ tag }}</span></a>{% endfor %}</td>
        <td align="center">{{ build.installfile_set.count }}</td>
        <td align="center">{{ build.envars.count }}</td>
        <td align="center">{{ build.modify_date }}</td>
