@@ -45,7 +45,14 @@ def update_build_phase(build, phase_name, status, output, **kwargs):
 
 
 def get_build(
-    full_hash, spack_version, hostname, kernel_version, host_os, host_target, platform
+    full_hash,
+    spack_version,
+    hostname,
+    kernel_version,
+    host_os,
+    host_target,
+    platform,
+    tag=None,
 ):
     """A shared function to first retrieve a spec, then the environment, then the build.
     This could be made much more efficient if we create a build id to return to the client
@@ -73,6 +80,11 @@ def get_build(
     build, build_created = Build.objects.get_or_create(
         spec=spec, build_environment=build_environment
     )
+
+    # Update the tags
+    if tag:
+        build.tags.add(tag)
+        build.save()
 
     return {
         "message": "Build get or create was successful.",

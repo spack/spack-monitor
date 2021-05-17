@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "crispy_forms",
     "social_django",
+    "taggit",
     "rest_framework",
     "rest_framework.authtoken",
 ]
@@ -301,6 +302,9 @@ CACHE_MIDDLEWARE_SECONDS = 86400  # one day
 
 # POSTs to API typically have a limit of 2.5MB, disable limit
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
+
+# Tags should not be case sensitive
+TAGGIT_CASE_INSENSITIVE = True
 
 # Add cache middleware
 for entry in [
