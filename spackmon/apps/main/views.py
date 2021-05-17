@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden, JsonResponse
 from spackmon.apps.main.models import Spec, Build
+from spackmon.apps.main.logparser import parse_build_logs
 import os
 
 from ratelimit.decorators import ratelimit
@@ -31,6 +32,10 @@ def index(request):
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def build_detail(request, bid):
     build = get_object_or_404(Build, pk=bid)
+
+    # Generate BuildWarnings and BuildErrors if don't exist
+    if build.logs_parsed == 0:
+        parse_build_logs(build)
     return render(request, "builds/detail.html", {"build": build})
 
 

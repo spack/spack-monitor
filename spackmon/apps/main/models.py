@@ -7,6 +7,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
+from itertools import chain
 
 from .utils import BUILD_STATUS, PHASE_STATUS, FILE_CATEGORIES
 
@@ -52,6 +53,46 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class BuildEvent(BaseModel):
+    """A BuildEvent is either a warning or an error produced by a build"""
+
+    phase = models.ForeignKey(
+        "main.BuildPhase", null=False, blank=False, on_delete=models.CASCADE
+    )
+    source_file = models.CharField(
+        max_length=150, blank=False, null=False, help_text="The source file."
+    )
+    source_line_no = models.PositiveIntegerField(default=None)
+    line_no = models.PositiveIntegerField(default=None)
+    repeat_count = models.PositiveIntegerField(default=0)
+    start = models.PositiveIntegerField(default=None)
+    end = models.PositiveIntegerField(default=None)
+    text = models.TextField()
+    pre_context = models.TextField()
+    post_context = models.TextField()
+
+    @property
+    def pre_context_lines(self):
+        for line in self.pre_context.split("\n"):
+            yield line
+
+    @property
+    def post_context_lines(self):
+        for line in self.post_context.split("\n"):
+            yield line
+
+    class Meta:
+        abstract = True
+
+
+class BuildWarning(BuildEvent):
+    pass
+
+
+class BuildError(BuildEvent):
+    pass
 
 
 class Attribute(BaseModel):
@@ -189,6 +230,40 @@ class Build(BaseModel):
     )
 
     config_args = models.TextField(blank=True, null=True)
+
+    @property
+    def logs_parsed(self):
+        count = 0
+        for phase in self.buildphase_set.all():
+            count += phase.builderror_set.count()
+            count += phase.buildwarning_set.count()
+        return count
+
+    @property
+    def build_errors_parsed(self):
+        count = 0
+        for phase in self.buildphase_set.all():
+            count += phase.builderror_set.count()
+        return count
+
+    @property
+    def build_warnings_parsed(self):
+        count = 0
+        for phase in self.buildphase_set.all():
+            count += phase.buildwarning_set.count()
+        return count
+
+    @property
+    def build_warnings(self):
+        for phase in self.buildphase_set.all():
+            for warning in phase.buildwarning_set.all():
+                yield warning
+
+    @property
+    def build_errors(self):
+        for phase in self.buildphase_set.all():
+            for error in phase.builderror_set.all():
+                yield error
 
     @property
     def phase_success_count(self):
@@ -571,6 +646,16 @@ class Spec(BaseModel):
         related_query_name="dependencies_for_spec",
     )
 
+    def get_needed_by(self):
+        """Walk up the tree to find other specs that need this one"""
+        needed_by = []
+        for depgroup in Dependency.objects.filter(spec=self):
+
+            # These are the other specs that need the spec here
+            specs = Spec.objects.filter(dependencies=depgroup)
+            needed_by = chain(needed_by, specs)
+        return list(needed_by)
+
     def print(self):
         if self.version:
             name = "%s v%s" % (self.name, self.version)
@@ -670,6 +755,9 @@ class BuildPhase(BaseModel):
     # Allow for arbitrary storage of output and error
     output = models.TextField(blank=True, null=True)
     error = models.TextField(blank=True, null=True)
+
+    # Parsed error and warning sections (done on request)
+    # are associated with the build
 
     status = models.CharField(
         choices=PHASE_STATUS,
