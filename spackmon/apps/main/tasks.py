@@ -52,7 +52,7 @@ def get_build(
     host_os,
     host_target,
     platform,
-    tag=None,
+    tags=None,
 ):
     """A shared function to first retrieve a spec, then the environment, then the build.
     This could be made much more efficient if we create a build id to return to the client
@@ -81,9 +81,10 @@ def get_build(
         spec=spec, build_environment=build_environment
     )
 
-    # Update the tags
-    if tag:
-        build.tags.add(tag)
+    # Update the tags, the input is comma separated
+    if tags:
+        for tag in tags.split(","):
+            build.tags.add(tag)
         build.save()
 
     return {

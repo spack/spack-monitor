@@ -127,7 +127,7 @@ class NewBuild(APIView):
 
         # Get the complete build environment
         data = json.loads(request.body)
-        tag = data.get("tag")
+        tags = data.get("tags")
         build_environment = get_build_environment(data)
         if not build_environment:
             return Response(
@@ -135,14 +135,14 @@ class NewBuild(APIView):
             )
 
         # Create the new build
-        result = get_build(**build_environment, tag=tag)
+        result = get_build(**build_environment, tags=tags)
 
         # If a spec is included in the build, the requester is okay to create
         # it given that it does not exist.
         if "spec" in data and "spack_version" in data:
             spack_version = data.get("spack_version")
             result = import_configuration(data["spec"], data["spack_version"])
-            result = get_build(**build_environment, tag=tag)
+            result = get_build(**build_environment, tags=tags)
 
         # Prepare data with
         return Response(status=result["code"], data=result)
