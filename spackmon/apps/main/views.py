@@ -26,13 +26,19 @@ import json
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def index(request):
     builds = Build.objects.all()
-    return render(request, "main/index.html", {"builds": builds})
+    tags = builds.values_list("tags__name", flat=True).distinct()
+    return render(request, "main/index.html", {"builds": builds, "tags": tags})
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def builds_by_tag(request, tag):
     builds = Build.objects.filter(tags__name=tag)
-    return render(request, "main/index.html", {"builds": builds, "tag": tag})
+
+    # Present all tags for browsing
+    tags = Build.objects.all().values_list("tags__name", flat=True).distinct()
+    return render(
+        request, "main/index.html", {"builds": builds, "tag": tag, "tags": tags}
+    )
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
