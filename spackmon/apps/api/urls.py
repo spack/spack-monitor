@@ -47,6 +47,11 @@ urlpatterns = [
         api_views.UpdateBuildMetadata.as_view(),
         name="update_build_metadata",
     ),
+    path(
+        "tables/build/",
+        api_views.BuildsTable.as_view(),
+        name="builds_table",
+    ),
 ]
 
 app_name = "api"

@@ -22,13 +22,13 @@ code {
 {% endblock %}
 {% block content %}
 
-<!-- TODO when this table gets large, do server side rendering -->
 <div class="buildgroup">
 <h3 class="buildgroupname">
   <a href="#" class="grouptrigger">
     Spack Monitor Builds{% if tag %}: {{ tag }}{% endif %}
   </a>
-  <span class="buildnums" align="right">{{ builds.count }}</span>
+  <span class="buildnums" align="right">{{ builds.count }}</span><span style="padding-left:50px">
+{% for tag in tags %}{% if tag %}<a style="color:white; padding-left:3px" href="{% url 'main:builds_by_tag' tag %}"><span class="badge badge-primary">{{ tag }}</span></a>{% endif %}{% endfor %}</span>
 </h3>
 <table class="tabb compact" id="builds_table" width="100%" cellspacing="0" cellpadding="4" border="0">
   <thead>
@@ -59,17 +59,8 @@ code {
         Error
         <span class="glyphicon glyphicon-chevron-down"></span>
       </th>
-
       <th class="column-header">
         Tags
-        <span class="glyphicon glyphicon-chevron-down"></span>
-      </th>
-      <th class="column-header">
-        Install Files
-        <span class="glyphicon glyphicon-chevron-down"></span>
-      </th>
-      <th class="column-header">
-        Envars
         <span class="glyphicon glyphicon-chevron-down"></span>
       </th>
       <th class="column-header">
@@ -78,31 +69,7 @@ code {
       </th>
    </tr>
   </thead>
-
-  <tbody>{% for build in builds %}
-    <tr class="odd" valign="middle">
-       <td class="paddt" style="" align="left">
-           <a href="{% url 'main:spec_detail' build.spec.id %}">{{ build.spec.pretty_print }}</a> <a href="{% url 'main:build_detail' build.id %}"><span style="float:right" class="badge badge-primary">build details</span></a>
-       </td>
-       <td style="" align="left">
-           <div style="float: left; margin: 0px 4px;">{{ build.build_environment.arch }}</div>
-       </td>
-       <td style="" align="left">
-           <div style="float: left; margin: 0px 4px;">{{ build.spec.compiler }}</div>
-       </td>
-       <td class="{% if build.status == 'SUCCESS' %}normal{% endif %}{% if build.status == 'ERRPR' %}error{% endif %}{% if build.status == 'CANCELLED' %}warning{% endif %}" style="" align="center">
-             {{ build.status }}
-       </td>
-       <td class="normal" style="" align="center">
-             {{ build.phase_success_count }}
-       </td>
-       <td class="error" align="center">{{ build.phase_error_count }}</td>
-       <td align="center">{% for tag in build.tags.all %}<a style="color:white" href="{% url 'main:builds_by_tag' tag %}"><span class="badge badge-info">{{ tag }}</span></a>{% endfor %}</td>
-       <td align="center">{{ build.installfile_set.count }}</td>
-       <td align="center">{{ build.envars.count }}</td>
-       <td align="center">{{ build.modify_date }}</td>
-      </tr>{% endfor %}
-  </tbody>
+  <tbody></tbody>
 </table>
 </div>
 </div>
@@ -111,8 +78,28 @@ code {
 {% block scripts %}
 <script>
 $(document).ready(function(){
-    $("#builds_table").DataTable({"order": [[ 3, "desc" ]]});
-    $("#builds_table").prepend('<thead><tr class="table-heading1"><td colspan="3" rowspan="1" class="nob"></td><td colspan="1" rowspan="1" class="center-text">Build</td><td colspan="2" rowspan="1" class="center-text">Phases</td><td colspan="3" rowspan="1" class="center-text">Analyze</td><td class="nob" align="right"></td></tr></thead>')
+    $("#builds_table").dataTable({"order": [[ 3, "desc" ]], "pageLength": 10, "processing": true, "serverSide": true, "ajax": "{% url 'api:builds_table' %}", "lengthMenu": [[10,15,20,25], [10,15,20,25]],
+    columnDefs: [ {
+    targets: 3,
+    createdCell: function (td, cellData, rowData, row, col) {
+        console.log(row);
+        if (( rowData[3] === 'SUCCESS' ) && (row % 2 != 0)) {
+            $(td).css('background-color', '#bfefbf');
+        } else if ((rowData[3] === 'SUCCESS') && (row % 2 == 0)) {
+            $(td).css('background-color', '#b4dcb4');
+        } else if ((rowData[3] === 'FAILED') && (row % 2 != 0)) {        
+            $(td).css('background-color', '#de6868');  
+        } else if ((rowData[3] === 'FAILED') && (row % 2 == 0)) {        
+            $(td).css('background-color', '#d95454');
+        } else if ((rowData[3] === 'CANCELLED') && (row % 2 != 0)) {
+            $(td).css('background-color', "#fd9e40");
+        } else if ((rowData[3] === 'CANCELLED') && (row % 2 == 0)) {
+            $(td).css('background-color', "#f39130");
+        }
+    }
+  }] 
+  });
+    $("#builds_table").prepend('<thead><tr class="table-heading1"><td colspan="3" rowspan="1" class="nob"></td><td colspan="1" rowspan="1" class="center-text">Build</td><td colspan="2" rowspan="1" class="center-text">Phases</td><td colspan="3" rowspan="1" class="center-text"></td><td class="nob" align="right"></td></tr></thead>')
 });
 </script>
 {% endblock %}
