@@ -65,11 +65,11 @@ class BuildEvent(BaseModel):
     source_file = models.CharField(
         max_length=150, blank=False, null=False, help_text="The source file."
     )
-    source_line_no = models.PositiveIntegerField(default=None)
-    line_no = models.PositiveIntegerField(default=None)
+    source_line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
+    line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
     repeat_count = models.PositiveIntegerField(default=0)
-    start = models.PositiveIntegerField(default=None)
-    end = models.PositiveIntegerField(default=None)
+    start = models.PositiveIntegerField(default=None, blank=True, null=True)
+    end = models.PositiveIntegerField(default=None, blank=True, null=True)
     text = models.TextField()
     pre_context = models.TextField()
     post_context = models.TextField()

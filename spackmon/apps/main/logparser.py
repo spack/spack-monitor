@@ -106,10 +106,14 @@ def parse_build_logs(build):
                     post_context="\n".join(warning.post_context),
                 )
             for error in errors:
+                try:
+                    source_line_no = error.source_line_no[0]
+                except:
+                    source_line_no = None
                 log = BE.objects.create(
                     phase=phase,
                     source_file=error.source_file,
-                    source_line_no=error.source_line_no,
+                    source_line_no=source_line_no,
                     line_no=error.line_no,
                     repeat_count=error.repeat_count,
                     start=error.start,
