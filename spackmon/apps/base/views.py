@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.http import HttpResponse
+from django.shortcuts import render
 
 # Warmup requests for app engine
 
