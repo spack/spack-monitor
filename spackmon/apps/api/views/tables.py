@@ -62,6 +62,11 @@ class BuildsTable(RatelimitMixin, APIView):
         query = request.GET.get("search[value]", "")
         queryset = Build.objects.all()
 
+        # A tag page should filter to those tags
+        tag = request.GET.get("tag")
+        if tag:
+            queryset = queryset.filter(tags__name=tag)
+
         # First do the search to reduce the size of the set
         if query:
             queryset = queryset.filter(

@@ -16,6 +16,10 @@ admin.site.site_header = "spackmon Admin"
 admin.site.site_title = "spackmon Admin"
 admin.site.index_title = "spackmon Admin"
 
+# Configure custom error pages
+handler404 = "spackmon.apps.base.views.handler404"
+handler500 = "spackmon.apps.base.views.handler500"
+
 admin.autodiscover()
 
 urlpatterns = [

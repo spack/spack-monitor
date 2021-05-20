@@ -40,6 +40,11 @@ DISABLE_AUTHENTICATION: null
 CACHE_DIR: null
 DISABLE_CACHE: true
 
+# Logging
+LOG_LEVEL: "WARNING"
+ENABLE_SENTRY: False
+SENTRY_DSN: "https://xxxxxxxxxxxxxxxxxxxxxxx@sentry.io/xxxxxxx"
+
 # API
 # The prefix for the spack monitor API (ms == monitor spec)
 URL_API_PREFIX: ms1

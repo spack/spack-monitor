@@ -330,6 +330,33 @@ CACHES.update(
     }
 )
 
+# Logging
+
+# Default Django logging is WARNINGS+ to console
+# so visible via docker-compose logs uwsgi
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": cfg.LOG_LEVEL,
+        },
+    },
+}
+
+if cfg.ENABLE_SENTRY:
+
+    SENTRY_DSN = cfg.SENTRY_DSN
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(dsn=cfg.SENTRY_DSN, integrations=[DjangoIntegration()])
 
 # Rate Limiting
 
