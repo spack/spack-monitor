@@ -4,6 +4,7 @@ django-extensions==3.0.2
 graphviz
 pydotplus
 sendgrid==6.4.3
+sentry-sdk
 # just for postgres
 psycopg2-binary==2.8.5
 django-gravatar2==1.4.4
