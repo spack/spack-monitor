@@ -161,3 +161,39 @@ and dependencies. If you've already added the package, you'll see:
     $ python script/api-examples/upload_config.py specs/singularity-3.6.4.json $(spack --version)
     This package already exists in the database.
 
+
+-------------------------
+Local Save Upload Example
+-------------------------
+
+When you run spack install and ask the monitor to save local:
+
+.. code-block:: console
+
+   $ spack install --monitor --monitor-save-local singularity
+
+
+This will generate a dated output directory in ``~/.spack/reports/monitor`` that
+you might want to upload later. You'll again want to export your credentials:
+
+.. code-block:: console
+
+    $ export SPACKMON_TOKEN=50445263afd8f67e59bd79bff597836ee6c05438
+    $ export SPACKMON_USER=vsoch
+
+    
+For this example `upload_save_local.py <https://github.com/spack/spack-monitor/blob/main/script/api-examples/upload_save_local.py>`_
+in the repository you'll see that by way of the `spackmon client <https://github.com/spack/spack-monitor/blob/main/script/spackmoncli.py>`_  we can do this upload.
+
+.. code-block:: console
+
+    $ python script/api-examples/upload_save_local.py ~/.spack/reports/monitor/2021-06-14-17-02-27-1623711747/
+
+In the above we run the script and provide the path to the directory we want to
+upload results for. The script will upload spec objects, then retrieve the build id,
+and finish up with phase logs and build statuses.
+
+
+
+
+
