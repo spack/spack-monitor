@@ -147,6 +147,11 @@ def get_target(meta):
     features, and parents) create the Target objects, which includes also
     creating Feature and Parent (other Target) objects.
     """
+    # A target can be a string or a data structure
+    if isinstance(meta, str):
+        target, _ = Target.objects.get_or_create(name=meta)
+        return target
+
     target, _ = Target.objects.get_or_create(name=meta["name"])
     target.generation = meta.get("generation")
     target.vendor = meta.get("vendor")
