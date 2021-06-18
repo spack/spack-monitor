@@ -7,6 +7,9 @@ from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
+
+# update this when confirm still compatible
+# from django.db.models import JsonField
 from taggit.managers import TaggableManager
 from itertools import chain
 
@@ -506,6 +509,15 @@ class Target(BaseModel):
         return str(self)
 
     def to_dict(self):
+        # If we only have a string, just return it
+        if (
+            not self.vendor
+            and not self.generation
+            and self.features.count() == 0
+            and self.parents.count() == 0
+        ):
+            return self.name
+
         return {
             "name": self.name,
             "vendor": self.vendor,
