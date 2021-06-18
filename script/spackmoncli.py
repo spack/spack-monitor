@@ -16,6 +16,7 @@ import requests
 import sys
 import logging
 
+from glob import glob
 from copy import deepcopy
 
 logger = logging.getLogger(__name__)
@@ -34,19 +35,27 @@ class SpackMonitorClient:
         self.headers.update({name: value})
 
     def set_basic_auth(self, username, password):
-        """A wrapper to adding basic authentication to the Request"""
+        """
+        A wrapper to adding basic authentication to the Request
+        """
         auth_header = get_basic_auth(username, password)
-        self.set_header("Authorization", "Basic %s" % auth_header.decode("utf-8"))
+        if isinstance(auth_header, bytes):
+            auth_header = auth_header.decode("utf-8")
+        self.set_header("Authorization", "Basic %s" % auth_header)
 
     def reset(self):
-        """Reset and prepare for a new request."""
+        """
+        Reset and prepare for a new request.
+        """
         if "Authorization" in self.headers:
             self.headers = {"Authorization": self.headers["Authorization"]}
         else:
             self.headers = {}
 
     def do_request(self, endpoint, method="GET", data=None, headers=None):
-        """Do a request. This is a wrapper around requests."""
+        """
+        Do a request. This is a wrapper around requests.
+        """
 
         # Always reset headers for new request.
         self.reset()
@@ -67,7 +76,10 @@ class SpackMonitorClient:
         return response
 
     def authenticate_request(self, originalResponse):
-        """Given a response, look for a Www-Authenticate header to parse. We
+        """
+        Authenticate Request
+
+        Given a response, look for a Www-Authenticate header to parse. We
         return True/False to indicate if the request should be retried.
         """
         authHeaderRaw = originalResponse.headers.get("Www-Authenticate")
@@ -128,6 +140,46 @@ class SpackMonitorClient:
         data = {"spec": spec, "spack_version": spack_version}
         return self.do_request("specs/new/", "POST", data=json.dumps(data))
 
+    # Functions to upload save local
+    def upload_local_save(self, dirname):
+        """
+        Upload results from a locally saved directory:
+
+        spack install --monitor --monitor-save-local outputs results to:
+        ~/.spack/reports/monitor/2021-06-14-17-02-27-1623711747/
+        """
+        # First find all the specs
+        for specfile in glob("%s%sspec*" % (dirname, os.sep)):
+            spec = read_json(specfile)
+            basename = os.path.basename(specfile)
+            print("Uploading spec for %s" % basename)
+            res = self.do_request("specs/new/", "POST", data=json.dumps(spec))
+
+        # Load build metadata to generate an id
+        metadata = glob("%s%sbuild-metadata*" % (dirname, os.sep))[0]
+        metadata = read_json(metadata)
+        response = self.do_request("builds/new/", "POST", data=json.dumps(metadata))
+        build = response.json()
+        build_id = build["data"]["build"]["build_id"]
+
+        # Next upload build phases
+        for phasefile in glob("%s%sbuild*phase*" % (dirname, os.sep)):
+            phase = read_json(phasefile)
+            phase["build_id"] = build_id
+            basename = os.path.basename(phasefile)
+            print("Uploading phase %s" % basename)
+            res = self.do_request(
+                "builds/phases/update/", "POST", data=json.dumps(phase)
+            )
+
+        # Next find the status objects
+        for statusfile in glob("%s%sbuild*status*" % (dirname, os.sep)):
+            status = read_json(statusfile)
+            status["build_id"] = build_id
+            basename = os.path.basename(statusfile)
+            print("Uploading status %s" % basename)
+            res = self.do_request("builds/update/", "POST", data=json.dumps(status))
+
 
 # Helper functions
 
@@ -138,7 +190,9 @@ def get_basic_auth(username, password):
 
 
 def parse_auth_header(authHeaderRaw):
-    """parse authentication header into pieces"""
+    """
+    Parse authentication header into pieces
+    """
     regex = re.compile('([a-zA-z]+)="(.+?)"')
     matches = regex.findall(authHeaderRaw)
     lookup = dict()
@@ -149,7 +203,9 @@ def parse_auth_header(authHeaderRaw):
 
 class authHeader:
     def __init__(self, lookup):
-        """Given a dictionary of values, match them to class attributes"""
+        """
+        Given a dictionary of values, match them to class attributes
+        """
         for key in lookup:
             if key in ["realm", "service", "scope"]:
                 setattr(self, key.capitalize(), lookup[key])
