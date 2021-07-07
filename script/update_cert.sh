@@ -4,18 +4,14 @@
 #
 #
 
-DOMAIN=${2}
+DOMAIN=monitor.spack.io
 INSTALL_ROOT=$HOME
-
-# Stop nginx
-sudo service nginx stop
 
 cd $INSTALL_ROOT/spack-monitor
 
 # 2. Renewing Certificates
 # To renew
 # sudo certbox renew
-# and then the same procedure above
 
 # stop nginx container since we need to start nginx on server
 docker-compose stop nginx
