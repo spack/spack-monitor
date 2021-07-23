@@ -52,7 +52,7 @@ router.register(r"^specs", SpecViewSet, basename="spec")
 schema_view = get_swagger_view(title="Spack Monitor API")
 
 server_views = [
-    url(r"^api/docs$", schema_view),
+    url(r"^api/docs/", schema_view),
     path(
         "tables/build/",
         api_views.BuildsTable.as_view(),
