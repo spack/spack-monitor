@@ -19,5 +19,6 @@ specifics for starting with containers.
    auth
    api
    api_tutorial
+   data_api
    interfaces
    settings

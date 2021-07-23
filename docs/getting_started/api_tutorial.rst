@@ -193,7 +193,3 @@ In the above we run the script and provide the path to the directory we want to
 upload results for. The script will upload spec objects, then retrieve the build id,
 and finish up with phase logs and build statuses.
 
-
-
-
-

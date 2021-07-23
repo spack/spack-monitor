@@ -21,6 +21,7 @@ from spackmon.apps.main.utils import BUILD_STATUS
 from spackmon.apps.main.models import Build
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import viewsets
 
 from ..auth import is_authenticated
 
