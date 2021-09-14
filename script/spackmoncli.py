@@ -137,7 +137,7 @@ class SpackMonitorClient:
         upload to the UploadSpec endpoint"""
         # We load as json just to validate it
         spec = read_json(filename)
-        data = {"spec": spec['spec'], "spack_version": spack_version}
+        data = {"spec": spec["spec"], "spack_version": spack_version}
         return self.do_request("specs/new/", "POST", data=json.dumps(data))
 
     # Functions to upload save local

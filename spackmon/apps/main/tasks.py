@@ -184,7 +184,7 @@ def add_dependencies(spec, dependency_list):
         # This assumes the dependencies have the same spack version
         dependency_spec, _ = Spec.objects.get_or_create(
             name=dep["name"],
-            full_hash=dep["full_hash"],
+            full_hash=dep.get("full_hash") or dep.get("build_hash"),
             spack_version=spec.spack_version,
         )
         dependency, _ = Dependency.objects.get_or_create(
@@ -234,11 +234,6 @@ def import_configuration(config, spack_version):
     for the configuration, this means that the data was malformed or there
     was another issue with creating it.
     """
-    print("SERVER")
-    import IPython
-
-    IPython.embed()
-
     # We are required to have a top level spec
     if "nodes" not in config:
         logging.error("nodes key not found in file.")
@@ -251,7 +246,6 @@ def import_configuration(config, spack_version):
 
     first_spec = None
     was_created = False
-    print(config)
     for i, meta in enumerate(config["nodes"]):
         name = meta["name"]
 

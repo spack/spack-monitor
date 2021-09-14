@@ -78,12 +78,12 @@ class SimpleTest(TestCase):
         """
 
         # We have to add a spec file first to do an associated build
-        spec_file = os.path.join(specs_dir, "singularity-3.6.4.json")
+        spec_file = os.path.join(specs_dir, "singularity-3.8.0.json")
         spec = read_json(spec_file)
 
         # Add the new spec
         response = self.client.post(
-            "/ms1/specs/new/", data={"spec": spec, "spack_version": "1.0.0"}
+            "/ms1/specs/new/", data={"spec": spec["spec"], "spack_version": "1.0.0"}
         )
         assert response.status_code == 401
         self.add_authentication(response)
@@ -91,7 +91,7 @@ class SimpleTest(TestCase):
         # Retry the request with auth headers
         response = self.client.post(
             "/ms1/specs/new/",
-            data={"spec": spec, "spack_version": "1.0.0"},
+            data={"spec": spec["spec"], "spack_version": "1.0.0"},
             content_type="application/json",
             **self.headers
         )
