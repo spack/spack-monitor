@@ -173,18 +173,19 @@ def get_target(meta):
     return target
 
 
-def add_dependencies(spec, dependency_lookup):
-    """Given an already created spec and a lookup of dependencies (a dict
-    where keys are the dependency (package) name and values include the hash
-    and the type) add dependencies to the package, and return a list of all
+def add_dependencies(spec, dependency_list):
+    """Given an already created spec and a list of dependencies
+    add dependencies to the package, and return a list of all
     (flattened) specs as a list to generate a configuration.
     """
     # Create dependencies (other specs) - they will be updated later
-    for dep_name, dep in dependency_lookup.items():
+    for dep in dependency_list:
 
         # This assumes the dependencies have the same spack version
         dependency_spec, _ = Spec.objects.get_or_create(
-            name=dep_name, full_hash=dep["hash"], spack_version=spec.spack_version
+            name=dep["name"],
+            full_hash=dep.get("full_hash") or dep.get("build_hash"),
+            spack_version=spec.spack_version,
         )
         dependency, _ = Dependency.objects.get_or_create(
             spec=dependency_spec, dependency_type=dep["type"]
@@ -233,10 +234,9 @@ def import_configuration(config, spack_version):
     for the configuration, this means that the data was malformed or there
     was another issue with creating it.
     """
-
     # We are required to have a top level spec
-    if "spec" not in config:
-        logging.error("spec key not found in file.")
+    if "nodes" not in config:
+        logging.error("nodes key not found in file.")
         return {
             "spec": None,
             "created": False,
@@ -246,9 +246,8 @@ def import_configuration(config, spack_version):
 
     first_spec = None
     was_created = False
-    for i, metadata in enumerate(config["spec"]):
-        name = list(metadata.keys())[0]
-        meta = metadata[name]
+    for i, meta in enumerate(config["nodes"]):
+        name = meta["name"]
 
         # Create target for architecture (uniqueness based on name)
         target = get_target(meta=meta["arch"]["target"])
@@ -272,7 +271,7 @@ def import_configuration(config, spack_version):
 
         # Add dependencies if not added yet
         if spec.dependencies.count() == 0:
-            spec = add_dependencies(spec, meta.get("dependencies", {}))
+            spec = add_dependencies(spec, meta.get("dependencies", []))
             spec.save()
 
         # Keep a handle on the first spec

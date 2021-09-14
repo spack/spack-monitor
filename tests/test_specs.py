@@ -36,12 +36,12 @@ class SimpleTest(TestCase):
         """Test the new spec endpoint. This also tests the auth workflow"""
 
         print("Testing NewSpec endpoint /ms1/specs/new/")
-        spec_file = os.path.join(specs_dir, "singularity-3.6.4.json")
+        spec_file = os.path.join(specs_dir, "singularity-3.8.0.json")
         spec = read_json(spec_file)
 
         # First attempt without user token should fail
         response = self.client.post(
-            "/ms1/specs/new/", data={"spec": spec, "spack_version": "1.0.0"}
+            "/ms1/specs/new/", data={"spec": spec["spec"], "spack_version": "1.0.0"}
         )
         assert response.status_code == 401
 
@@ -80,7 +80,7 @@ class SimpleTest(TestCase):
         # Retry the request with auth headers
         response = self.client.post(
             "/ms1/specs/new/",
-            data={"spec": spec, "spack_version": "1.0.0"},
+            data={"spec": spec["spec"], "spack_version": "1.0.0"},
             content_type="application/json",
             **headers
         )
@@ -101,9 +101,9 @@ class SimpleTest(TestCase):
         assert data
 
         # Check the response object
-        assert data.get("full_hash") == "p64nmszwer36ly7pnch5fznni4cnmndg"
+        assert data.get("full_hash") == "36u22fm5i3w2tqyiyje22j6x55emekjw"
         assert data.get("name") == "singularity"
-        assert data.get("version") == "3.6.4"
+        assert data.get("version") == "3.8.0"
         assert data.get("spack_version") == "1.0.0"
 
         specs = data.get("specs")
@@ -124,9 +124,6 @@ class SimpleTest(TestCase):
             spec_obj = Spec.objects.get(full_hash=spec_hash)
             hashes.add(spec_hash)
 
-        # We should have created the number of specs in the file
-        assert len([list(x.keys())[0] for x in spec["spec"]]) == Spec.objects.count()
-
         # Get all spec hashes to compare against top level
         created_hashes = set(Spec.objects.all().values_list("full_hash", flat=True))
         dependency_hashes = created_hashes.difference(hashes)
@@ -134,7 +131,7 @@ class SimpleTest(TestCase):
         # A second response should indicate it already exists (200)
         response = self.client.post(
             "/ms1/specs/new/",
-            data={"spec": spec, "spack_version": "1.0.0"},
+            data={"spec": spec["spec"], "spack_version": "1.0.0"},
             content_type="application/json",
             **headers
         )

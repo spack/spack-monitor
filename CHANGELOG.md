@@ -13,3 +13,5 @@ represented by the pull requests that fixed them. Critical items to know are:
 
 ## [master](https://github.com/spack/spack-monitor/tree/main) (master)
  - skeleton release (0.0.0)
+ - first version that has specs before September 2021 (1.0.0)
+ - second version after that (2.0.0)

@@ -11,17 +11,10 @@ with docker-compose (containers), but it could also be installed and run nativel
 using a hosted database elsewhere, if necessary. You can read the [documentation](https://spack-monitor.readthedocs.io/)
 to get started, but keep in mind this is under development. 👇️
 
-⚠️ *This respository is under development! All is subject to change. Use at your own risk!* ⚠️
+## Which version should I use?
 
-## Next TODO
-
-1. Update spack to include build environment information
-2. Create endpoint to accept a new spec, and build environment, should return a build ID
-3. Update spack monitor to be able to reference the build id for endpoints instead of spec full_hash
-4. Create simple endpoint to retrieve a build_id based on a spec, spack_version, and environment.
-
-5. Develop separate tool to parse libabigail xml
-6. Somehow get list of files that are objects generated, send them to Spack Monitor (even if we don't have ABI yet)
+ - [1.0.0](https://github.com/spack/spack-monitor/releases/tag/1.0.0) is suggested for before September 2021, before the spec format was changed from json to yaml.
+ - *main* (or current) is required for after September 2021.
 
 ## License
 

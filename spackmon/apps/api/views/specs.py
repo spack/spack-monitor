@@ -56,6 +56,7 @@ class NewSpec(APIView):
         # We require the spack version and the spec
         result = import_configuration(data.get("spec"), spack_version)
 
+        print(result)
         # Created or already existed
         if result["data"].get("spec"):
 
