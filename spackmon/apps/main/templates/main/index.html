@@ -25,7 +25,7 @@ code {
 <div class="buildgroup">
 <h3 class="buildgroupname">
   <a href="#" class="grouptrigger">
-    Spack Monitor Builds{% if tag %}: {{ tag }}{% endif %}
+    Spack Monitor Builds{% if tag %}: {{ tag }}{% endif %} {% if owner %} owned by {{ owner }}{% endif %}
   </a>
   <span class="buildnums" align="right">{{ builds.count }}</span><span style="padding-left:50px">
 {% for tag in tags %}{% if tag %}<a style="color:white; padding-left:3px" href="{% url 'main:builds_by_tag' tag %}"><span class="badge badge-primary">{{ tag }}</span></a>{% endif %}{% endfor %}</span>

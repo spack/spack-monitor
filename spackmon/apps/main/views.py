@@ -33,11 +33,19 @@ def index(request):
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def builds_by_tag(request, tag):
     builds = Build.objects.filter(tags__name=tag)
-
     # Present all tags for browsing
     tags = Build.objects.all().values_list("tags__name", flat=True).distinct()
     return render(
         request, "main/index.html", {"builds": builds, "tag": tag, "tags": tags}
+    )
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
+def builds_by_owner(request, username):
+    builds = Build.objects.filter(owner__username=username)
+    tags = Build.objects.all().values_list("tags__name", flat=True).distinct()
+    return render(
+        request, "main/index.html", {"builds": builds, "owner": username, "tags": tags}
     )
 
 

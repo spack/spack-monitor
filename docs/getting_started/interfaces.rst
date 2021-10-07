@@ -28,3 +28,15 @@ The build interface shows basic summary, install environment, and phase informat
 along with complete output for each phase (given that the build has associated phases).
 
 .. image:: img/interface-build.png
+
+
+------------
+User Account
+------------
+
+When you login, you can view your token page, which shows how to export your
+username and token to the environment, and then interact with the Spack Monitor
+server from spack:
+
+.. image:: img/user-token.png
+

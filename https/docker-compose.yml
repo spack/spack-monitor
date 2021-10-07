@@ -6,6 +6,11 @@ db:
 uwsgi:
   restart: always
   build: .
+
+  # Add your GitHub key and secret here
+  environment:
+    - SOCIAL_AUTH_GITHUB_KEY=
+    - SOCIAL_AUTH_GITHUB_SECRET=
   volumes:
     - .:/code
     - ./static:/var/www/static

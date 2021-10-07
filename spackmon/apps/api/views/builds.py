@@ -73,7 +73,7 @@ class UpdateBuildStatus(APIView):
         """POST /ms1/builds/update/ to update one or more tasks"""
 
         # If allow_continue False, return response
-        allow_continue, response, _ = is_authenticated(request)
+        allow_continue, response, user = is_authenticated(request)
         if not allow_continue:
             return response
 
@@ -97,6 +97,14 @@ class UpdateBuildStatus(APIView):
             )
 
         build = get_object_or_404(Build, pk=build_id)
+
+        # The requesting user must own the build
+        if build.owner != user:
+            return Response(
+                status=400,
+                data={"message": "You do not own the build and cannot update it."},
+            )
+
         result = update_build_status(build, status)
         return Response(status=result["code"], data=result)
 
@@ -122,7 +130,7 @@ class NewBuild(APIView):
         """POST /ms1/builds/new/ to start a new build"""
 
         # If allow_continue False, return response
-        allow_continue, response, _ = is_authenticated(request)
+        allow_continue, response, user = is_authenticated(request)
         if not allow_continue:
             return response
 
@@ -136,14 +144,14 @@ class NewBuild(APIView):
             )
 
         # Create the new build
-        result = get_build(**build_environment, tags=tags)
+        result = get_build(**build_environment, tags=tags, owner=user)
 
         # If a spec is included in the build, the requester is okay to create
         # it given that it does not exist.
         if "spec" in data and "spack_version" in data:
             spack_version = data.get("spack_version")
             result = import_configuration(data["spec"], data["spack_version"])
-            result = get_build(**build_environment, tags=tags)
+            result = get_build(**build_environment, tags=tags, owner=user)
 
         # Prepare data with
         return Response(status=result["code"], data=result)
@@ -170,7 +178,7 @@ class UpdatePhaseStatus(APIView):
         print("POST /ms1/builds/phases/update/")
 
         # If allow_continue False, return response
-        allow_continue, response, _ = is_authenticated(request)
+        allow_continue, response, user = is_authenticated(request)
         if not allow_continue:
             return response
 
@@ -192,6 +200,13 @@ class UpdatePhaseStatus(APIView):
             )
 
         build = get_object_or_404(Build, pk=build_id)
+
+        # The requesting user must own the build
+        if build.owner != user:
+            return Response(
+                status=400,
+                data={"message": "You do not own the build and cannot update it."},
+            )
 
         # Update the phase
         data = update_build_phase(build, phase_name, status, output)

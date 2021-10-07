@@ -5,50 +5,13 @@
 
 from django.db import models
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField as DjangoJSONField
 from django.db.models import Field, Count
-
-# update this when confirm still compatible
-# from django.db.models import JsonField
 from taggit.managers import TaggableManager
 from itertools import chain
 
 from .utils import BUILD_STATUS, PHASE_STATUS, FILE_CATEGORIES
 
 import json
-
-
-class JSONField(DjangoJSONField):
-    pass
-
-
-# Sqlite doesn't support a Json Field, so we make it
-if "sqlite" in settings.DATABASES["default"]["ENGINE"]:
-
-    class JSONField(Field):
-        def db_type(self, connection):
-            return "text"
-
-        def from_db_value(self, value, expression, connection):
-            if value is not None:
-                return self.to_python(value)
-            return value
-
-        def to_python(self, value):
-            if value is not None:
-                try:
-                    return json.loads(value)
-                except (TypeError, ValueError):
-                    return value
-            return value
-
-        def get_prep_value(self, value):
-            if value is not None:
-                return str(json.dumps(value))
-            return value
-
-        def value_to_string(self, obj):
-            return self.value_from_object(obj)
 
 
 class BaseModel(models.Model):
@@ -208,6 +171,11 @@ class Build(BaseModel):
 
     spec = models.ForeignKey(
         "main.Spec", null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    # The owner (user account) that owns the build, we don't delete builds on account deletion
+    owner = models.ForeignKey(
+        "users.user", null=False, blank=False, on_delete=models.DO_NOTHING
     )
 
     # Tags for the build to identify the experiment
@@ -651,7 +619,7 @@ class Spec(BaseModel):
 
     # Parameters are less likely to be queried (we still can with json field) but we should
     # use json field to allow for more flexibility in variance or change
-    parameters = JSONField(blank=True, null=True, default=dict)
+    parameters = models.JSONField(blank=True, null=True, default=dict)
 
     # Dependencies are just other specs
     dependencies = models.ManyToManyField(
@@ -812,7 +780,7 @@ class Dependency(BaseModel):
     spec = models.ForeignKey(
         "main.Spec", null=False, blank=False, on_delete=models.CASCADE
     )
-    dependency_type = JSONField(
+    dependency_type = models.JSONField(
         blank=False,
         null=False,
         default=list,

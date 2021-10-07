@@ -67,6 +67,11 @@ class User(AbstractUser):
 
     class Meta:
         app_label = "users"
+    
+    @property
+    def builds_count(self):
+        from spackmon.apps.main.models import Build
+        return Build.objects.filter(owner=self).count()
 
     @property
     def token(self):

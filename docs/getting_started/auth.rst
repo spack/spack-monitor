@@ -9,12 +9,53 @@ to authenticate you to the :ref:`getting-started_api` so you can walk through
 the :ref:`getting-started_api_tutorial`. You should already have your containers
 running (see :ref:`getting-started_install` if you do not).
 
-Create Accounts
+OAuth2 Accounts
 ===============
 
-Since we currently are not exposing a web interface to create accounts, etc.,
-all account creation happens on the command line. For example, if we want to add
-a user:
+To support allowing a user to create their own account, Spack Monitor has support
+to login via OAauth2 from GitHub, which means that as the admin of the server
+you'll need to setup an OAuth2 application, and as a user you'll need to authenticate with
+GitHub to login. Setup of that requires the following.
+For users to connect to Github, you need to `register a new application <https://github.com/settings/applications/new>`_ 
+and export the key and secret to your environment as follows:
+
+.. code-block:: console
+
+    # http://psa.matiasaguirre.net/docs/backends/github.html?highlight=github
+    export SOCIAL_AUTH_GITHUB_KEY='xxxxxxxxxxxxx'
+    export SOCIAL_AUTH_GITHUB_SECRET='xxxxxxxxxxxxx'
+
+To provide these secrets via docker-compose, you can add an ``environment`` section
+to your yaml (that should not be placed in version control!)
+
+.. code-block:: yaml
+
+    uwsgi:
+      restart: always
+      build: .
+      environment:
+        - SOCIAL_AUTH_GITHUB_KEY=xxxxxxxxxxxxx
+        - SOCIAL_AUTH_GITHUB_SECRET=xxxxxxxxxxxxxxxxx
+      volumes:
+        - .:/code
+        - ./static:/var/www/static
+        - ./images:/var/www/images
+      links:
+        - db
+
+And then in the settings.yml, update ``ENABLE_GITHUB_AUTH`` to true. The server will
+not start if the credentials are not found in the environment. When you register
+the application, the callback url should be in the format `http://127.0.0.1/complete/github/`, 
+and replace the localhost address with your domain. See the `Github Developers <https://github.com/settings/developers>`_ 
+pages to browse more information on the Github APIs.
+
+Legacy Account Creation
+=======================
+
+Before supporting user accounts, a user token could be generated on the command line
+to associate with a build. This is still supported for anyone that doesn't want to use
+(or cannot use) GitHub, however it requires a server admin to manually do the work,
+which isn't ideal for all deployments. For example, if we want to add a user:
 
 .. code-block:: console
 

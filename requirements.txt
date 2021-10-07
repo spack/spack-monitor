@@ -1,4 +1,4 @@
-Django==3.1.12
+Django>=3.1.13
 django-ratelimit==3.0.0
 django-extensions==3.0.2
 graphviz
@@ -12,6 +12,8 @@ django-taggit==1.3.0
 djangorestframework==3.11.2
 django-rest-swagger
 django-crispy-forms==1.11.0
-social-auth-app-django==4.0.0
+social-auth-core
+social-auth-app-django
+django-gravatar2
 ipython
 pyaml

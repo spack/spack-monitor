@@ -94,6 +94,9 @@ DOMAIN_NAME = cfg.DOMAIN_NAME
 if cfg.DOMAIN_PORT:
     DOMAIN_NAME = "%s:%s" % (DOMAIN_NAME, cfg.DOMAIN_PORT)
 
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = DOMAIN_NAME
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv("DEBUG") != "false" else False
 
@@ -129,6 +132,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "django_gravatar",
     "crispy_forms",
     "social_django",
     "taggit",
@@ -187,6 +191,61 @@ AUTHENTICATED_VIEWS = [
     "spackmon.apps.api.views.builds.UpdatePhaseStatus",
 ]
 
+# Social Authentication (OAuth2)
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "social_core.backends.github.GithubOAuth2",
+    #    'social_core.backends.saml.SAMLAuth',
+    #    'social_core.backends.google.GoogleOAuth2',
+    #    'social_core.backends.twitter.TwitterOAuth',
+    #    'social_core.backends.facebook.FacebookOAuth2',
+    #    'spackmon.apps.users.views.auth.SpackmonGithubOAuth2',
+    #    'spackmon.apps.users.views.auth.GithubPrivateOAuth2',
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+
+SOCIAL_AUTH_PIPELINE = (
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "spackmon.apps.users.views.social_user",
+    "spackmon.apps.users.views.redirect_if_no_refresh_token",
+    "social_core.pipeline.user.get_username",
+    "social_core.pipeline.social_auth.associate_by_email",  # <--- must share same email
+    "social_core.pipeline.user.create_user",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+)
+
+# Only require https if we aren't localhost (development)
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+if "localhost" in cfg.DOMAIN_NAME or "127.0.0.1" in cfg.DOMAIN_NAME:
+    SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+SOCIAL_AUTH_URL_NAMESPACE = "users:social"
+
+# We only need the account to login, no extra permissions
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
+
+# GitHub OAuth
+# Only required if ENABLE_GITHUB_AUTH=TRUE in config.py
+# http://psa.matiasaguirre.net/docs/backends/github.html?highlight=github
+
+# Required to be in environment
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get("SOCIAL_AUTH_GITHUB_KEY")
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
+
+# Don't allow running without keys defined
+if cfg.ENABLE_GITHUB_AUTH and (
+    not SOCIAL_AUTH_GITHUB_KEY or not SOCIAL_AUTH_GITHUB_SECRET
+):
+    sys.exit(
+        "GitHub auth is enabled, but keys SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET not found in the environment."
+    )
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -231,6 +290,8 @@ else:
         }
     }
 
+# Default auto field
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -326,7 +387,7 @@ CACHES.update(
     {
         "spackmon_api": {
             "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-            "LOCATION": cache,
+            "LOCATION": os.path.abspath(cache),
         }
     }
 )
@@ -368,10 +429,8 @@ VIEW_RATE_LIMIT_BLOCK = (
 )
 
 # On any admin or plugin login redirect to standard social-auth entry point for agreement to terms
-LOGIN_REDIRECT_URL = "/login"
-LOGIN_URL = "/login"
-
-AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+LOGIN_REDIRECT_URL = "/login/"
+LOGIN_URL = "/login/"
 
 ## API #########################################################################
 

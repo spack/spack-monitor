@@ -14,6 +14,7 @@ def globals(request):
         "DOMAIN": settings.DOMAIN_NAME,
         "TWITTER_USERNAME": settings.cfg.TWITTER_USERNAME,
         "GITHUB_REPOSITORY": settings.cfg.GITHUB_REPOSITORY,
+        "ENABLE_GITHUB_AUTH": settings.cfg.ENABLE_GITHUB_AUTH,
         "GITHUB_DOCUMENTATION": settings.cfg.GITHUB_DOCUMENTATION,
         "SITE_NAME": get_current_site(request).name,
         "GOOGLE_ANALYTICS_ID": settings.cfg.GOOGLE_ANALYTICS_ID,

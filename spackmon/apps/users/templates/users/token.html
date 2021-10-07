@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}User > {{ request.user.username }} > Token {% endblock %}
+{% block css %} <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-coy.min.css" rel="stylesheet" type="text/css">{% endblock %}
+{% block content %}
+
+    {% if not request.user.is_anonymous %}
+    <div class="row" style='padding-bottom:30px'>
+        <div class="col-md-12">
+        <h2>API Token</h2>
+        <p><small>to send builds to Spack Monitor.</small>
+        <a style="float:right" href="{% url 'users:update_token' %}"><button class="btn btn-secondary btn-sm">Regenerate Token</button></a></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+        <p>You can export your username and token to the environment and interact with spack as follows:</p>
+       <pre><code class="language-shell">
+export SPACKMON_TOKEN={{ request.user.token }}
+export SPACKMON_USER={{ request.user.username }}
+
+# And then build with spack, enabling spack monitor!
+spack install --monitor --monitor-host {{ DOMAIN }} zlib
+
+</code></pre>
+        </div>
+    </div>
+
+    {% else %}
+    <div style="padding-top:20px" class="alert alert-info" role="alert">You aren't authorized to see this. Sneaky!</div>
+    {% endif %}
+</div>
+
+</div>
+{% include "messages/notification.html" %}
+{% endblock %}
+
+{% block footer %}
+{% include 'main/footer.html' %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+{% endblock %}

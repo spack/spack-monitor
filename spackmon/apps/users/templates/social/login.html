@@ -1,0 +1,40 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block css %}<link rel="stylesheet" href="{% static "css/social-auth.css"%}">
+<style>
+.btn {
+  cursor: pointer;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+    {% include 'messages/message.html' %}
+    {% if user and not user.is_anonymous %}
+    <h3>Hello, {{ user.get_full_name }}!</h3>
+    <br>
+    <div>
+       <!-- If all credentials provided, give user full access -->
+       <a href="{% url 'main:builds_by_owner' request.user.username %}"><button class="btn btn-secondary btn-sm">My Builds</button></a>
+       <a href="{% url 'users:profile' %}"><button class="btn btn-secondary btn-sm">Profile</button></a>
+       <a href="{% url 'users:logout' %}"><button class="btn btn-secondary btn-sm">Logout</button></a>
+
+    {% else %}
+
+    <!-- User isn't logged in yet! -->
+    <div class="login-box">
+
+        {% if ENABLE_GITHUB_AUTH %}
+        <a class="social-button" id="github-connect" href="{% url 'users:social:begin' 'github' %}?next={{ DOMAIN }}{{ request.path }}">Login with Github</a>
+        {% endif %}
+
+    {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block footer %}
+{% include 'main/footer.html' %}
+{% endblock %}
