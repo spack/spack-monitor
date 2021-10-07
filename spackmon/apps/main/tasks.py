@@ -52,6 +52,7 @@ def get_build(
     host_os,
     host_target,
     platform,
+    owner,
     tags=None,
 ):
     """A shared function to first retrieve a spec, then the environment, then the build.
@@ -78,7 +79,7 @@ def get_build(
     )
 
     build, build_created = Build.objects.get_or_create(
-        spec=spec, build_environment=build_environment
+        spec=spec, build_environment=build_environment, owner=owner
     )
 
     # Update the tags, the input is comma separated

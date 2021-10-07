@@ -1,0 +1,7 @@
+<div class="row">
+    <div class="col-md-12">
+        <h3>{{ profile.username }}</h3>
+        <hr>
+        You have <a href="{% url 'main:builds_by_owner' profile.username %}">{{ profile.builds_count }} builds</a>.
+    </div>
+</div>

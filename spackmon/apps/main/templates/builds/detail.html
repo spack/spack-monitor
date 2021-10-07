@@ -20,13 +20,17 @@ pre {
         {% if build.build_errors_parsed > 0 %}<a href="#build-errors"><li class="list-group-item">Errors</li></a>{% endif %}
         {% if build.buildphase_set.count > 0 %}<a href="#full-logs"><li class="list-group-item">Full Logs</li></a>{% endif %}
         </ul>
+     <div style="position: absolute; bottom: 0px">
+      {% include "social/share_links.html" %}
+     </div>
     </div>
    <div class="col-md-4">
       <h4>Summary</h4>
 
       <b>Spec: </b> {{ build.spec.pretty_print }}
       <br>
-
+      <b>Owner: </b> <a href="{% url 'main:builds_by_owner' build.owner.username %}">{{ build.owner.username }}</a>
+      <br>
       <b>Environment: </b>{{ build.build_environment.arch }}
       <br>
       <b>Compiler: </b>{{ build.spec.compiler }}

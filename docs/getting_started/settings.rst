@@ -64,6 +64,9 @@ into Spack Monitor.
    * - AUTH_SERVER
      - Set to non null to define a custom authentication server
      - None
+   * - ENABLE_GITHUB_AUTH
+     - Enable GitHub OAuth2 Authentication (requires environment secrets)
+     - True
    * - AUTH_INSTRUCTIONS
      - A link for the user to get authentication instructions
      - https://spack-monitor.readthedocs.io/en/latest/getting_started/auth.html

@@ -69,6 +69,12 @@ class User(AbstractUser):
         app_label = "users"
 
     @property
+    def builds_count(self):
+        from spackmon.apps.main.models import Build
+
+        return Build.objects.filter(owner=self).count()
+
+    @property
     def token(self):
         """The user token is for interaction with creating and updating workflows"""
         return str(Token.objects.get(user=self))
