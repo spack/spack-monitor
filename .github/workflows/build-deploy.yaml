@@ -1,0 +1,36 @@
+name: Build and Deploy Container
+
+on:
+  # Always test on pull request
+  pull_request: []
+
+  # Deploy on merge to main
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-test-containers:
+    runs-on: ubuntu-latest
+    name: Build Container
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2        
+
+      - name: Build Base Smeagle Container
+        run: |
+            docker build -t ghcr.io/spack/spack-monitor .
+            version=$(cat VERSION)
+            printf "Found version ${version}"
+            docker tag ghcr.io/spack/spack-monitor:latest ghcr.io/spack/spack-monitor:${version}
+            docker images | grep spack
+
+      - name: Login and Deploy Test Container
+        if: (github.event_name != 'pull_request')
+        run: |
+            docker images
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            version=$(cat VERSION)
+            docker push ghcr.io/spack/spack-monitor:latest
+            docker push ghcr.io/spack/spack-monitor:${version}
+
