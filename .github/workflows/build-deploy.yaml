@@ -22,6 +22,7 @@ jobs:
             docker build -t ghcr.io/spack/spack-monitor .
             version=$(cat VERSION)
             printf "Found version ${version}"
+            docker tag ghcr.io/spack/spack-monitor:latest ghcr.io/spack/spack-monitor:${GITHUB_SHA::8} 
             docker tag ghcr.io/spack/spack-monitor:latest ghcr.io/spack/spack-monitor:${version}
             docker images | grep spack
 
@@ -31,6 +32,7 @@ jobs:
             docker images
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
             version=$(cat VERSION)
+            docker push ghcr.io/spack/spack-monitor:${GITHUB_SHA::8}
             docker push ghcr.io/spack/spack-monitor:latest
             docker push ghcr.io/spack/spack-monitor:${version}
 

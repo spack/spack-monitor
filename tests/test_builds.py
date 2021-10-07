@@ -48,8 +48,8 @@ class SimpleTest(TestCase):
 
     def add_authentication(self, response):
         """Given a request that gets a 403 response, authenticate it."""
-        assert "www-authenticate" in response._headers
-        h = parse_auth_header(response._headers["www-authenticate"][1])
+        assert "www-authenticate" in response.headers
+        h = parse_auth_header(response.headers["www-authenticate"])
 
         self.headers.update(
             {

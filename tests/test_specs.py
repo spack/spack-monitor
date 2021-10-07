@@ -46,8 +46,8 @@ class SimpleTest(TestCase):
         assert response.status_code == 401
 
         # And provide a www-authenticate header
-        assert "www-authenticate" in response._headers
-        h = parse_auth_header(response._headers["www-authenticate"][1])
+        assert "www-authenticate" in response.headers
+        h = parse_auth_header(response.headers["www-authenticate"])
 
         assert h.Realm == "http://testserver/auth/token/"
         assert h.Scope == "build"
