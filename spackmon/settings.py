@@ -274,6 +274,7 @@ elif os.getenv("DATABASE_HOST") is not None:
             "USER": os.environ.get("DATABASE_USER"),
             "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
             "NAME": os.environ.get("DATABASE_NAME"),
+            "PORT": os.environ.get("DATABASE_PORT", ""),
         }
     }
 
