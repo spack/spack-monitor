@@ -15,7 +15,6 @@ from importlib import import_module
 # Build paths inside the project with the base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
 # The spackmon global conflict contains all settings.
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.yml")
 if not os.path.exists(SETTINGS_FILE):
@@ -146,6 +145,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -329,9 +329,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_ROOT = "static"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+
+# disabled for whitenoise
 STATIC_URL = "/static/"
-MEDIA_ROOT = "data"
 MEDIA_URL = "/data/"
 
 # Caches
