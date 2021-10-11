@@ -17,3 +17,4 @@ django-gravatar2
 ipython
 pyaml
 gunicorn
+whitenoise

@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2        
 
-      - name: Build Base Smeagle Container
+      - name: Build Container
         run: |
             docker build -t ghcr.io/spack/spack-monitor .
             version=$(cat VERSION)
