@@ -98,7 +98,7 @@ SOCIAL_AUTH_LOGIN_REDIRECT_URL = cfg.DOMAIN_NAME
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if os.getenv("DEBUG") != "false" else False
+DEBUG = True if os.getenv("DEBUG") == "true" else False
 
 # Derive list of plugins enabled from the environment (currently none)
 PLUGINS_LOOKUP = {}
