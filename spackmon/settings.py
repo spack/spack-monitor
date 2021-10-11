@@ -47,7 +47,9 @@ with open(SETTINGS_FILE, "r") as fd:
 # For each setting, if it's defined in the environment with spackmon_ prefix, override
 for key, value in cfg:
     envar = os.getenv("SPACKMON_%s" % key)
-    if envar:
+
+    # Note that empty envars can be empty strings
+    if envar is not None:
         setattr(cfg, key, envar)
 
 # Secret Key and Dates
