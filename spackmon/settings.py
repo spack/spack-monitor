@@ -266,7 +266,6 @@ if running_tests or cfg.USE_SQLITE:
 
 # Database local development uses DATABASE_* variables
 elif os.getenv("DATABASE_HOST") is not None:
-    print("FOUND pre-defined DATABASE_HOST")
     # Make sure to export all of these in your .env file
     DATABASES = {
         "default": {
