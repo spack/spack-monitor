@@ -17,4 +17,4 @@ if [ ! -f "/opt/migrations-run" ]; then
 fi
 
 # Kubernetes does not work with uwsgi
-gunicorn --bind :3031 --workers 4 spackmon.wsgi
+gunicorn --chdir /code --bind :3031 --workers 4 spackmon.wsgi
