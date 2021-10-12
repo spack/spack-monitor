@@ -47,34 +47,27 @@ def is_authenticated(request, scopes=None):
     """
     # Scopes default to build
     scopes = scopes or ["build"]
-    print(scopes)
 
     # Derive the view name from the request PATH_INFO
     func, two, three = resolve(request.META["PATH_INFO"])
     view_name = "%s.%s" % (func.__module__, func.__name__)
-    print(func)
-    print(view_name)
 
     # If authentication is disabled, return the original view
     if cfg.DISABLE_AUTHENTICATION or view_name not in settings.AUTHENTICATED_VIEWS:
-        print("FIRST LOOP")
         return True, None, None
 
     # Case 1: Already has a jwt valid token
     is_valid, user = validate_jwt(request)
     if is_valid:
-        print("NOT VALID JWT")
         return True, None, user
 
     # Case 2: Response will return request for auth
     user = get_user(request)
     if not user:
-        print("NO USER")
         headers = {"Www-Authenticate": get_challenge(request, scopes=scopes)}
         return False, Response(status=401, headers=headers), user
 
     # Denied for any other reason
-    print("BOTTOM")
     return False, Response(status=403), user
 
 
@@ -138,6 +131,7 @@ def validate_jwt(request):
         # Ensure that the jti is still valid
         filecache = cache.caches["spackmon_api"]
         if not filecache.get(decoded.get("jti")) == "good":
+            print("jwt not found in cache.")
             return False, None
 
         # The user must exist
