@@ -39,8 +39,6 @@ class NewSpec(APIView):
         """POST /ms1/specs/new/ to upload a specs file"""
 
         # If allow_continue False, return response
-        print(request)
-        print(request.body)
         allow_continue, response, _ = is_authenticated(request)
         if not allow_continue:
             return response
