@@ -131,7 +131,7 @@ def validate_jwt(request):
         # Ensure that the jti is still valid
         filecache = cache.caches["spackmon_api"]
         if not filecache.get(decoded.get("jti")) == "good":
-            print("Filecache with jti not found.")
+            print("jwt not found in cache.")
             return False, None
 
         # The user must exist
