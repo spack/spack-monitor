@@ -93,10 +93,14 @@ def parse_build_logs(build):
 
             # Create errors and warning objects
             for warning in warnings:
+                try:
+                    source_line_no = warning.source_line_no[0]
+                except:
+                    source_line_no = None
                 log = BW.objects.create(
                     phase=phase,
                     source_file=warning.source_file,
-                    source_line_no=warning.source_line_no or 0,
+                    source_line_no=source_line_no or 0,
                     line_no=warning.line_no,
                     repeat_count=warning.repeat_count,
                     start=warning.start,
