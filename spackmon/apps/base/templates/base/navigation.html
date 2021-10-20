@@ -29,6 +29,7 @@
 {% if request.user.is_authenticated %}<li class="nav-item dropdown">
          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }}</a>
           <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="{% url 'main:builds_by_owner' request.user.username %}">My Builds</a>
               <a class="dropdown-item" href="{% url 'users:profile' %}">Settings</a>
               <a class="dropdown-item" href="{% url 'users:token' %}">Token</a>
               <div class="dropdown-divider"></div>
