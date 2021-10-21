@@ -37,7 +37,7 @@ DISABLE_AUTHENTICATION: null
 
 # Enable authentication with GitHub (requires environment export of
 # SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET
-ENABLE_GITHUB_AUTH: false
+ENABLE_GITHUB_AUTH: true
 
 # Caching
 # Will default to local "cache" folder in repository root

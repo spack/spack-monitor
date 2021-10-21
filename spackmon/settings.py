@@ -90,8 +90,9 @@ if not SERVER_CREATION_DATE:
         generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
         from .creation_date import SERVER_CREATION_DATE
 
-# Set the domain name
+# Set the domain name (and keep record of without port)
 DOMAIN_NAME = cfg.DOMAIN_NAME
+DOMAIN_NAME_PORTLESS = cfg.DOMAIN_NAME
 if cfg.DOMAIN_PORT:
     DOMAIN_NAME = "%s:%s" % (DOMAIN_NAME, cfg.DOMAIN_PORT)
 
@@ -387,6 +388,10 @@ for entry in [
 cache = cfg.CACHE_DIR or os.path.join(MEDIA_ROOT, "cache")
 if not os.path.exists(cache):
     os.makedirs(cache)
+
+# Disable check for max memory size of data
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+FILE_UPLOAD_MAX_MEMORY_SIZE = None
 
 CACHES.update(
     {
