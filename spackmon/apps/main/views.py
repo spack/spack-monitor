@@ -43,7 +43,7 @@ def builds_by_tag(request, tag):
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def builds_by_owner(request, username):
     builds = Build.objects.filter(owner__username=username)
-    tags = Build.objects.all().values_list("tags__name", flat=True).distinct()
+    tags = builds.values_list("tags__name", flat=True).distinct()
     return render(
         request, "main/index.html", {"builds": builds, "owner": username, "tags": tags}
     )

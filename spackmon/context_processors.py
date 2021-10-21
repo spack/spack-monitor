@@ -12,6 +12,7 @@ def globals(request):
     correcty in the settings.py file."""
     return {
         "DOMAIN": settings.DOMAIN_NAME,
+        "DOMAIN_NAME": settings.DOMAIN_NAME_PORTLESS,
         "TWITTER_USERNAME": settings.cfg.TWITTER_USERNAME,
         "GITHUB_REPOSITORY": settings.cfg.GITHUB_REPOSITORY,
         "ENABLE_GITHUB_AUTH": settings.cfg.ENABLE_GITHUB_AUTH,

@@ -22,7 +22,7 @@ export SPACKMON_TOKEN={{ request.user.token }}
 export SPACKMON_USER={{ request.user.username }}
 
 # And then build with spack, enabling spack monitor!
-spack install --monitor --monitor-host {{ DOMAIN }} zlib
+spack install --monitor --monitor-host {{ DOMAIN_NAME }} zlib
 
 </code></pre>
         </div>

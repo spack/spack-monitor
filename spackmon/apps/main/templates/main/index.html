@@ -78,7 +78,7 @@ code {
 {% block scripts %}
 <script>
 $(document).ready(function(){
-    $("#builds_table").dataTable({"order": [[ 3, "desc" ]], "pageLength": 10, "processing": true, "serverSide": true, "ajax": "{% url 'api:internal_apis:builds_table' %}{% if tag %}?tag={{ tag }}{% endif %}", "lengthMenu": [[10,15,20,25], [10,15,20,25]],
+    $("#builds_table").dataTable({"order": [[ 3, "asc" ]], "pageLength": 100, "processing": true, "serverSide": true, "ajax": "{% url 'api:internal_apis:builds_table' %}{% if tag %}?tag={{ tag }}{% endif %}", "lengthMenu": [[25,50,100,250], [25,50,100,250]],
     columnDefs: [ {
     targets: 3,
     createdCell: function (td, cellData, rowData, row, col) {

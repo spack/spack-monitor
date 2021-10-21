@@ -90,8 +90,9 @@ if not SERVER_CREATION_DATE:
         generate_creation_date(os.path.join(BASE_DIR, "creation_date.py"))
         from .creation_date import SERVER_CREATION_DATE
 
-# Set the domain name
+# Set the domain name (and keep record of without port)
 DOMAIN_NAME = cfg.DOMAIN_NAME
+DOMAIN_NAME_PORTLESS = cfg.DOMAIN_NAME
 if cfg.DOMAIN_PORT:
     DOMAIN_NAME = "%s:%s" % (DOMAIN_NAME, cfg.DOMAIN_PORT)
 
@@ -240,9 +241,14 @@ SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get("SOCIAL_AUTH_GITHUB_KEY")
 SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
 
+# Are we running tests?
+running_tests = "tests" in sys.argv or "runtests.py" in sys.argv
+
 # Don't allow running without keys defined
-if cfg.ENABLE_GITHUB_AUTH and (
-    not SOCIAL_AUTH_GITHUB_KEY or not SOCIAL_AUTH_GITHUB_SECRET
+if (
+    cfg.ENABLE_GITHUB_AUTH
+    and not running_tests
+    and (not SOCIAL_AUTH_GITHUB_KEY or not SOCIAL_AUTH_GITHUB_SECRET)
 ):
     sys.exit(
         "GitHub auth is enabled, but keys SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET not found in the environment."
@@ -253,7 +259,6 @@ if cfg.ENABLE_GITHUB_AUTH and (
 
 
 # Always use sqlite for testing
-running_tests = "tests" in sys.argv or "runtests.py" in sys.argv
 if running_tests or cfg.USE_SQLITE:
 
     dbfile = "test-db.sqlite" if running_tests else os.path.join(BASE_DIR, "db.sqlite3")
@@ -387,6 +392,10 @@ for entry in [
 cache = cfg.CACHE_DIR or os.path.join(MEDIA_ROOT, "cache")
 if not os.path.exists(cache):
     os.makedirs(cache)
+
+# Disable check for max memory size of data
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+FILE_UPLOAD_MAX_MEMORY_SIZE = None
 
 CACHES.update(
     {
