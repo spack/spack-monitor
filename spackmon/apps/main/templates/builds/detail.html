@@ -27,7 +27,7 @@ pre {
    <div class="col-md-4">
       <h4>Summary</h4>
 
-      <b>Spec: </b> {{ build.spec.pretty_print }}
+      <b>Spec: </b> <a href="{% url 'main:spec_detail' build.spec.id %}">{{ build.spec.pretty_print }}</a>
       <br>
       <b>Owner: </b> <a href="{% url 'main:builds_by_owner' build.owner.username %}">{{ build.owner.username }}</a>
       <br>
