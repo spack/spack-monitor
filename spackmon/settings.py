@@ -250,8 +250,8 @@ if (
     and not running_tests
     and (not SOCIAL_AUTH_GITHUB_KEY or not SOCIAL_AUTH_GITHUB_SECRET)
 ):
-    sys.exit(
-        "GitHub auth is enabled, but keys SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET not found in the environment."
+    print(
+        "WARNING: GitHub auth is enabled, but keys SOCIAL_AUTH_GITHUB_KEY and SOCIAL_AUTH_GITHUB_SECRET not found in the environment."
     )
 
 # Database
