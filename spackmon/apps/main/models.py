@@ -84,6 +84,9 @@ class Attribute(BaseModel):
     )
     value = models.TextField(blank=True, null=True, help_text="A text based value")
     binary_value = models.BinaryField(blank=True, null=True, help_text="A binary value")
+    json_value = models.JSONField(
+        blank=True, null=True, help_text="A json value", default=dict
+    )
 
     class Meta:
         app_label = "main"
@@ -98,13 +101,11 @@ class InstallFile(BaseModel):
     build = models.ForeignKey(
         "main.Build", null=False, blank=False, on_delete=models.CASCADE
     )
-
     name = models.CharField(
         max_length=500,
         blank=False,
         null=False,
         help_text="The name of the install file, with user prefix removed",
-        unique=True,
     )
 
     ftype = models.CharField(
@@ -289,11 +290,16 @@ class Build(BaseModel):
             file_name = result.get("install_file")
             if file_name:
 
-                if "name" not in result or (
-                    "value" not in result and "binary_value" not in result
-                ):
+                # It has to be a value, a binary value, or json value
+                has_value = (
+                    "value" in result
+                    or "binary_value" in result
+                    or "json_value" in result
+                )
+
+                if "name" not in result or not has_value:
                     print(
-                        "Result for %s is malformed, missing name or one of value/binary_value"
+                        "Result for %s is malformed, missing name or one of value/binary_value/json_value"
                         % file_name
                     )
                     continue
@@ -316,6 +322,23 @@ class Build(BaseModel):
                         analyzer=analyzer_name,
                         install_file=obj,
                     )
+
+                elif "json_value" in result:
+                    print(result["json_value"])
+                    print(type(result["json_value"]))
+                    try:
+                        value = json.loads(result["json_value"])
+                        attr, _ = Attribute.objects.get_or_create(
+                            name=result["name"],
+                            json_value=value,
+                            analyzer=analyzer_name,
+                            install_file=obj,
+                        )
+                    except:
+                        print(
+                            "Issue loading json value, skipping for %s %s"
+                            % (result["name"], obj)
+                        )
 
     def update_install_files(self, manifest):
         """Given a spack install manifest, update the spec to include the
