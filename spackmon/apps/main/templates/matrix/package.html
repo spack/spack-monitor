@@ -1,0 +1,252 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Package {% if package %}> {{ package.name }}{% endif %}{% endblock %}
+{% block css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style type="text/css">
+#controls {
+  position: absolute:
+  top: 10px;
+  left: 30px;
+}
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  max-width: 800px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+   <div class="col-md-12">
+      <h2 style="align:center">Package Matrix</h2>
+      <p>Select a package to view.</p>
+      <p style="display:none" id="message" class="alert alert-info"></p>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-md-6">
+     <select class="autocomplete" style="width:100%" id="package-select" class="form-select" aria-label="package">
+      {% for pkg in packages %}<option value="{{ pkg }}" {% if package and package == pkg %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-2">
+     <a href="#" type="button" id="generate-button" class="btn btn-primary" style="padding:5px">Generate</a>
+    </div>
+</div>
+
+{% if specs %}
+<!--<div class="row">
+   <div class="col-md-3">
+      <p>Select a dimension</p>
+     <select class="autocomplete" style="width:100%" id="dimension-select" class="form-select" aria-label="package" onchange="update_graph(this)">
+      <option value="compiler" {% if dimension and dimension == "compiler" %}selected{% endif %}>compiler</option>
+      <option value="architecture" {% if dimension and dimension == "architecture" %}selected{% endif %}>architecture</option>
+      </select>
+    </div>
+</div>-->
+<div class="row" style="padding-bottom:30px">
+   <div class="col-md-12">
+       <div id="matrix"></div>
+   </div>
+</div>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://d3js.org/d3.v2.min.js?2.8.1"></script>
+<script src="https://vsoch.github.io/image-comparison-thresholding/static/js/tipsy.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+
+  $('.autocomplete').select2();
+
+  // Calculate the diff when the user clicks, unless it's the same spec
+  $("#generate-button").click(function(){
+      pkg = $( "#package-select option:selected" ).val();
+      if (!pkg) {
+           $("#message").html("Please select a package to generate a build matrix for.")
+           $("#message").show()
+      } else {
+          document.location = "/analysis/matrix/" + pkg + "/"  
+      }
+  })
+  {% if rows %}generate_plot(){% endif %}
+});
+
+var margin = {top: 100, right: 100, bottom: 100, left: 30},
+    width = 1400,
+    height = 800;
+
+{% if rows %}
+function generate_plot(dimension) {
+    dimension = dimension || "compiler"
+
+    // Tooltips
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10,10])
+        .html(function(d) {
+        if (d.status == "UNKNOWN") {
+            return "<div class='row'><strong style='color:red'>Error: </strong>This combination of compiler and version is unknown to Spack Monitor.</div>";
+        }
+        console.log(d.spec["{{ package }}"])
+        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.spec["{{ package }}"]["version"] + "</code><br></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
+       })
+
+    var element = document.getElementById("plotarea");
+    if (element) {
+        element.parentNode.removeChild(element);    
+    }
+
+    var svg = d3.select("#matrix").append("svg")
+        .attr("id", "plotarea")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Call tooltips function
+    svg.call(tip);
+
+    svg.append("rect")
+        .attr("class", "background")
+        .attr("width", width)
+        .attr("height", height);
+
+    var colorscale = d3.scale.quantize()
+        .domain([0, 1])
+        .range(["#9e011e","#e8e807", "#36aa0c"]);
+
+    // Create a matrix for data, x is test, y is tensorflow version, and labels
+    var matrix = []
+    var rows = []
+    var rowLabels = [{% for label in rowLabels %}"{{ label }}"{% if forloop.last %}{% else %},{% endif%}{% endfor %}]
+    var columnLabels = [{% for label in colLabels %}"{{ label }}"{% if forloop.last %}{% else %},{% endif%}{% endfor %}]
+      
+    // Create rows - so one version across dimension
+    {% for row in rows %}
+    row = []{% for entry in row %}
+    row.push({"spec": {% if entry.spec %}{{ entry.spec.to_json | safe }}{% else %}{}{% endif %}, "value": {{ entry.value }}, "status": "{{ entry.status }}", "spec_id": "{{ entry.spec_id }}"});{% endfor %}
+    matrix.push(row);{% endfor %}
+
+    console.log(matrix)
+    var numrows = matrix.length;
+    var numcols = columnLabels.length;
+
+    var x = d3.scale.ordinal()
+        .domain(d3.range(numcols))
+        .rangeBands([0, width]);
+
+    var y = d3.scale.ordinal()
+        .domain(d3.range(numrows))
+        .rangeBands([0, height]);
+
+    var row = svg.selectAll(".row")
+        .data(matrix)
+      .enter().append("g")
+        .attr("class", "row")
+        .attr("transform", function(d, i) { return "translate(0," + y(i) + ")"; });
+
+    row.selectAll(".cell")
+        .data(function(d) { return d; })
+      .enter().append("rect")
+        .attr("class", "cell")
+        .attr("x", function(d, i) { return x(i); })
+        .attr("width", x.rangeBand())
+        .attr("height", y.rangeBand())
+        .style("stroke-width", 0);
+
+    row.append("line")
+        .attr("x2", width);
+
+    row.append("text")
+        .attr("x", 0)
+        .attr("y", y.rangeBand() / 2)
+        .attr("dy", ".32em")
+        .style("font-size", "10px")
+        .attr("text-anchor", "end")
+        .text(function(d, i) { return rowLabels[i]; });
+
+    var column = svg.selectAll(".column")
+        .data(columnLabels)
+      .enter().append("g")
+        .attr("class", "column")
+        .style("font-size", "10px")
+        .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+
+    column.append("line")
+        .attr("x1", -width);
+
+    column.append("text")
+        .attr("x", 6)
+        .attr("y", y.rangeBand() / 2)
+        .attr("dy", ".32em")
+        .style("font-size", "10px")
+        .attr("text-anchor", "start")
+        .text(function(d, i) {return d; });
+
+    row.selectAll(".cell")
+        .data(function(d, i) { return matrix[i]; })
+        .style("cursor", function(d) {
+           if (d.spec_id != "") {
+              return "pointer";
+           }
+           return "inherit";
+        })
+        .style("fill", function(d, i) {
+           console.log(d)
+
+           // Case 1 that we had a run, and a value between 0 and 1 for success
+           if (d.status == "RUN") {
+               return colorscale(d.value); 
+           }
+           // Case 2: the build outcome is unknown
+           return "gray"
+        }) 
+        .on('mouseout.tip', tip.hide)
+        .on('mouseover.tip', tip.show)
+        .on('click', function(d) {
+            if (d.spec_id != "") {
+               document.location = "/specs/detail/" + d.spec_id                    
+            }
+        });
+
+}{% endif %}
+// Change version on select change
+//update_graph = function(selector) {
+// if (selector) {
+//     generate_plot(selector.value || "compiler"); 
+//   } else {
+//     generate_plot();  
+//   }
+//}
+</script>
+{% endblock %}

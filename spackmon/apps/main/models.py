@@ -88,6 +88,15 @@ class Attribute(BaseModel):
         blank=True, null=True, help_text="A json value", default=dict
     )
 
+    def to_json(self):
+        if self.json_value:
+            return json.dumps(self.json_value, indent=4)
+        elif self.binary_value:
+            return "This result is a binary value."
+        elif self.value:
+            return self.value
+        return "{}"
+
     class Meta:
         app_label = "main"
         unique_together = (("name", "analyzer", "install_file"),)

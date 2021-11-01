@@ -1,0 +1,107 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Analysis Diffs > {{ pkg }}{% endblock %}
+{% block css %}
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+   <style type="text/css">
+        table.diff {font-family:Courier; border:medium;}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+   <div class="col-md-12">
+      <h2 style="align:center">Analysis Diff</h2>
+      <p>Select a package and analyzer to view the analysis diffs for.</p>
+      <p style="display:none" id="message" class="alert alert-info"></p>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="spec-select" class="form-select" aria-label="spec1">
+      {% for pkg in packages %}<option value="{{ pkg }}" {% if pkg == package %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="analysis-select" class="form-select" aria-label="analysis">
+      {% for ana in analyses %}<option value="{{ ana }}" {% if analysis == ana %}selected{% endif %}>{{ ana }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-2">
+     <a href="#" type="button" id="diff-button" class="btn btn-primary" style="padding:5px">Calculate Diffs</a>
+    </div>
+</div>
+
+{% if package and not diffs %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">
+     <p class="alert alert-info">We don't have any analyzer output for that package.</p>
+   </div>
+</div>{% elif diffs %}
+<div id="accordion">
+   {% for diff in diffs %}<div class="card">
+    <div class="card-header" id="heading-{{ forloop.counter }}">
+      <h5 class="mb-0">
+        <button style="color:black !important; border: none !important; cursor: pointer !important" class="btn btn-link" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.counter == 1 %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
+            {{ diff.A }} vs. {{ diff.B }}
+        </button>
+      </h5>
+    </div>
+    <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.counter == 1 %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#accordion">
+      <div class="card-body">
+     {% if diff.same %}<p class="alert alert-info">{{ diff.diff }}</p>{% else %}
+     {{ diff.diff | safe }}{% endif %}
+      </div>
+    </div>
+  </div>     
+   {% endfor %}
+   </div>
+<div class="row">
+   <div class="col-md-12">
+    <table style="margin-top:20px" class="diff" summary="Legends">
+        <tr> <th colspan="2"> Legends </th> </tr>
+        <tr> <td> <table border="" summary="Colors">
+                      <tr><th> Colors </th> </tr>
+                      <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
+                      <tr><td class="diff_chg">Changed</td> </tr>
+                      <tr><td class="diff_sub">Deleted</td> </tr>
+                  </table></td>
+             <td> <table border="" summary="Links">
+                      <tr><th colspan="2"> Links </th> </tr>
+                      <tr><td>(f)irst change</td> </tr>
+                      <tr><td>(n)ext change</td> </tr>
+                      <tr><td>(t)op</td> </tr>
+                  </table></td> </tr>
+    </table>
+</div>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+
+  $('.autocomplete').select2();
+
+  // Calculate the diff when the user clicks, unless it's the same spec
+  $("#diff-button").click(function(){
+      spec = $( "#spec-select option:selected" ).val();
+      analysis = $( "#analysis-select option:selected" ).val();
+      if (spec == null) {
+           $("#message").html("Please select a package and analysis to view diffs for.")
+           $("#message").show()
+      } else {
+          $("#fade").show();
+          document.location = "/analysis/diffs/" + spec + "/" + analysis + "/"
+      }
+  })
+});
+</script>
+{% endblock %}
