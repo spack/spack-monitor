@@ -45,14 +45,14 @@
    {% for comp in comps %}<div class="card">
     <div class="card-header" id="heading-{{ forloop.counter }}">
       <h5 class="mb-0">
-        <button style="color:black !important; border: none !important; cursor: pointer !important" class="btn btn-link" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.counter == 1 %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
-            {{ comp.A }} {{ comp.specA }} vs. {{ comp.B }} {{ comp.specB }}
+        <button style="color:black !important; border: none !important; cursor: pointer !important" class="btn btn-link" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse-{{ forloop.counter }}">
+           <span style="color:purple">{{ comp.specA.name }}@{{ comp.specA.version }} {{ comp.A }}</span> vs. <span style="color:blue">{{ comp.specB.name }}@{{ comp.specB.version }} {{ comp.B }}</span>
         </button>
       </h5>
     </div>
-    <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.counter == 1 %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#accordion">
+    <div id="collapse-{{ forloop.counter }}" class="collapse show" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#accordion">
       <div class="card-body">
-        <p class="alert alert-info">{% if comp.missing_imports %}<strong>Missing Imports:</strong> {% for mi in comp.missing_imports %}{{ mi }}{% if forloop.last %}{% else %},{% endif %}{% endfor %}{% else %}Stability tests - there are no missing imports{% endif %}</p>
+        <p class="alert alert-{% if comp.missing_imports %}info{% else %}success{% endif %}">{% if comp.missing_imports %}<strong>Missing Imports:</strong> {% for mi in comp.missing_imports %}{{ mi }}{% if forloop.last %}{% else %}, {% endif %}{% endfor %}{% else %}Stability tests - there are no missing imports{% endif %}</p>
       </div>
     </div>
   </div>     

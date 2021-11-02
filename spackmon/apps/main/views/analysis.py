@@ -35,32 +35,41 @@ def stability_test_package(request, pkg=None):
         # Run symbolator on all pairs - we will present a list of comparisons
         for A in results.all():
             modelA = Model(A.install_file.name, A.json_value)
+            specA = A.install_file.build.spec.pretty_print().replace(" ", "-")
 
             # Do comparison based on basename (e.g. libz.1.so == libz.1.2.11.so)
             prefixA = os.path.basename(A.install_file.name).split(".")[0]
             for B in results.all():
                 prefixB = os.path.basename(B.install_file.name).split(".")[0]
-                if not prefixB.startswith(prefixA):
+                specB = B.install_file.build.spec.pretty_print().replace(" ", "-")
+
+                # Try to match files, and don't compare perfectly equal objects
+                if not prefixB.startswith(prefixA) or A == B:
                     continue
+
                 modelB = Model(B.install_file.name, B.json_value)
                 runner.records = {
-                    A.install_file.name: modelA,
-                    B.install_file.name: modelB,
+                    specA + "-" + A.install_file.name: modelA,
+                    specB + "-" + B.install_file.name: modelB,
                 }
-                res = runner.stability_test(return_result=True)
+                try:
+                    res = runner.stability_test(return_result=True)
 
-                # Currently we can only see missing imports
-                comps.append(
-                    {
-                        "missing_imports": set(
-                            [x[0] for x in res.answers["missing_imports"]]
-                        ),
-                        "A": A.install_file.name,
-                        "B": B.install_file.name,
-                        "specA": A.install_file.spec,
-                        "specB": B.install_file.spec,
-                    }
-                )
+                    # Currently we can only see missing imports
+                    comps.append(
+                        {
+                            "missing_imports": set(
+                                [x[0] for x in res.answers.get("missing_imports", [])]
+                            ),
+                            "A": A.install_file.name,
+                            "B": B.install_file.name,
+                            "specA": A.install_file.build.spec,
+                            "specB": B.install_file.build.spec,
+                        }
+                    )
+                except:
+                    print("Skipping %s and %s" % (A, B))
+                    pass
 
     return render(
         request,
