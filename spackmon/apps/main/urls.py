@@ -34,6 +34,11 @@ urlpatterns = [
     ),
     # Smeagle diffs / symbols
     path(
+        "analysis/abi/stability/<str:pkg>/<str:specA>/<str:specB>/",
+        views.stability_test_package,
+        name="stability-test-package",
+    ),
+    path(
         "analysis/abi/stability/<str:pkg>/",
         views.stability_test_package,
         name="stability-test-package",

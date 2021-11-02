@@ -17,6 +17,7 @@
 {% endblock %}
 {% block content %}
 
+{% include "messages/message.html" %}
 <div class="row">
    <div class="col-md-12">
       <h2 style="align:center">Smeagle (ABI) Diffs</h2>
@@ -31,12 +32,23 @@
       {% for pkg in packages %}<option value="{{ pkg }}" {% if pkg == package %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
       </select>
     </div>
+   {% if package and versions %}<!-- If we have a package selected, require selecting versions -->
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="a-select" class="form-select" aria-label="a">
+      {% for version in versions %}<option value="{{ version.id }}" {% if version.id == A.id %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="b-select" class="form-select" aria-label="b">
+      {% for version in versions %}<option value="{{ version.id }}" {% if version.id == A.id %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>{% endif %}
    <div class="col-md-2">
      <a href="#" type="button" id="diff-button" class="btn btn-primary" style="padding:5px">View Missing Symbols</a>
     </div>
 </div>
 
-{% if package and not comps %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+{% if package and specA and specB and not comps %}<div class="row" style="padding-top:20px; padding-bottom:30px">
    <div class="col-md-12">
      <p class="alert alert-info">We don't have any analyzer output for that package.</p>
    </div>
@@ -46,7 +58,7 @@
     <div class="card-header" id="heading-{{ forloop.counter }}">
       <h5 class="mb-0">
         <button style="color:black !important; border: none !important; cursor: pointer !important" class="btn btn-link" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse-{{ forloop.counter }}">
-           <span style="color:purple">{{ comp.specA.name }}@{{ comp.specA.version }} {{ comp.A }}</span> vs. <span style="color:blue">{{ comp.specB.name }}@{{ comp.specB.version }} {{ comp.B }}</span>
+           <span style="color:purple">{{ comp.specA.name }}@{{ comp.specA.version }} %{{ comp.specA.compiler }} {{ comp.A }}</span> vs. <span style="color:blue">{{ comp.specB.name }}@{{ comp.specB.version }} %{{ comp.specB.compiler }} {{ comp.B }}</span>
         </button>
       </h5>
     </div>
@@ -87,12 +99,31 @@ $(document).ready(function() {
   // Calculate the diff when the user clicks, unless it's the same spec
   $("#diff-button").click(function(){
       spec = $( "#spec-select option:selected" ).val();
-      if (spec == null) {
-           $("#message").html("Please select a package to view analysis for.")
-           $("#message").show()
-      } else {
+
+      {% if package and versions %}
+      versionA = $( "#a-select option:selected" ).val();
+      versionB = $( "#b-select option:selected" ).val();
+      {% else %}
+      versionA = null
+      versionB = null
+      {% endif %}
+
+       if (spec != null && versionA == null && versionB == null) {
           $("#fade").show();
           document.location = "/analysis/abi/stability/" + spec + "/"
+       }
+       if (spec != null && versionA != null && versionB != null && versionA == versionB) {
+           $("#message").html("Please select different versions to compare.")
+           $("#message").show()
+       } else if (spec != null && versionA != null && versionB != null) {
+          $("#fade").show();
+          document.location = "/analysis/abi/stability/" + spec + "/" + versionA + "/" + versionB + "/"
+       } else if (spec == null && (versionA == null || versionB == null) ) {
+           $("#message").html("Please select a package and two versions to view analysis for.")
+           $("#message").show()
+      } else {
+           $("#message").html("Please select a package to view analysis for.")
+           $("#message").show()
       }
   })
 });

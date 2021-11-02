@@ -118,7 +118,7 @@ function generate_plot(dimension) {
             return "<div class='row'><strong style='color:red'>Error: </strong>This combination of compiler and version is unknown to Spack Monitor.</div>";
         }
         console.log(d.spec["{{ package }}"])
-        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.spec["{{ package }}"]["version"] + "</code><br></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
+        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.spec["{{ package }}"]["version"] + "</code><br><br><strong>Summary:</strong><br><table><tr><td>SUCCESS</td><td>"+ d.success +" </td></tr><tr><td>FAILURE</td><td>"+ d.failed +" </td></tr><tr><td>CANCELLED</td><td>"+ d.cancelled + " </td></tr><tr><td>NOT RUN</td><td>"+ d.notrun +" </td></tr><tr><td>TOTAL</td><td>"+ d.total +" </td></tr></table></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
        })
 
     var element = document.getElementById("plotarea");
@@ -154,7 +154,7 @@ function generate_plot(dimension) {
     // Create rows - so one version across dimension
     {% for row in rows %}
     row = []{% for entry in row %}
-    row.push({"spec": {% if entry.spec %}{{ entry.spec.to_json | safe }}{% else %}{}{% endif %}, "value": {{ entry.value }}, "status": "{{ entry.status }}", "spec_id": "{{ entry.spec_id }}"});{% endfor %}
+    row.push({"spec": {% if entry.spec %}{{ entry.spec.to_json | safe }}{% else %}{}{% endif %}, "value": {{ entry.value }}, "status": "{{ entry.status }}", "spec_id": "{{ entry.spec_id }}", "failed": {{ entry.failed }}, "cancelled": {{ entry.cancelled}}, "success": {{ entry.success }}, "total": {{ entry.total }}, "notrun": {{ entry.notrun }} });{% endfor %}
     matrix.push(row);{% endfor %}
 
     console.log(matrix)
@@ -226,6 +226,11 @@ function generate_plot(dimension) {
 
            // Case 1 that we had a run, and a value between 0 and 1 for success
            if (d.status == "RUN") {
+
+               // all were cancelled
+               if (d.cancelled == d.total) {
+                   return "#ecb03f";  
+               }
                return colorscale(d.value); 
            }
            // Case 2: the build outcome is unknown

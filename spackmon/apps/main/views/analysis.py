@@ -5,6 +5,7 @@
 
 from django.db.models import Value
 from django.db.models.functions import Concat
+from django.contrib import messages
 from django.shortcuts import render
 from spackmon.apps.main.models import Spec, Attribute
 from symbolator.smeagle.model import SmeagleRunner, Model
@@ -20,15 +21,32 @@ import difflib
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
-def stability_test_package(request, pkg=None):
+def stability_test_package(request, pkg=None, specA=None, specB=None):
 
     # Filter down to those we have analyzer results for
     packages = Spec.objects.values_list("name", flat=True).distinct()
+    versions = None
     comps = []
 
-    if pkg:
+    # If we have a package and no specs, the user needs to select
+    if pkg and not specA or not specB:
+        versions = Spec.objects.filter(
+            name=pkg, build__installfile__attribute__name="smeagle-json"
+        ).distinct()
+        if not versions:
+            messages.info(
+                request, "We don't have any ABI analysis results for that package."
+            )
+
+    elif pkg and specA and specB:
+        versions = Spec.objects.filter(
+            name=pkg, build__installfile__attribute__name="smeagle-json"
+        ).distinct()
+        specs = Spec.objects.filter(id__in=[specA, specB])
+        specA = specs[0]
+        specB = specs[1]
         results = Attribute.objects.filter(
-            name="smeagle-json", install_file__build__spec__name=pkg
+            name="smeagle-json", install_file__build__spec__in=specs
         ).exclude(json_value=None)
         runner = SmeagleRunner()
 
@@ -74,7 +92,15 @@ def stability_test_package(request, pkg=None):
     return render(
         request,
         "smeagle/diffs.html",
-        {"package": pkg, "packages": packages, "package": pkg, "comps": comps},
+        {
+            "package": pkg,
+            "packages": packages,
+            "package": pkg,
+            "comps": comps,
+            "versions": versions,
+            "A": specA,
+            "B": specB,
+        },
     )
 
 
@@ -198,11 +224,19 @@ def package_matrix(request, pkg=None):
                     # Calculate percentage of matches with success
                     statuses = match.values_list("build__status", flat=True)
                     success = [x for x in statuses if x == "SUCCESS"]
+                    notrun = [x for x in statuses if x == "NOTRUN"]
+                    failed = [x for x in statuses if x == "FAILED"]
+                    cancelled = [x for x in statuses if x == "CANCELLED"]
                     row.append(
                         {
                             "spec": match.first(),
                             "status": "RUN",
                             "value": len(success) / len(statuses),
+                            "cancelled": len(cancelled),
+                            "failed": len(failed),
+                            "notrun": len(notrun),
+                            "success": len(success),
+                            "total": len(statuses),
                             "spec_id": match.first().id,
                         }
                     )
