@@ -18,3 +18,4 @@ ipython
 pyaml
 gunicorn
 whitenoise
+symbolator-python

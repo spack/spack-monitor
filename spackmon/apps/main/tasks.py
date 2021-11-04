@@ -235,6 +235,9 @@ def import_configuration(config, spack_version):
     for the configuration, this means that the data was malformed or there
     was another issue with creating it.
     """
+    if "spec" in config:
+        config = config["spec"]
+
     # We are required to have a top level spec
     if "nodes" not in config:
         logging.error("nodes key not found in file.")

@@ -36,7 +36,7 @@
                     <b><a href="{% url 'main:spec_detail' dep.spec.id %}">{{ dep.spec.name }}</a></b>
                 </td>
                 <td class="normal" align="right">{% if dep.spec.build_set.count == 0 %}<span title="NOT RUN means there were no build phases sent for this spec." class="badge badge-secondary">NOT RUN</span>{% else %}
-                  <b>{% for phase in dep.spec.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "FAILED" %}error{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
+                  <b>{% for phase in dep.spec.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "FAILED" %}danger{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
                   </b>{% endif %}
                 </td>
               </tr>{% endfor %}
@@ -63,7 +63,7 @@
                     <b><a href="{% url 'main:spec_detail' dep.id %}">{{ dep.name }}</a></b>
                 </td>
                 <td class="normal" align="right">{% if dep.build_set.count == 0 %}<span title="NOT RUN means there were no build phases sent for this spec." class="badge badge-secondary">NOT RUN</span>{% else %}
-                  <b>{% for phase in dep.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "FAILED" %}danger{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
+                  <b>{% for phase in dep.build_set.all %}<span class="badge badge-{% if phase.status == "CANCELLED" %}warning{% elif phase.status == "SUCCESS" %}success{% elif phase.status == "ERROR" %}danger{% elif phase.status == "FAILED" %}danger{% else %}info{% endif %}">{{ phase.status }}</span>{% endfor %}
                   </b>{% endif %}
                 </td>
               </tr>{% endfor %}

@@ -13,6 +13,62 @@ urlpatterns = [
     path("builds/owner/<str:username>/", views.builds_by_owner, name="builds_by_owner"),
     path("specs/diff/<int:spec1>/<int:spec2>/", views.spec_diff, name="spec-diff"),
     path("specs/diff/", views.spec_diff, name="spec-diff"),
+    # General analysis results / matrices
+    path("analysis/matrix/<str:pkg>/", views.package_matrix, name="package-matrix"),
+    path("analysis/matrix/", views.package_matrix, name="package-matrix"),
+    path(
+        "analysis/diffs/<str:pkg>/<str:analysis>/",
+        views.view_analysis_diffs,
+        name="package-analysis-diffs",
+    ),
+    path("analysis/diffs/", views.view_analysis_diffs, name="package-analysis-diffs"),
+    path(
+        "analysis/results/<str:pkg>/<str:analysis>/",
+        views.view_analysis_results,
+        name="package-analysis-results",
+    ),
+    path(
+        "analysis/results/",
+        views.view_analysis_results,
+        name="package-analysis-results",
+    ),
+    # Smeagle stability tests
+    path(
+        "analysis/abi/stability/<str:pkg>/<str:specA>/<str:specB>/",
+        views.stability_test_package,
+        name="stability-test-package",
+    ),
+    path(
+        "analysis/abi/stability/<str:pkg>/",
+        views.stability_test_package,
+        name="stability-test-package",
+    ),
+    path(
+        "analysis/abi/stability/",
+        views.stability_test_package,
+        name="stability-test-package",
+    ),
+    # Symbolator diffs (splicing emulation)
+    path(
+        "analysis/symbols/<str:pkg>/<int:specA>/<int:specB>/",
+        views.symbol_test_package,
+        name="symbols-test-package",
+    ),
+    path(
+        "analysis/symbols/<str:pkg>/<int:specA>/",
+        views.symbol_test_package,
+        name="symbols-test-package",
+    ),
+    path(
+        "analysis/symbols/<str:pkg>/",
+        views.symbol_test_package,
+        name="symbols-test-package",
+    ),
+    path(
+        "analysis/symbols/",
+        views.symbol_test_package,
+        name="symbols-test-package",
+    ),
     path("specs/detail/<int:specid>", views.spec_detail, name="spec_detail"),
 ]
 

@@ -1,0 +1,85 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Analysis Results > {{ pkg }}{% endblock %}
+{% block css %}
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-coy.min.css" rel="stylesheet" type="text/css">
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+{% include "messages/message.html" %}
+<div class="row">
+   <div class="col-md-12">
+      <h2 style="align:center">Package Analysis</h2>
+      <p>Select a package and analysis result to view.</p>
+      <p style="display:none" id="message" class="alert alert-info"></p>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="spec-select" class="form-select" aria-label="spec1">
+      {% for spec in specs %}<option value="{{ spec.id }}" {% if spec == package.first %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-3">
+     <select class="autocomplete" style="width:100%" id="analysis-select" class="form-select" aria-label="analysis">
+      {% for ana in analyses %}<option value="{{ ana }}" {% if analysis == ana %}selected{% endif %}>{{ ana }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-2">
+     <a href="#" type="button" id="run-button" class="btn btn-primary" style="padding:5px">View Analysis Results</a>
+    </div>
+</div>
+{% if not results and package %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">     
+     <p class="alert alert-info">Builds have been done for {{ package.first.pretty_print }}, but there are no analysis results.</p>
+   </div>
+</div>
+{% elif results %}
+<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">     
+
+<div id="accordion">
+   {% for result in results %}<div class="card">
+    <div class="card-header" id="heading-{{ forloop.counter }}">
+      <h5 class="mb-0">
+        <button style="color:black !important; border: none !important; cursor: pointer !important" class="btn btn-link" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.counter == 1 %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
+          {{ result.install_file.build.spec.name }}@{{ result.install_file.build.spec.version }}/{{ result.install_file.build.spec.hash }}
+        </button>
+      </h5>
+    </div>
+    <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.counter == 1 %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#accordion">
+      <div class="card-body">
+      <pre><code class="language-javascript">{{ result.to_json }}</code></pre></code></pre>  
+      </div>
+    </div>
+  </div>     
+   {% endfor %}
+   </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+
+  $('.autocomplete').select2();
+
+  // Calculate the diff when the user clicks, unless it's the same spec
+  $("#run-button").click(function(){
+      spec = $( "#spec-select option:selected" ).val();
+      analysis = $( "#analysis-select option:selected" ).val();
+      if (spec == null || analysis == null) {
+           $("#message").html("Please select a package and analysis type to view.")
+           $("#message").show()
+      } else {
+          document.location = "/analysis/results/" + spec + "/"  + analysis + "/" 
+      }
+  })
+});
+</script>
+{% endblock %}

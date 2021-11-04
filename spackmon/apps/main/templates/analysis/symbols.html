@@ -1,0 +1,115 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Symbol Splicing {% if pkg %}> {{ pkg }}{% endif %}{% endblock %}
+{% block css %}
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+{% include "messages/message.html" %}
+<div class="row">
+   <div class="col-md-12">
+      <h2 style="align:center">Symbol Splicing</h2>
+      <p>A "symbol splice" means that we take the entire space of global symbols for a library, and then simulate substituting a new library for one that is included (called a splice). This is done by way of the <a href="https://github.com/buildsi/symbolator" target="_blank">symbolator</a> library. Select a package to emulate a splice for.</p>
+      <p style="display:none" id="message" class="alert alert-info"></p>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-md-3">
+     <label>The package to select a spec to splice</label>
+     <select autocomplete="nope" class="autocomplete" style="width:100%" id="spec-select" class="form-select" aria-label="spec1">
+      {% for pkg in packages %}<option value="{{ pkg }}" {% if pkg == package %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
+      </select>
+    </div>
+   {% if package and splicesA %}<!-- If we have a package selected, require selecting a first spec to splice -->
+   <div class="col-md-3">
+     <label>The specific spec of the package to splice into.</label>
+     <select autocomplete="nope" class="autocomplete" style="width:100%" id="a-select" class="form-select" aria-label="a">
+      {% for version in splicesA %}<option value="{{ version.id }}" {% if version.id == specA %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>{% endif %}    
+   {% if package and splicesB %}<!-- If we have a package and original spec, require selecting what to splice -->
+   <div class="col-md-3" id="b-select-parent">
+     <label>The library to splice.</label>
+     <select autocomplete="nope" class="autocomplete" style="width:100%" id="b-select" class="form-select" aria-label="b">
+      {% for version in splicesB %}<option value="{{ version.id }}" {% if version.id == specB %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
+      </select>
+    </div>{% endif %}
+   <div class="col-md-2">
+     <a href="#" type="button" id="diff-button" class="btn btn-primary" style="padding:5px">{% if not package %}Select Package{% elif package and splicesA and not splicesB %}Select Spec{% else %}Select Spec to Splice{% endif %}</a>
+    </div>
+</div>
+{% if package and A and B and not missing %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">
+     <p class="alert alert-info">There are no missing symbols for that splice, so we predict it to work. 🎉️</p>
+   </div>
+</div>{% elif missing %}
+<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">
+     <p class="alert alert-info">There are {{ missing | length }} missing symbols for that splice, so we predict it not to work. 😭️</p>
+     <p class="alert alert-info"><strong>Undefined Symbols:</strong><br> {% for miss in missing %}{{ miss }}{% if forloop.last %}{% else %}<br> {% endif %}{% endfor %}</p>
+  </div>
+</div>{% endif %}
+{% if selected %}
+<div class="row" style="padding-top:20px; padding-bottom:30px">
+   <div class="col-md-12">
+     <h3>Libraries Spliced</h3>
+     <p class="alert alert-info">{% for libs in selected %}{% if libs.0 == libs.1 %}{{ libs.0 }} did not change.{% if forloop.last %}{% else %}<br>{% endif %}{% else %}{{ libs.0 }} was spliced into {{ libs.1 }}{% if forloop.last %}{% else %}</br>{% endif %}{% endif %}{% endfor %}</p>
+   </div>
+</div>
+{% endif %}
+{% if specA or specB %}
+<br>
+<ul>
+  {% if specA %}<li><a href="{% url 'main:spec_detail' specA %}" target="_blank">{{ A.pretty_print }} Spec Details</li>{% endif %}
+  {% if specB %}<li><a href="{% url 'main:spec_detail' specB %}" target="_blank">{{ B.pretty_print }} Spec Details</li>{% endif %}
+</ul>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+
+  $('.autocomplete').select2();
+
+   $("#a-select").on('change', function() {
+     $("#b-select option:selected").removeAttr("selected");
+     $("#b-select-parent").hide();  
+   });
+
+  // Calculate the diff when the user clicks, unless it's the same spec
+  $("#diff-button").click(function(){
+      spec = $( "#spec-select option:selected" ).val();
+
+      splicesA = null
+      splicesB = null
+      {% if package and splicesA %}
+      splicesA = $( "#a-select option:selected" ).val();
+      {% if splicesB %}splicesB = $( "#b-select option:selected" ).val();{% endif %}{% endif %}
+       if (spec != null && splicesA == null && splicesB == null) {
+          $("#fade").show();
+          document.location = "/analysis/symbols/" + spec + "/"
+       }
+       if (spec != null && splicesA != null && splicesB != null && splicesA == splicesB) {
+           $("#message").html("Please select a different spec to splice in.")
+           $("#message").show()
+       } else if (spec != null && splicesA != null && splicesB == null) {
+          $("#fade").show();
+          document.location = "/analysis/symbols/" + spec + "/" + splicesA + "/"
+       } else if (spec != null && splicesA != null && splicesB != null) {
+          $("#fade").show();
+          document.location = "/analysis/symbols/" + spec + "/" + splicesA + "/" + splicesB + "/"
+       } else if (spec == null && (splicesA == null || splicesB == null) ) {
+           $("#message").html("Please select a package and two specs to splice.")
+           $("#message").show()
+      } else {
+           $("#message").html("Please select a package and specs.")
+           $("#message").show()
+      }
+  })
+});
+</script>
+{% endblock %}

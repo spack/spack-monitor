@@ -21,8 +21,12 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="{% url 'main:spec-diff' %}">Spec Diff</a>
-          <!--<a class="dropdown-item" href="#">Another action</a>
-          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="{% url 'main:package-matrix' %}">Build Matrix</a>
+          <a class="dropdown-item" href="{% url 'main:package-analysis-results' %}">Analysis Results</a>
+          <a class="dropdown-item" href="{% url 'main:package-analysis-diffs' %}">Analysis Diffs</a>
+          <a class="dropdown-item" href="{% url 'main:stability-test-package' %}">Stability Test</a>
+          <a class="dropdown-item" href="{% url 'main:symbols-test-package' %}">Symbol Splicing</a>
+          <!--<div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Something else here</a>-->
         </div>
       </li>
