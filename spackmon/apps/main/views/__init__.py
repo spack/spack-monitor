@@ -4,5 +4,6 @@ from .analysis import (
     view_analysis_diffs,
     view_analysis_results,
     stability_test_package,
+    symbol_test_package,
     package_matrix,
 )

@@ -9,6 +9,9 @@ from django.contrib import messages
 from django.shortcuts import render
 from spackmon.apps.main.models import Spec, Attribute
 from symbolator.smeagle.model import SmeagleRunner, Model
+from symbolator.corpus import JsonCorpusLoader
+from symbolator.asp import PyclingoDriver, ABIGlobalSolverSetup
+from symbolator.facts import get_facts
 import os
 
 from ratelimit.decorators import ratelimit
@@ -22,6 +25,7 @@ import difflib
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def stability_test_package(request, pkg=None, specA=None, specB=None):
+    """This is the Smeagle stability test (although not complete)"""
 
     # Filter down to those we have analyzer results for
     packages = Spec.objects.values_list("name", flat=True).distinct()
@@ -100,6 +104,189 @@ def stability_test_package(request, pkg=None, specA=None, specB=None):
             "versions": versions,
             "A": specA,
             "B": specB,
+        },
+    )
+
+
+def get_splice_contenders(pkg=None, names=None):
+    if names:
+        return (
+            Spec.objects.filter(
+                name__in=names, build__installfile__attribute__name="symbolator-json"
+            )
+            .exclude(build__installfile__attribute__json_value=None)
+            .distinct()
+        )
+    return (
+        Spec.objects.filter(
+            name=pkg, build__installfile__attribute__name="symbolator-json"
+        )
+        .exclude(build__installfile__attribute__json_value=None)
+        .distinct()
+    )
+
+
+def run_symbol_solver(corpora):
+    """
+    A helper function to run the symbol solver.
+    """
+    driver = PyclingoDriver()
+    setup = ABIGlobalSolverSetup()
+    return driver.solve(
+        setup,
+        corpora,
+        dump=False,
+        logic_programs=get_facts("missing_symbols.lp"),
+        facts_only=False,
+        # Loading from json already includes system libs
+        system_libs=False,
+    )
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
+def symbol_test_package(request, pkg=None, specA=None, specB=None):
+    """This is looking at symbols undefined for some package, and (optionally) a splice."""
+    # Filter down to those we have analyzer results for
+    packages = Spec.objects.values_list("name", flat=True).distinct()
+    splicesA = None
+    splicesB = None
+    selected = None
+    missing = []
+
+    # Keep track of original IDs
+    specA_id = specA
+    specB_id = specB
+
+    # If we have a package but no selected splices
+    if pkg and not specA and not specB:
+
+        # SpecA will be spliced INTO
+        splicesA = get_splice_contenders(pkg)
+        if not splicesA:
+            messages.info(
+                request, "We don't have any symbol analysis results for that package."
+            )
+
+    elif pkg and specA and not specB:
+
+        # SpecB can be any dependency package of A
+        splicesA = get_splice_contenders(pkg)
+        specA = Spec.objects.filter(id=specA)
+        if not specA:
+            messages.info(request, "We cannot find that spec.")
+        else:
+            names = specA.values_list("dependencies__spec__name", flat=True)
+            splicesB = get_splice_contenders(names=names)
+
+    elif pkg and specA and specB:
+        splicesA = get_splice_contenders(pkg=pkg)
+        names = splicesA.values_list("dependencies__spec__name", flat=True)
+        splicesB = get_splice_contenders(names=names)
+
+        # Retrieve the specs chosen by ID (if empty, we will fail getting results)
+        specA = Spec.objects.filter(id=specA).first()
+        specB = Spec.objects.filter(id=specB).first()
+
+        # We have to assume one analyzer result per spec chosen
+        resultA = (
+            Attribute.objects.filter(
+                name="symbolator-json", install_file__build__spec=specA
+            )
+            .exclude(json_value=None)
+            .first()
+        )
+        resultB = (
+            Attribute.objects.filter(
+                name="symbolator-json", install_file__build__spec=specB
+            )
+            .exclude(json_value=None)
+            .first()
+        )
+
+        if not resultA and not resultB:
+            messages.info(
+                request,
+                "Cannot find analysis result for either spec selection, choose others",
+            )
+        elif not resultA:
+            messages.info(
+                request,
+                "Cannot find analysis result for spec %s" % specA.pretty_print(),
+            )
+        elif not resultB:
+            messages.info(
+                request,
+                "Cannot find analysis result for spec %s" % specB.pretty_print(),
+            )
+        else:
+
+            # Spliced libraries will be added as corpora here
+            loader = JsonCorpusLoader()
+            loader.load(resultA.json_value)
+            corpora = loader.get_lookup()
+            print("Corpora without Splice %s" % corpora)
+
+            # original set of symbols without splice
+            result = run_symbol_solver(list(corpora.values()))
+
+            # Now load the splices separately, and select what we need
+            splice_loader = JsonCorpusLoader()
+            splice_loader.load(resultB.json_value)
+            splices = splice_loader.get_lookup()
+            print("Splices %s" % splices)
+
+            # If we have the library in corpora, delete it, add spliced libraries
+            # E.g., libz.so.1.2.8 is just "libz" and will be replaced by anything with the same prefix
+            corpora_lookup = {key.split(".")[0]: corp for key, corp in corpora.items()}
+            splices_lookup = {key.split(".")[0]: corp for key, corp in splices.items()}
+
+            # Keep a lookup of libraries names
+            corpora_libnames = {key.split(".")[0]: key for key, _ in corpora.items()}
+            splices_libnames = {key.split(".")[0]: key for key, _ in splices.items()}
+
+            # Splices selected
+            selected = []
+
+            # Here we match based on the top level name, and add splices that match
+            # (this assumes that if a lib is part of a splice corpus set but not included, we don't add it)
+            for lib, corp in splices_lookup.items():
+
+                # ONLY splice in those known
+                if lib in corpora_lookup:
+
+                    # Library A was spliced in place of Library B
+                    selected.append([splices_libnames[lib], corpora_libnames[lib]])
+                    corpora_lookup[lib] = corp
+
+            spliced_result = run_symbol_solver(list(corpora_lookup.values()))
+            print("After splicing %s" % corpora_lookup)
+
+            # Compare sets of missing symbols
+            result_missing = [
+                "%s %s" % (os.path.basename(x[0]).split(".")[0], x[1])
+                for x in result.answers.get("missing_symbols", [])
+            ]
+            spliced_missing = [
+                "%s %s" % (os.path.basename(x[0]).split(".")[0], x[1])
+                for x in spliced_result.answers.get("missing_symbols", [])
+            ]
+            # these are new missing symbols after the splice
+            missing = [x for x in spliced_missing if x not in result_missing]
+
+    return render(
+        request,
+        "analysis/symbols.html",
+        {
+            "package": pkg,
+            "packages": packages,
+            "splicesA": splicesA,
+            "splicesB": splicesB,
+            "selected": selected,
+            "A": specA,
+            "B": specB,
+            "specA": specA_id,
+            "specB": specB_id,
+            "missing": missing,
         },
     )
 

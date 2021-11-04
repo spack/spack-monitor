@@ -29,8 +29,8 @@ We also need to ensure that everything builds with debug.
     export SPACK_ADD_DEBUG_FLAGS=true
 
 
-Test
-----
+Test Smeagle
+------------
 
 And then here is how to install zlib with using spack monitor (locally) and then
 running the analyzer for the same set:
@@ -92,3 +92,19 @@ And now we want to install the same versions of zlib with different compilers.
     $ spack analyze --monitor run --analyzer smeagle --recursive --all zlib%gcc@8.4.0
     $ spack analyze --monitor run --analyzer smeagle --recursive --all zlib%gcc@7.5.0
 
+
+Test Symbolator
+---------------
+
+Let's now do the same, but using the symbolator analyzer (we already have them installed):
+
+
+.. code-block:: console
+
+    # Analyze all versions of zlib plus recursive dependents
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all zlib
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all zlib%gcc@8.4.0
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all zlib%gcc@7.5.0
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all curl
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all curl%gcc@8.4.0
+    $ spack analyze --monitor run --analyzer symbolator --recursive --all curl%gcc@7.5.0

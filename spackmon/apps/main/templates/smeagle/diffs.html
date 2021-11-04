@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load my_filters %}
 {% load static %}
-{% block page_title %}ABI (Smeagle) Diffs > {{ pkg }}{% endblock %}
+{% block page_title %}ABI (Smeagle) Diffs > {% if pkg %}> {{ pkg }}{% endif %}{% endblock %}
 {% block css %}
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
    <style type="text/css">
