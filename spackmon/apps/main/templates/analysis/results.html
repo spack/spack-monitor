@@ -8,6 +8,7 @@
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 {% endblock %}
 {% block content %}
+{% include "messages/message.html" %}
 <div class="row">
    <div class="col-md-12">
       <h2 style="align:center">Package Analysis</h2>
@@ -19,7 +20,7 @@
 <div class="row">
    <div class="col-md-3">
      <select class="autocomplete" style="width:100%" id="spec-select" class="form-select" aria-label="spec1">
-      {% for pkg in packages %}<option value="{{ pkg }}" {% if pkg == package %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
+      {% for spec in specs %}<option value="{{ spec.id }}" {% if spec == package.first %}selected{% endif %}>{{ spec.pretty_print }}</option>{% endfor %}
       </select>
     </div>
    <div class="col-md-3">
@@ -33,7 +34,7 @@
 </div>
 {% if not results and package %}<div class="row" style="padding-top:20px; padding-bottom:30px">
    <div class="col-md-12">     
-     <p class="alert alert-info">Builds have been done for {{ package }}, but there are no analysis results.</p>
+     <p class="alert alert-info">Builds have been done for {{ package.first.pretty_print }}, but there are no analysis results.</p>
    </div>
 </div>
 {% elif results %}

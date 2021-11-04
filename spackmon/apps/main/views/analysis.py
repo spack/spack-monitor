@@ -7,7 +7,7 @@ from django.db.models import Value
 from django.db.models.functions import Concat
 from django.contrib import messages
 from django.shortcuts import render
-from spackmon.apps.main.models import Spec, Attribute
+from spackmon.apps.main.models import Spec, Attribute, Build
 from symbolator.smeagle.model import SmeagleRunner, Model
 from symbolator.corpus import JsonCorpusLoader
 from symbolator.asp import PyclingoDriver, ABIGlobalSolverSetup
@@ -294,15 +294,19 @@ def symbol_test_package(request, pkg=None, specA=None, specB=None):
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def view_analysis_results(request, pkg=None, analysis=None):
     """
-    General view to show results (json, values) for some analyzer across a package
+    General view to show results (json, values) for some analyzer and a spec
     """
     results = None
-    packages = Spec.objects.values_list("name", flat=True).distinct()
+    specs = Spec.objects.exclude(build__installfile__attribute=None).distinct()
     analyses = Attribute.objects.values_list("name", flat=True).distinct()
     if pkg and analysis:
-        results = Attribute.objects.filter(
-            name=analysis, install_file__build__spec__name=pkg
-        ).exclude(json_value=None)
+        pkg = Spec.objects.filter(id=pkg)
+        if not pkg:
+            messages.info(request, "We cannot find a package spec with that id.")
+        else:
+            results = Attribute.objects.filter(
+                name=analysis, install_file__build__spec_id__in=pkg
+            ).exclude(json_value=None)
 
     return render(
         request,
@@ -310,7 +314,7 @@ def view_analysis_results(request, pkg=None, analysis=None):
         {
             "package": pkg,
             "results": results,
-            "packages": packages,
+            "specs": specs,
             "analyses": analyses,
             "analysis": analysis,
         },
@@ -370,13 +374,20 @@ def package_matrix(request, pkg=None):
     Generate a build matrix for one or more specs.
     """
     # Unique package names
-    packages = Spec.objects.values_list("name", flat=True).distinct()
+    packages = (
+        Spec.objects.exclude(build=None).values_list("name", flat=True).distinct()
+    )
     specs = None
     rows = None
     versions = None
     compilers = None
 
     if pkg:
+
+        # If we don't have any builds!
+        if Build.objects.filter(spec__name=pkg).count() == 0:
+            messages.info(request, "Spack monitor doesn't have build data for %s" % pkg)
+
         # Annotate with compiler name and version
         specs = (
             Spec.objects.filter(name=pkg)
