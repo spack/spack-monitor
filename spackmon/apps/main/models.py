@@ -406,7 +406,7 @@ class BuildEnvironment(BaseModel):
     )
     # host target we can get from archspec inside spack
     host_target = models.CharField(
-        max_length=150, blank=False, null=False, help_text="The hostname"
+        max_length=150, blank=False, null=False, help_text="The host target"
     )
 
     def __str__(self):
