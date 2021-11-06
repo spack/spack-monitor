@@ -14,7 +14,11 @@ urlpatterns = [
     path("specs/diff/<int:spec1>/<int:spec2>/", views.spec_diff, name="spec-diff"),
     path("specs/diff/", views.spec_diff, name="spec-diff"),
     # General analysis results / matrices
-    path("analysis/matrix/<str:pkg>/", views.package_matrix, name="package-matrix"),
+    path(
+        "analysis/matrix/<str:pkg>/<str:arch>/",
+        views.package_matrix,
+        name="package-matrix",
+    ),
     path("analysis/matrix/", views.package_matrix, name="package-matrix"),
     path(
         "analysis/diffs/<str:pkg>/<str:analysis>/",

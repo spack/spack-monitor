@@ -53,11 +53,22 @@
 </div>
 
 <div class="row">
-   <div class="col-md-6">
+   <div class="col-md-3">
+     <label>Select the package</label>
      <select class="autocomplete" style="width:100%" id="package-select" class="form-select" aria-label="package">
       {% for pkg in packages %}<option value="{{ pkg }}" {% if package and package == pkg %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
       </select>
     </div>
+   <div class="col-md-3">
+     <label>Select the architecture</label>
+     <select class="autocomplete" style="width:100%" id="arch-select" class="form-select" aria-label="arch">
+      {% for a in arches %}<option value="{{ a }}" {% if a and a == arch %}selected{% endif %}>{{ a }}</option>{% endfor %}
+      </select>
+    </div>
+   <div class="col-md-3" id="specs-table">
+  </div>
+</div>
+<div class="row" style="margin-top:10px">
    <div class="col-md-2">
      <a href="#" type="button" id="generate-button" class="btn btn-primary" style="padding:5px">Generate</a>
     </div>
@@ -91,11 +102,13 @@ $(document).ready(function() {
   // Calculate the diff when the user clicks, unless it's the same spec
   $("#generate-button").click(function(){
       pkg = $( "#package-select option:selected" ).val();
-      if (!pkg) {
-           $("#message").html("Please select a package to generate a build matrix for.")
+      arch = $( "#arch-select option:selected" ).val();
+
+      if (!pkg || !arch) {
+           $("#message").html("Please select a package and arch to generate a build matrix for.")
            $("#message").show()
       } else {
-          document.location = "/analysis/matrix/" + pkg + "/"  
+          document.location = "/analysis/matrix/" + pkg + "/"  + arch + "/"
       }
   })
   {% if rows %}generate_plot(){% endif %}
@@ -117,8 +130,7 @@ function generate_plot(dimension) {
         if (d.status == "UNKNOWN") {
             return "<div class='row'><strong style='color:red'>Error: </strong>This combination of compiler and version is unknown to Spack Monitor.</div>";
         }
-        console.log(d.spec["{{ package }}"])
-        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.spec["{{ package }}"]["version"] + "</code><br><br><strong>Summary:</strong><br><table><tr><td>SUCCESS</td><td>"+ d.success +" </td></tr><tr><td>FAILURE</td><td>"+ d.failed +" </td></tr><tr><td>CANCELLED</td><td>"+ d.cancelled + " </td></tr><tr><td>NOT RUN</td><td>"+ d.notrun +" </td></tr><tr><td>TOTAL</td><td>"+ d.total +" </td></tr></table></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
+        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.version + "</code><br><br><strong>Summary:</strong><br><table><tr><td>SUCCESS</td><td>"+ d.success +" </td></tr><tr><td>FAILURE</td><td>"+ d.failed +" </td></tr><tr><td>CANCELLED</td><td>"+ d.cancelled + " </td></tr><tr><td>NOT RUN</td><td>"+ d.notrun +" </td></tr><tr><td>TOTAL</td><td>"+ d.total +" </td></tr></table></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
        })
 
     var element = document.getElementById("plotarea");
@@ -154,7 +166,7 @@ function generate_plot(dimension) {
     // Create rows - so one version across dimension
     {% for row in rows %}
     row = []{% for entry in row %}
-    row.push({"spec": {% if entry.spec %}{{ entry.spec.to_json | safe }}{% else %}{}{% endif %}, "value": {{ entry.value }}, "status": "{{ entry.status }}", "spec_id": "{{ entry.spec_id }}", "failed": {% if entry.failed %}{{ entry.failed }}{% else %}0{% endif %}, "cancelled": {% if entry.cancelled %}{{ entry.cancelled}}{% else %}0{% endif %}, "success": {% if entry.success %}{{ entry.success }}{% else %}0{% endif %}, "total": {% if entry.total %}{{ entry.total }}{% else %}0{% endif %}, "notrun": {% if entry.notrun %}{{ entry.notrun }}{% else %}0{% endif %} });{% endfor %}
+    row.push({"specs": [{% if entry.specs %}{% for sid in entry.specs %}{{ sid }}{% if forloop.last %}{% else %},{% endif %}{% endfor %}{% endif %}], {% if entry.version %}"version": "{{ entry.version }}",{% endif %}{% if entry.compiler %}"compiler": "{{ entry.compiler }}",{% endif %} "value": {{ entry.value }}, "status": "{{ entry.status }}", "failed": {% if entry.failed %}{{ entry.failed }}{% else %}0{% endif %}, "cancelled": {% if entry.cancelled %}{{ entry.cancelled}}{% else %}0{% endif %}, "success": {% if entry.success %}{{ entry.success }}{% else %}0{% endif %}, "total": {% if entry.total %}{{ entry.total }}{% else %}0{% endif %}, "notrun": {% if entry.notrun %}{{ entry.notrun }}{% else %}0{% endif %} });{% endfor %}
     matrix.push(row);{% endfor %}
 
     console.log(matrix)
@@ -216,7 +228,7 @@ function generate_plot(dimension) {
     row.selectAll(".cell")
         .data(function(d, i) { return matrix[i]; })
         .style("cursor", function(d) {
-           if (d.spec_id != "") {
+           if (d.specs.length != 0) {
               return "pointer";
            }
            return "inherit";
@@ -239,9 +251,11 @@ function generate_plot(dimension) {
         .on('mouseout.tip', tip.hide)
         .on('mouseover.tip', tip.show)
         .on('click', function(d) {
-            if (d.spec_id != "") {
-               document.location = "/specs/detail/" + d.spec_id                    
-            }
+            content = "View Specs for {{ package }} " + d.version + " " + d.compiler + ": "
+            $.each(d.specs, function(i, e) {
+                content += "<a target='_blank' href='/specs/detail/" + e +"'>[" + i + "]</a> " 
+            })
+            $("#specs-table").html(content);
         });
 
 }{% endif %}

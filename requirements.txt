@@ -19,3 +19,4 @@ pyaml
 gunicorn
 whitenoise
 symbolator-python
+pandas

@@ -3,16 +3,17 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from django.db.models import Value
+from django.db.models import Value, F
 from django.db.models.functions import Concat
 from django.contrib import messages
 from django.shortcuts import render
-from spackmon.apps.main.models import Spec, Attribute, Build
+from spackmon.apps.main.models import Spec, Attribute, Build, BuildEnvironment
 from symbolator.smeagle.model import SmeagleRunner, Model
 from symbolator.corpus import JsonCorpusLoader
 from symbolator.asp import PyclingoDriver, ABIGlobalSolverSetup
 from symbolator.facts import get_facts
 import os
+import pandas
 
 from ratelimit.decorators import ratelimit
 from spackmon.settings import (
@@ -147,7 +148,11 @@ def run_symbol_solver(corpora):
 def symbol_test_package(request, pkg=None, specA=None, specB=None):
     """This is looking at symbols undefined for some package, and (optionally) a splice."""
     # Filter down to those we have analyzer results for
-    packages = Spec.objects.values_list("name", flat=True).distinct()
+    packages = (
+        Spec.objects.filter(build__installfile__attribute__name="symbolator-json")
+        .values_list("name", flat=True)
+        .distinct()
+    )
     splicesA = None
     splicesB = None
     selected = None
@@ -369,31 +374,38 @@ def view_analysis_diffs(request, pkg=None, analysis=None):
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
-def package_matrix(request, pkg=None):
+def package_matrix(request, pkg=None, arch=None):
     """
     Generate a build matrix for one or more specs.
     """
-    # Unique package names
+    # Unique package names and os options
     packages = (
         Spec.objects.exclude(build=None).values_list("name", flat=True).distinct()
     )
+
+    # arch options
+    arches = BuildEnvironment.objects.values_list("host_os", flat=True).distinct()
     specs = None
     rows = None
     versions = None
     compilers = None
 
-    if pkg:
+    if pkg and arch:
 
         # If we don't have any builds!
         if Build.objects.filter(spec__name=pkg).count() == 0:
-            messages.info(request, "Spack monitor doesn't have build data for %s" % pkg)
+            messages.info(
+                request,
+                "Spack monitor doesn't have build data for %s and %s" % (pkg, arch),
+            )
 
         # Annotate with compiler name and version
         specs = (
-            Spec.objects.filter(name=pkg)
+            Spec.objects.filter(name=pkg, build__build_environment__host_os=arch)
             .order_by("version")
             .annotate(
-                compiler_name=Concat("compiler__name", Value(" "), "compiler__version")
+                compiler_name=Concat("compiler__name", Value(" "), "compiler__version"),
+                build_status=F("build__status"),
             )
         )
 
@@ -403,39 +415,39 @@ def package_matrix(request, pkg=None):
         # distinct doesn't seem to work here
         compilers = list(set(specs.values_list("compiler_name", flat=True)))
 
-        # Assemble results by compiler (we don't have different arches for now)
-        # TODO this won't scale, but should work okay for small datasets
+        # Convert to a data frame to do summary stats (yes this is actually faster)
+        df = pandas.DataFrame(list(specs.values()))
+
+        # Assemble results by compiler and host os
+        # TODO why is only one arc in data? NEED ALL ARCHES
         rows = []
         for version in versions:
             row = []
+            version_df = df[df["version"] == version]
             for compiler in compilers:
-                match = (
-                    specs.filter(version=version, compiler_name=compiler)
-                    .exclude(build__status=None)
-                    .distinct()
-                )
-
-                # Appending an empty record means "We don't have that version/compiler"
-                if match.count() == 0:
-                    row.append({"specs": match, "value": 0, "status": "UNKNOWN"})
+                # Do a count of specs that use that version and compiler
+                filtered = version_df[version_df["compiler_name"] == compiler]
+                print(filtered.build_status.unique())
+                # We don't have that compiler /version combo, it's "we don't know"
+                if filtered.shape[0] == 0:
+                    row.append({"specs": {}, "value": 0, "status": "UNKNOWN"})
                 else:
-                    # Calculate percentage of matches with success
-                    statuses = match.values_list("build__status", flat=True)
-                    success = [x for x in statuses if x == "SUCCESS"]
-                    notrun = [x for x in statuses if x == "NOTRUN"]
-                    failed = [x for x in statuses if x == "FAILED"]
-                    cancelled = [x for x in statuses if x == "CANCELLED"]
+                    success = len(filtered[filtered["build_status"] == "SUCCESS"])
+                    cancelled = len(filtered[filtered["build_status"] == "CANCELLED"])
+                    failed = len(filtered[filtered["build_status"] == "FAILED"])
+                    notrun = len(filtered[filtered["build_status"] == "NOTRUN"])
                     row.append(
                         {
-                            "spec": match.first(),
+                            "specs": list(filtered.id.unique()),
+                            "version": version,
+                            "compiler": compiler,
                             "status": "RUN",
-                            "value": len(success) / len(statuses),
-                            "cancelled": len(cancelled),
-                            "failed": len(failed),
-                            "notrun": len(notrun),
-                            "success": len(success),
-                            "total": len(statuses),
-                            "spec_id": match.first().id,
+                            "value": success / df.shape[0],
+                            "cancelled": cancelled,
+                            "failed": failed,
+                            "notrun": notrun,
+                            "success": success,
+                            "total": filtered.shape[0],
                         }
                     )
             rows.append(row)
@@ -448,6 +460,8 @@ def package_matrix(request, pkg=None):
             "package": pkg,
             "specs": specs,
             "rows": rows,
+            "arches": arches,
+            "arch": arch,
             "rowLabels": versions,
             "colLabels": compilers,
         },
