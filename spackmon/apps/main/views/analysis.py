@@ -447,6 +447,7 @@ def package_matrix(request, pkg=None, arch=None):
                 if filtered.shape[0] == 0:
                     row.append({"specs": {}, "value": 0, "status": "UNKNOWN"})
                 else:
+                    total = filtered.shape[0]
                     success = len(filtered[filtered["build_status"] == "SUCCESS"])
                     cancelled = len(filtered[filtered["build_status"] == "CANCELLED"])
                     failed = len(filtered[filtered["build_status"] == "FAILED"])
@@ -457,12 +458,12 @@ def package_matrix(request, pkg=None, arch=None):
                             "version": version,
                             "compiler": compiler,
                             "status": "RUN",
-                            "value": success / df.shape[0],
+                            "value": success / total,
                             "cancelled": cancelled,
                             "failed": failed,
                             "notrun": notrun,
                             "success": success,
-                            "total": filtered.shape[0],
+                            "total": total,
                         }
                     )
             rows.append(row)
