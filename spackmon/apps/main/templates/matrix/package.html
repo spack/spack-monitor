@@ -74,7 +74,7 @@
     </div>
 </div>
 
-{% if specs %}
+{% if rows %}
 <!--<div class="row">
    <div class="col-md-3">
       <p>Select a dimension</p>
@@ -111,6 +111,7 @@ $(document).ready(function() {
           document.location = "/analysis/matrix/" + pkg + "/"  + arch + "/"
       }
   })
+
   {% if rows %}generate_plot(){% endif %}
 });
 
@@ -130,13 +131,8 @@ function generate_plot(dimension) {
         if (d.status == "UNKNOWN") {
             return "<div class='row'><strong style='color:red'>Error: </strong>This combination of compiler and version is unknown to Spack Monitor.</div>";
         }
-        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.version + "</code><br><br><strong>Summary:</strong><br><table><tr><td>SUCCESS</td><td>"+ d.success +" </td></tr><tr><td>FAILURE</td><td>"+ d.failed +" </td></tr><tr><td>CANCELLED</td><td>"+ d.cancelled + " </td></tr><tr><td>NOT RUN</td><td>"+ d.notrun +" </td></tr><tr><td>TOTAL</td><td>"+ d.total +" </td></tr></table></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
+        return "<div class='row'><div class='col-md-12'><strong>Spec: </strong><code> Version: {{ package }} " + d.version + "</code><br><br><strong>Summary:</strong><br><table><tr><td>SUCCESS</td><td>"+ d.success +" </td></tr><tr><td>FAILURE</td><td>"+ d.failed +" </td></tr><tr><td>CANCELLED</td><td>"+ d.cancelled + " </td></tr><tr><td>CONCRETIZATION FAILED</td><td>"+ d.failed_concretize +" </td></tr><tr><td>NOT RUN</td><td>"+ d.notrun +" </td></tr><tr><td>TOTAL</td><td>"+ d.total +" </td></tr></table></div></div><br><div class='row'><div class='col-md-12'><strong>Score: </strong>Out of all the builds for this combination that Spack Monitor knows, the rate of success is " + d.value + "</div></div>";
        })
-
-    var element = document.getElementById("plotarea");
-    if (element) {
-        element.parentNode.removeChild(element);    
-    }
 
     var svg = d3.select("#matrix").append("svg")
         .attr("id", "plotarea")
@@ -162,11 +158,11 @@ function generate_plot(dimension) {
     var rows = []
     var rowLabels = [{% for label in rowLabels %}"{{ label }}"{% if forloop.last %}{% else %},{% endif%}{% endfor %}]
     var columnLabels = [{% for label in colLabels %}"{{ label }}"{% if forloop.last %}{% else %},{% endif%}{% endfor %}]
-      
+
     // Create rows - so one version across dimension
     {% for row in rows %}
     row = []{% for entry in row %}
-    row.push({"specs": [{% if entry.specs %}{% for sid in entry.specs %}{{ sid }}{% if forloop.last %}{% else %},{% endif %}{% endfor %}{% endif %}], {% if entry.version %}"version": "{{ entry.version }}",{% endif %}{% if entry.compiler %}"compiler": "{{ entry.compiler }}",{% endif %} "value": {{ entry.value }}, "status": "{{ entry.status }}", "failed": {% if entry.failed %}{{ entry.failed }}{% else %}0{% endif %}, "cancelled": {% if entry.cancelled %}{{ entry.cancelled}}{% else %}0{% endif %}, "success": {% if entry.success %}{{ entry.success }}{% else %}0{% endif %}, "total": {% if entry.total %}{{ entry.total }}{% else %}0{% endif %}, "notrun": {% if entry.notrun %}{{ entry.notrun }}{% else %}0{% endif %} });{% endfor %}
+    row.push({"specs": [{% if entry.specs %}{% for sid in entry.specs %}{{ sid }}{% if forloop.last %}{% else %},{% endif %}{% endfor %}{% endif %}], {% if entry.version %}"version": "{{ entry.version }}",{% endif %}{% if entry.compiler %}"compiler": "{{ entry.compiler }}",{% endif %} "value": {{ entry.value }}, "status": "{{ entry.status }}", "failed": {% if entry.failed %}{{ entry.failed }}{% else %}0{% endif %}, "failed_concretize": {{ entry.failed_concrete }}, "cancelled": {% if entry.cancelled %}{{ entry.cancelled}}{% else %}0{% endif %}, "success": {% if entry.success %}{{ entry.success }}{% else %}0{% endif %}, "total": {% if entry.total %}{{ entry.total }}{% else %}0{% endif %}, "notrun": {% if entry.notrun %}{{ entry.notrun }}{% else %}0{% endif %} });{% endfor %}
     matrix.push(row);{% endfor %}
 
     console.log(matrix)

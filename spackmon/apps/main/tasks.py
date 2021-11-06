@@ -253,15 +253,20 @@ def import_configuration(config, spack_version):
     for i, meta in enumerate(config["nodes"]):
         name = meta["name"]
 
-        # Create target for architecture (uniqueness based on name)
-        target = get_target(meta=meta["arch"]["target"])
+        # If "arch" is not in meta, we failed concretization
+        target = None
+        arch = None
+        if "arch" in meta:
 
-        # Create architecture
-        arch, _ = Architecture.objects.get_or_create(
-            target=target,
-            platform=meta["arch"]["platform"],
-            platform_os=meta["arch"]["platform_os"],
-        )
+            # Create target for architecture (uniqueness based on name)
+            target = get_target(meta=meta["arch"]["target"])
+
+            # Create architecture
+            arch, _ = Architecture.objects.get_or_create(
+                target=target,
+                platform=meta["arch"]["platform"],
+                platform_os=meta["arch"]["platform_os"],
+            )
 
         # Create compiler (only if it's still there)
         compiler = None

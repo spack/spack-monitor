@@ -7,11 +7,12 @@ from django.db.models import Value, F
 from django.db.models.functions import Concat
 from django.contrib import messages
 from django.shortcuts import render
-from spackmon.apps.main.models import Spec, Attribute, Build, BuildEnvironment
+from spackmon.apps.main.models import Spec, Attribute, Build
 from symbolator.smeagle.model import SmeagleRunner, Model
 from symbolator.corpus import JsonCorpusLoader
 from symbolator.asp import PyclingoDriver, ABIGlobalSolverSetup
 from symbolator.facts import get_facts
+from itertools import chain
 import os
 import pandas
 
@@ -382,9 +383,20 @@ def package_matrix(request, pkg=None, arch=None):
     packages = (
         Spec.objects.exclude(build=None).values_list("name", flat=True).distinct()
     )
+    failed_packages = (
+        Spec.objects.filter(build_hash="FAILED_CONCRETIZATION")
+        .exclude(name__in=packages)
+        .values_list("name", flat=True)
+        .distinct()
+    )
+    packages = chain(packages, failed_packages)
 
     # arch options
-    arches = BuildEnvironment.objects.values_list("host_os", flat=True).distinct()
+    arches = (
+        Spec.objects.exclude(arch__platform_os=None)
+        .values_list("arch__platform_os", flat=True)
+        .distinct()
+    )
     specs = None
     rows = None
     versions = None
@@ -392,14 +404,23 @@ def package_matrix(request, pkg=None, arch=None):
 
     if pkg and arch:
 
+        # Annotate with compiler name and version - if failed concrete, we cannot know
+        failed_concrete = (
+            Spec.objects.filter(name=pkg, build_hash="FAILED_CONCRETIZATION")
+            .order_by("version")
+            .annotate(
+                compiler_name=Concat("compiler__name", Value(" "), "compiler__version"),
+                build_status=Value("FAILED_CONCRETIZATION"),
+            )
+        )
+
         # If we don't have any builds!
-        if Build.objects.filter(spec__name=pkg).count() == 0:
+        if Build.objects.filter(spec__name=pkg).count() + failed_concrete.count() == 0:
             messages.info(
                 request,
                 "Spack monitor doesn't have build data for %s and %s" % (pkg, arch),
             )
 
-        # Annotate with compiler name and version
         if arch == "all":
             specs = (
                 Spec.objects.filter(name=pkg)
@@ -414,7 +435,7 @@ def package_matrix(request, pkg=None, arch=None):
             )
         else:
             specs = (
-                Spec.objects.filter(name=pkg, build__build_environment__host_os=arch)
+                Spec.objects.filter(name=pkg, arch__platform_os=arch)
                 .exclude(build__status=None)
                 .order_by("version")
                 .annotate(
@@ -427,12 +448,25 @@ def package_matrix(request, pkg=None, arch=None):
 
         # Unique compilers and versions
         versions = specs.values_list("version", flat=True).distinct()
+        failed_versions = (
+            failed_concrete.exclude(version__in=versions)
+            .values_list("version", flat=True)
+            .distinct()
+        )
+        versions = list(chain(versions, failed_versions))
 
         # distinct doesn't seem to work here
-        compilers = list(set(specs.values_list("compiler_name", flat=True)))
+        compilers = specs.values_list("compiler_name", flat=True).distinct()
+        failed_compilers = (
+            failed_concrete.exclude(compiler_name__in=compilers)
+            .values_list("compiler_name", flat=True)
+            .distinct()
+        )
+        compilers = list(chain(compilers, failed_compilers))
 
         # Convert to a data frame to do summary stats (yes this is actually faster)
         df = pandas.DataFrame(list(specs.values()))
+        df = df.append(pandas.DataFrame(list(failed_concrete.values())))
 
         # Assemble results by compiler and host os
         rows = []
@@ -440,6 +474,7 @@ def package_matrix(request, pkg=None, arch=None):
             row = []
             version_df = df[df["version"] == version]
             for compiler in compilers:
+
                 # Do a count of specs that use that version and compiler
                 filtered = version_df[version_df["compiler_name"] == compiler]
 
@@ -452,6 +487,9 @@ def package_matrix(request, pkg=None, arch=None):
                     cancelled = len(filtered[filtered["build_status"] == "CANCELLED"])
                     failed = len(filtered[filtered["build_status"] == "FAILED"])
                     notrun = len(filtered[filtered["build_status"] == "NOTRUN"])
+                    failed_concrete = len(
+                        filtered[filtered["build_hash"] == "FAILED_CONCRETIZATION"]
+                    )
                     row.append(
                         {
                             "specs": list(filtered.id.unique()),
@@ -461,6 +499,7 @@ def package_matrix(request, pkg=None, arch=None):
                             "value": success / total,
                             "cancelled": cancelled,
                             "failed": failed,
+                            "failed_concrete": failed_concrete,
                             "notrun": notrun,
                             "success": success,
                             "total": total,

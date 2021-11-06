@@ -17,7 +17,8 @@
     </div>
    <div class="col-md-4">
       <h4></h4>
-    {% if spec.build_set.count > 0 %}<a href="{% url 'main:build_detail' spec.build_set.first.id %}"><span class="badge badge-primary">build details</span></a>{% else %}<p style="padding:10px; radius:3px" class="alert-info">This spec build was not attempted.</p>{% endif %}
+    {% if spec.build_hash == "FAILED_CONCRETIZATION" %}<p style="padding:10px; radius:3px" class="alert-info">This spec failed to concretize.</p>
+    {% elif spec.build_set.count > 0 %}<a href="{% url 'main:build_detail' spec.build_set.first.id %}"><span class="badge badge-primary">build details</span></a>{% else %}<p style="padding:10px; radius:3px" class="alert-info">This spec build was not attempted.</p>{% endif %}
       <div class="row">
           <div class="col-md-6">
           {% if spec.dependencies.count > 0 %}

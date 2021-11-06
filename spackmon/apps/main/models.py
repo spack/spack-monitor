@@ -685,7 +685,10 @@ class Spec(BaseModel):
         return "[spec:%s|%s]" % (self.name, self.full_hash)
 
     def pretty_print(self):
-        full_hash = self.full_hash[0:8]
+        if self.build_hash == "FAILED_CONCRETIZATION":
+            full_hash = "FAILED CONCRETIZATION"
+        else:
+            full_hash = self.full_hash[0:8]
         if self.version:
             return "%s v%s %s" % (self.name, self.version, full_hash)
         return "%s %s" % (self.name, full_hash)
