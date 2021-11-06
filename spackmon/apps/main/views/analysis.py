@@ -400,14 +400,30 @@ def package_matrix(request, pkg=None, arch=None):
             )
 
         # Annotate with compiler name and version
-        specs = (
-            Spec.objects.filter(name=pkg, build__build_environment__host_os=arch)
-            .order_by("version")
-            .annotate(
-                compiler_name=Concat("compiler__name", Value(" "), "compiler__version"),
-                build_status=F("build__status"),
+        if arch == "all":
+            specs = (
+                Spec.objects.filter(name=pkg)
+                .exclude(build__status=None)
+                .order_by("version")
+                .annotate(
+                    compiler_name=Concat(
+                        "compiler__name", Value(" "), "compiler__version"
+                    ),
+                    build_status=F("build__status"),
+                )
             )
-        )
+        else:
+            specs = (
+                Spec.objects.filter(name=pkg, build__build_environment__host_os=arch)
+                .exclude(build__status=None)
+                .order_by("version")
+                .annotate(
+                    compiler_name=Concat(
+                        "compiler__name", Value(" "), "compiler__version"
+                    ),
+                    build_status=F("build__status"),
+                )
+            )
 
         # Unique compilers and versions
         versions = specs.values_list("version", flat=True).distinct()
@@ -419,7 +435,6 @@ def package_matrix(request, pkg=None, arch=None):
         df = pandas.DataFrame(list(specs.values()))
 
         # Assemble results by compiler and host os
-        # TODO why is only one arc in data? NEED ALL ARCHES
         rows = []
         for version in versions:
             row = []
@@ -427,7 +442,7 @@ def package_matrix(request, pkg=None, arch=None):
             for compiler in compilers:
                 # Do a count of specs that use that version and compiler
                 filtered = version_df[version_df["compiler_name"] == compiler]
-                print(filtered.build_status.unique())
+
                 # We don't have that compiler /version combo, it's "we don't know"
                 if filtered.shape[0] == 0:
                     row.append({"specs": {}, "value": 0, "status": "UNKNOWN"})

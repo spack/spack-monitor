@@ -55,14 +55,14 @@
 <div class="row">
    <div class="col-md-3">
      <label>Select the package</label>
-     <select class="autocomplete" style="width:100%" id="package-select" class="form-select" aria-label="package">
+     <select autocomplete="nope" class="autocomplete" style="width:100%" id="package-select" class="form-select" aria-label="package">
       {% for pkg in packages %}<option value="{{ pkg }}" {% if package and package == pkg %}selected{% endif %}>{{ pkg }}</option>{% endfor %}
       </select>
     </div>
    <div class="col-md-3">
      <label>Select the architecture</label>
-     <select class="autocomplete" style="width:100%" id="arch-select" class="form-select" aria-label="arch">
-      {% for a in arches %}<option value="{{ a }}" {% if a and a == arch %}selected{% endif %}>{{ a }}</option>{% endfor %}
+     <select autocomplete="nope" class="autocomplete" style="width:100%" id="arch-select" class="form-select" aria-label="arch">
+      <option value="all">all</option>{% for a in arches %}<option value="{{ a }}" {% if a and a == arch %}selected{% endif %}>{{ a }}</option>{% endfor %}
       </select>
     </div>
    <div class="col-md-3" id="specs-table">
