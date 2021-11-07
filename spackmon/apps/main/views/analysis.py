@@ -397,10 +397,15 @@ def package_matrix(request, pkg=None, arch=None):
         .values_list("arch__platform_os", flat=True)
         .distinct()
     )
+    compilers = (
+        Spec.objects.exclude(compiler=None)
+        .values_list("compiler__name", flat=True)
+        .distinct()
+    )
+
     specs = None
-    rows = None
+    rows = []
     versions = None
-    compilers = None
 
     if pkg and arch:
 
@@ -432,7 +437,7 @@ def package_matrix(request, pkg=None, arch=None):
                     ),
                     build_status=F("build__status"),
                 )
-            )
+            ).distinct()
         else:
             specs = (
                 Spec.objects.filter(name=pkg, arch__platform_os=arch)
@@ -444,7 +449,7 @@ def package_matrix(request, pkg=None, arch=None):
                     ),
                     build_status=F("build__status"),
                 )
-            )
+            ).distinct()
 
         # Unique compilers and versions
         versions = specs.values_list("version", flat=True).distinct()
@@ -453,7 +458,7 @@ def package_matrix(request, pkg=None, arch=None):
             .values_list("version", flat=True)
             .distinct()
         )
-        versions = list(chain(versions, failed_versions))
+        versions = list(set(chain(versions, failed_versions)))
 
         # distinct doesn't seem to work here
         compilers = specs.values_list("compiler_name", flat=True).distinct()
@@ -462,7 +467,7 @@ def package_matrix(request, pkg=None, arch=None):
             .values_list("compiler_name", flat=True)
             .distinct()
         )
-        compilers = list(chain(compilers, failed_compilers))
+        compilers = list(set(chain(compilers, failed_compilers)))
 
         # Convert to a data frame to do summary stats (yes this is actually faster)
         df = pandas.DataFrame(list(specs.values()))
@@ -507,6 +512,7 @@ def package_matrix(request, pkg=None, arch=None):
                     )
             rows.append(row)
 
+
     return render(
         request,
         "matrix/package.html",
@@ -515,6 +521,7 @@ def package_matrix(request, pkg=None, arch=None):
             "package": pkg,
             "specs": specs,
             "rows": rows,
+            "numrows": len(rows),
             "arches": arches,
             "arch": arch,
             "rowLabels": versions,

@@ -86,7 +86,7 @@
 </div>-->
 <div class="row" style="padding-bottom:30px">
    <div class="col-md-12">
-       <div id="matrix"></div>
+       <div id="matrix" {% if numrows  > 500 %}style="scroll:true"{% endif %}></div>
    </div>
 </div>{% endif %}
 {% endblock %}
@@ -116,7 +116,7 @@ $(document).ready(function() {
 });
 
 var margin = {top: 100, right: 100, bottom: 100, left: 30},
-    width = 1400,
+    width = {% if numrows > 500 %}2500{% else %}1400{% endif %},
     height = 800;
 
 {% if rows %}
