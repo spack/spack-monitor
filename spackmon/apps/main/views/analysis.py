@@ -469,6 +469,10 @@ def package_matrix(request, pkg=None, arch=None):
         )
         compilers = list(set(chain(compilers, failed_compilers)))
 
+        # Ensure we are sorted!
+        versions.sort()
+        compilers.sort()
+
         # Convert to a data frame to do summary stats (yes this is actually faster)
         df = pandas.DataFrame(list(specs.values()))
         df = df.append(pandas.DataFrame(list(failed_concrete.values())))
@@ -511,7 +515,6 @@ def package_matrix(request, pkg=None, arch=None):
                         }
                     )
             rows.append(row)
-
 
     return render(
         request,
