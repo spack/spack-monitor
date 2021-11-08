@@ -46,14 +46,14 @@
      <p class="alert alert-info">There are no missing symbols for that splice, so we predict it to work. 🎉️</p>
    </div>
 </div>{% elif missing %}
-<div class="row" style="padding-top:20px; padding-bottom:30px">
+<div class="row" style="padding-top:20px; padding-bottom:30px" id="rowA">
    <div class="col-md-12">
      <p class="alert alert-info">There are {{ missing | length }} missing symbols for that splice, so we predict it not to work. 😭️</p>
      <p class="alert alert-info"><strong>Undefined Symbols:</strong><br> {% for miss in missing %}{{ miss }}{% if forloop.last %}{% else %}<br> {% endif %}{% endfor %}</p>
   </div>
 </div>{% endif %}
 {% if selected %}
-<div class="row" style="padding-top:20px; padding-bottom:30px">
+<div class="row" style="padding-top:20px; padding-bottom:30px" id="rowB">
    <div class="col-md-12">
      <h3>Libraries Spliced</h3>
      <p class="alert alert-info">{% for libs in selected %}{% if libs.0 == libs.1 %}{{ libs.0 }} did not change.{% if forloop.last %}{% else %}<br>{% endif %}{% else %}{{ libs.0 }} was spliced into {{ libs.1 }}{% if forloop.last %}{% else %}</br>{% endif %}{% endif %}{% endfor %}</p>
@@ -74,11 +74,6 @@
 $(document).ready(function() {
 
   $('.autocomplete').select2();
-
-   $("#a-select").on('change', function() {
-     $("#b-select option:selected").removeAttr("selected");
-     $("#b-select-parent").hide();  
-   });
 
   // Calculate the diff when the user clicks, unless it's the same spec
   $("#diff-button").click(function(){
@@ -111,5 +106,6 @@ $(document).ready(function() {
       }
   })
 });
+
 </script>
 {% endblock %}

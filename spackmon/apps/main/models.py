@@ -4,8 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.db import models
-from django.conf import settings
-from django.db.models import Field, Count
+from django.db.models import Count
 from taggit.managers import TaggableManager
 from itertools import chain
 
@@ -88,6 +87,15 @@ class Attribute(BaseModel):
         blank=True, null=True, help_text="A json value", default=dict
     )
 
+    def __str__(self):
+        return "[attribute|%s|%s]" % (
+            self.name,
+            self.install_file.name,
+        )
+
+    def __repr__(self):
+        return str(self)
+
     def to_json(self):
         if self.json_value:
             return json.dumps(self.json_value, indent=4)
@@ -166,6 +174,15 @@ class InstallFile(BaseModel):
         manifest = self.to_manifest()
         manifest["object_type"] = self.object_type
         manifest["build"] = self.build.to_dict()
+
+    def __str__(self):
+        return "[installfile|%s|%s]" % (
+            self.build.spec.name,
+            self.name,
+        )
+
+    def __repr__(self):
+        return str(self)
 
     class Meta:
         app_label = "main"

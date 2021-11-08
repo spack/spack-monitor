@@ -32,27 +32,28 @@
       </select>
     </div>
    {% if package and versions %}<!-- If we have a package selected, require selecting versions -->
-   <div class="col-md-3">
+   <div class="col-md-3" id="rowA">
      <select class="autocomplete" style="width:100%" id="a-select" class="form-select" aria-label="a">
       {% for version in versions %}<option value="{{ version.id }}" {% if version.id == A.id %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
       </select>
     </div>
-   <div class="col-md-3">
+   <div class="col-md-3" id="rowB">
      <select class="autocomplete" style="width:100%" id="b-select" class="form-select" aria-label="b">
       {% for version in versions %}<option value="{{ version.id }}" {% if version.id == A.id %}selected{% endif %}>{{ version.pretty_print }}</option>{% endfor %}
       </select>
     </div>{% endif %}
    <div class="col-md-2">
      <a href="#" type="button" id="diff-button" class="btn btn-primary" style="padding:5px">View Missing Symbols</a>
+     <a href="#" type="button" id="reset-button" class="btn btn-primary" style="padding:5px">Reset</a>
     </div>
 </div>
 
-{% if package and specA and specB and not comps %}<div class="row" style="padding-top:20px; padding-bottom:30px">
+{% if package and specA and specB and not comps %}<div class="row results-row" style="padding-top:20px; padding-bottom:30px">
    <div class="col-md-12">
      <p class="alert alert-info">We don't have any analyzer output for that package.</p>
    </div>
 </div>{% elif comps %}
-<div id="accordion">
+<div id="accordion" class="results-row">
    {% for comp in comps %}<div class="card">
     <div class="card-header" id="heading-{{ forloop.counter }}">
       <h5 class="mb-0">
@@ -95,6 +96,26 @@ $(document).ready(function() {
 
   $('.autocomplete').select2();
 
+  $("#spec-select").on("change", function(e) {  
+     $("#a-select").val(null).trigger("change"); 
+     $("#b-select").val(null).trigger("change"); 
+     $("#rowA").hide();  
+     $("#rowB").hide();  
+  })
+
+  $("#a-select").on("change", function(e) {  
+     $("#b-select").val(null).trigger("change"); 
+     $("#rowB").hide();  
+  })
+
+  $("#reset-button").click(function(){
+     $("#a-select").val(null).trigger("change"); 
+     $("#b-select").val(null).trigger("change"); 
+     $("#rowA").hide();  
+     $("#rowB").hide();  
+     $(".results-row").hide();  
+  })
+
   // Calculate the diff when the user clicks, unless it's the same spec
   $("#diff-button").click(function(){
       spec = $( "#spec-select option:selected" ).val();
@@ -110,8 +131,7 @@ $(document).ready(function() {
        if (spec != null && versionA == null && versionB == null) {
           $("#fade").show();
           document.location = "/analysis/abi/stability/" + spec + "/"
-       }
-       if (spec != null && versionA != null && versionB != null && versionA == versionB) {
+       } else if (spec != null && versionA != null && versionB != null && versionA == versionB) {
            $("#message").html("Please select different versions to compare.")
            $("#message").show()
        } else if (spec != null && versionA != null && versionB != null) {

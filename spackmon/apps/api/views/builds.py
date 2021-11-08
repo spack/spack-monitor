@@ -14,14 +14,12 @@ from spackmon.apps.main.tasks import (
     update_build_status,
     update_build_phase,
     get_build,
-    update_build_metadata,
     import_configuration,
 )
 from spackmon.apps.main.utils import BUILD_STATUS
 from spackmon.apps.main.models import Build
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import viewsets
 
 from ..auth import is_authenticated
 
@@ -150,7 +148,7 @@ class NewBuild(APIView):
         # it given that it does not exist.
         if "spec" in data and "spack_version" in data:
             spack_version = data.get("spack_version")
-            result = import_configuration(data["spec"], data["spack_version"])
+            result = import_configuration(data["spec"], spack_version)
             result = get_build(**build_environment, tags=tags, owner=user)
 
         # Prepare data with

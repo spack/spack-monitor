@@ -9,11 +9,9 @@
 
 import base64
 import json
-import logging
 import os
 import re
 import requests
-import sys
 import logging
 
 from glob import glob
@@ -140,6 +138,62 @@ class SpackMonitorClient:
         data = {"spec": spec["spec"], "spack_version": spack_version}
         return self.do_request("specs/new/", "POST", data=json.dumps(data))
 
+    def get_specs_by_name(self, name):
+        """
+        Get specs based on te name of the package
+        """
+        return self.do_request("specs/name/%s/" % name, "GET").json()
+
+    def get_analyzer_results_spec(self, spec_id, analyzer=None):
+        """
+        Get a listing of analyzer results (ids to lookup) based on a spec id)
+        """
+        if analyzer:
+            return self.do_request("specs/%s/attributes/%s/" % (spec_id, analyzer), "GET").json()
+        return self.do_request("specs/%s/attributes/" % spec_id, "GET").json()
+
+    def download_analyzer_result(self, result_id, return_type="json"):
+        """
+        Given the id for a result, download to file
+        """
+        result = self.do_request("attributes/%s/download/" % result_id, "GET")
+        if result.status_code == 404:
+            print("There is no result for that identifier.")
+            return
+        if return_type == "json":
+            return result.json()
+        elif return_type == "binary":
+            return result.content
+        return result.text
+
+    def get_spec_analyzer_results(self, spec_id):
+        """
+        Given the id for a result, download to file
+        """
+        result = self.do_request("specs/%s/splices/contenders/" % spec_id, "GET")
+        if result.status_code == 200:
+            return result.json()
+       
+    def get_splice_contenders(self, result_id):
+        """
+        Get splice contenders for a result based on id.
+        """
+        return self.do_request("attributes/%s/splice/contenders/" % result_id, "GET").json()
+
+    def get_splice_predictions(self, result_id, splice_id):
+        """
+        Get splice contenders for a result based on id, and a dependency spec id (splice_id)
+        This is a list of splice results with identifiers and then new missing symbols:
+        
+        {'missing': [],
+         'selected': [['libz.so.1.2.8', 'libz.so.1'], ['libc.so.6', 'libc.so.6']],
+         'A': 'curl v7.79.0 2iqe362m',
+         'B': 'zlib v1.2.8 n6cwcxsk',
+         'A_id': 148,
+         'B_id': 358},
+        """
+        return self.do_request("analysis/splices/attribute/%s/spec/%s/" % (result_id, splice_id), "GET").json()        
+
     # Functions to upload save local
     def upload_local_save(self, dirname):
         """
@@ -153,7 +207,7 @@ class SpackMonitorClient:
             spec = read_json(specfile)
             basename = os.path.basename(specfile)
             print("Uploading spec for %s" % basename)
-            res = self.do_request("specs/new/", "POST", data=json.dumps(spec))
+            self.do_request("specs/new/", "POST", data=json.dumps(spec))
 
         # Load build metadata to generate an id
         metadata = glob("%s%sbuild-metadata*" % (dirname, os.sep))[0]
@@ -168,7 +222,7 @@ class SpackMonitorClient:
             phase["build_id"] = build_id
             basename = os.path.basename(phasefile)
             print("Uploading phase %s" % basename)
-            res = self.do_request(
+            self.do_request(
                 "builds/phases/update/", "POST", data=json.dumps(phase)
             )
 
@@ -178,7 +232,7 @@ class SpackMonitorClient:
             status["build_id"] = build_id
             basename = os.path.basename(statusfile)
             print("Uploading status %s" % basename)
-            res = self.do_request("builds/update/", "POST", data=json.dumps(status))
+            self.do_request("builds/update/", "POST", data=json.dumps(status))
 
 
 # Helper functions

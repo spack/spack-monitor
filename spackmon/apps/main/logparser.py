@@ -76,7 +76,6 @@ from spackmon.apps.main.models import BuildWarning as BW, BuildError as BE
 from contextlib import contextmanager
 
 from six import StringIO
-from six import string_types
 
 
 def parse_build_logs(build):
@@ -114,7 +113,7 @@ def parse_build_logs(build):
                     source_line_no = error.source_line_no[0]
                 except:
                     source_line_no = None
-                log = BE.objects.create(
+                BE.objects.create(
                     phase=phase,
                     source_file=error.source_file,
                     source_line_no=source_line_no or 0,
@@ -416,7 +415,7 @@ def _parse(lines, offset, profile):
     warning_exceptions = compile(_warning_exceptions)
     file_line_matches = compile(_file_line_matches)
 
-    matcher, args = _match, []
+    matcher, _ = _match, []
     timings = []
     if profile:
         matcher = _profile_match

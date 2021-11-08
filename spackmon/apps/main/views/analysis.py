@@ -9,9 +9,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from spackmon.apps.main.models import Spec, Attribute, Build
 from symbolator.smeagle.model import SmeagleRunner, Model
-from symbolator.corpus import JsonCorpusLoader
-from symbolator.asp import PyclingoDriver, ABIGlobalSolverSetup
-from symbolator.facts import get_facts
+from spackmon.apps.main.analysis.symbols import run_symbols_splice
 from itertools import chain
 import os
 import pandas
@@ -112,37 +110,12 @@ def stability_test_package(request, pkg=None, specA=None, specB=None):
 
 def get_splice_contenders(pkg=None, names=None):
     if names:
-        return (
-            Spec.objects.filter(
-                name__in=names, build__installfile__attribute__name="symbolator-json"
-            )
-            .exclude(build__installfile__attribute__json_value=None)
-            .distinct()
-        )
-    return (
-        Spec.objects.filter(
-            name=pkg, build__installfile__attribute__name="symbolator-json"
-        )
-        .exclude(build__installfile__attribute__json_value=None)
-        .distinct()
-    )
-
-
-def run_symbol_solver(corpora):
-    """
-    A helper function to run the symbol solver.
-    """
-    driver = PyclingoDriver()
-    setup = ABIGlobalSolverSetup()
-    return driver.solve(
-        setup,
-        corpora,
-        dump=False,
-        logic_programs=get_facts("missing_symbols.lp"),
-        facts_only=False,
-        # Loading from json already includes system libs
-        system_libs=False,
-    )
+        return Spec.objects.filter(
+            name__in=names, build__installfile__attribute__name="symbolator-json"
+        ).distinct()
+    return Spec.objects.filter(
+        name=pkg, build__installfile__attribute__name="symbolator-json"
+    ).distinct()
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
@@ -225,59 +198,9 @@ def symbol_test_package(request, pkg=None, specA=None, specB=None):
                 "Cannot find analysis result for spec %s" % specB.pretty_print(),
             )
         else:
-
-            # Spliced libraries will be added as corpora here
-            loader = JsonCorpusLoader()
-            loader.load(resultA.json_value)
-            corpora = loader.get_lookup()
-            print("Corpora without Splice %s" % corpora)
-
-            # original set of symbols without splice
-            result = run_symbol_solver(list(corpora.values()))
-
-            # Now load the splices separately, and select what we need
-            splice_loader = JsonCorpusLoader()
-            splice_loader.load(resultB.json_value)
-            splices = splice_loader.get_lookup()
-            print("Splices %s" % splices)
-
-            # If we have the library in corpora, delete it, add spliced libraries
-            # E.g., libz.so.1.2.8 is just "libz" and will be replaced by anything with the same prefix
-            corpora_lookup = {key.split(".")[0]: corp for key, corp in corpora.items()}
-            splices_lookup = {key.split(".")[0]: corp for key, corp in splices.items()}
-
-            # Keep a lookup of libraries names
-            corpora_libnames = {key.split(".")[0]: key for key, _ in corpora.items()}
-            splices_libnames = {key.split(".")[0]: key for key, _ in splices.items()}
-
-            # Splices selected
-            selected = []
-
-            # Here we match based on the top level name, and add splices that match
-            # (this assumes that if a lib is part of a splice corpus set but not included, we don't add it)
-            for lib, corp in splices_lookup.items():
-
-                # ONLY splice in those known
-                if lib in corpora_lookup:
-
-                    # Library A was spliced in place of Library B
-                    selected.append([splices_libnames[lib], corpora_libnames[lib]])
-                    corpora_lookup[lib] = corp
-
-            spliced_result = run_symbol_solver(list(corpora_lookup.values()))
-            print("After splicing %s" % corpora_lookup)
-
-            # Compare sets of missing symbols
-            result_missing = [
-                "%s %s" % (os.path.basename(x[0]).split(".")[0], x[1])
-                for x in result.answers.get("missing_symbols", [])
-            ]
-            spliced_missing = [
-                "%s %s" % (os.path.basename(x[0]).split(".")[0], x[1])
-                for x in spliced_result.answers.get("missing_symbols", [])
-            ]
-            # these are new missing symbols after the splice
-            missing = [x for x in spliced_missing if x not in result_missing]
+            result = run_symbols_splice(resultA, resultB)
+            selected = result["selected"]
+            missing = result["missing"]
 
     return render(
         request,

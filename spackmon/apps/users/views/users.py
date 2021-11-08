@@ -15,7 +15,6 @@ from rest_framework.authtoken.models import Token
 from spackmon.settings import (
     VIEW_RATE_LIMIT as rl_rate,
     VIEW_RATE_LIMIT_BLOCK as rl_block,
-    cfg,
 )
 
 

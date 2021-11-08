@@ -7,10 +7,8 @@
 # export SPACKMON_TOKEN=xxxxxxxxxxxxxxxxxx
 # export SPACKMON_USER=thebestdude
 
-import base64
 import os
 import json
-import requests
 import sys
 
 here = os.path.dirname(os.path.abspath(__file__))
