@@ -1,0 +1,372 @@
+[
+    [
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 afxakpfi",
+            "A_id": 148,
+            "B_id": 139
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 n6cwcxsk",
+            "A_id": 148,
+            "B_id": 140
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 wpl2isik",
+            "A_id": 148,
+            "B_id": 142
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 btll7ezy",
+            "A_id": 148,
+            "B_id": 143
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 44nphewc",
+            "A_id": 148,
+            "B_id": 145
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 4qxuyul2",
+            "A_id": 148,
+            "B_id": 146
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 afxakpfi",
+            "A_id": 148,
+            "B_id": 357
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 n6cwcxsk",
+            "A_id": 148,
+            "B_id": 358
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 wpl2isik",
+            "A_id": 148,
+            "B_id": 363
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 btll7ezy",
+            "A_id": 148,
+            "B_id": 364
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.11",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.11 44nphewc",
+            "A_id": 148,
+            "B_id": 366
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libz.so.1.2.8",
+                    "libz.so.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "zlib v1.2.8 4qxuyul2",
+            "A_id": 148,
+            "B_id": 367
+        }
+    ],
+    [
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libssl.so.1.1",
+                    "libssl.so.1.1"
+                ],
+                [
+                    "libcrypto.so.1.1",
+                    "libcrypto.so.1.1"
+                ],
+                [
+                    "libpthread.so.0",
+                    "libpthread.so.0"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ],
+                [
+                    "libz.so.1",
+                    "libz.so.1"
+                ],
+                [
+                    "libdl.so.2",
+                    "libdl.so.2"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libcrypto.so.1.1",
+                    "libcrypto.so.1.1"
+                ],
+                [
+                    "libz.so.1",
+                    "libz.so.1"
+                ],
+                [
+                    "libdl.so.2",
+                    "libdl.so.2"
+                ],
+                [
+                    "libpthread.so.0",
+                    "libpthread.so.0"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libssl.so.1.1",
+                    "libssl.so.1.1"
+                ],
+                [
+                    "libcrypto.so.1.1",
+                    "libcrypto.so.1.1"
+                ],
+                [
+                    "libpthread.so.0",
+                    "libpthread.so.0"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ],
+                [
+                    "libz.so.1",
+                    "libz.so.1"
+                ],
+                [
+                    "libdl.so.2",
+                    "libdl.so.2"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        },
+        {
+            "missing": [],
+            "selected": [],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libcrypto.so.1.1",
+                    "libcrypto.so.1.1"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ],
+                [
+                    "libz.so.1",
+                    "libz.so.1"
+                ],
+                [
+                    "libdl.so.2",
+                    "libdl.so.2"
+                ],
+                [
+                    "libpthread.so.0",
+                    "libpthread.so.0"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        },
+        {
+            "missing": [],
+            "selected": [
+                [
+                    "libcrypto.so.1.1",
+                    "libcrypto.so.1.1"
+                ],
+                [
+                    "libpthread.so.0",
+                    "libpthread.so.0"
+                ],
+                [
+                    "libc.so.6",
+                    "libc.so.6"
+                ],
+                [
+                    "libz.so.1",
+                    "libz.so.1"
+                ],
+                [
+                    "libdl.so.2",
+                    "libdl.so.2"
+                ]
+            ],
+            "A": "curl v7.79.0 2iqe362m",
+            "B": "openssl v1.1.1l 7nza5dzj",
+            "A_id": 148,
+            "B_id": 149
+        }
+    ],
+    []
+]

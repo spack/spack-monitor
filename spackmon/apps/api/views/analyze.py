@@ -10,13 +10,7 @@ from ratelimit.decorators import ratelimit
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
-from spackmon.apps.main.tasks import (
-    update_build_status,
-    update_build_phase,
-    get_build,
-    update_build_metadata,
-)
-from spackmon.apps.main.utils import BUILD_STATUS
+from spackmon.apps.main.tasks import update_build_metadata
 from spackmon.apps.main.models import Build
 from rest_framework.response import Response
 from rest_framework.views import APIView

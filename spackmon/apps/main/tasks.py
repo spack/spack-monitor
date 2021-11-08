@@ -17,7 +17,6 @@ from spackmon.apps.main.models import (
 from spackmon.apps.main.utils import read_json
 
 import os
-import platform
 
 import logging
 

@@ -9,8 +9,6 @@ from django.db.models import Count, Case, When, IntegerField, Q
 
 from ratelimit.mixins import RatelimitMixin
 
-from spackmon.settings import cfg
-from spackmon.version import __version__
 from spackmon.apps.main.models import Build
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -103,7 +101,6 @@ class BuildsTable(RatelimitMixin, APIView):
 
         # Empty datatable
         data = {"draw": draw, "recordsTotal": 0, "recordsFiltered": 0, "data": []}
-        taglist = []
         count = 0
 
         order_by = "%s%s" % (order, direction)

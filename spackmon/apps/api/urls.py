@@ -52,7 +52,7 @@ router.register(r"^specs", SpecViewSet, basename="spec")
 schema_view = get_swagger_view(title="Spack Monitor API")
 
 server_views = [
-    url(r"^api/docs/", schema_view),
+    url(r"^api/docs/", schema_view, name="docs"),
     path(
         "tables/build/",
         api_views.BuildsTable.as_view(),
@@ -102,6 +102,51 @@ urlpatterns = [
         api_views.UpdateBuildMetadata.as_view(),
         name="update_build_metadata",
     ),
+    # Get all specs based on a package name
+    path(
+        "%s/specs/name/<str:name>/" % cfg.URL_API_PREFIX,
+        api_views.SpecByName.as_view(),
+        name="spec_by_name",
+    ),
+    # Parse through specs -> builds -> install files and return attributes
+    # Optionally an analyzer can be provided to filter
+    # If the requester wants data for an attribute, it must be requested by id.
+    path(
+        "%s/specs/<int:spec_id>/attributes/<str:analyzer>/" % cfg.URL_API_PREFIX,
+        api_views.SpecAttributes.as_view(),
+        name="spec_attributes",
+    ),
+    path(
+        "%s/specs/<int:spec_id>/attributes/" % cfg.URL_API_PREFIX,
+        api_views.SpecAttributes.as_view(),
+        name="spec_attributes",
+    ),
+    # Given an analysis result id, return splice contenders (dependency specs)
+    path(
+        "%s/attributes/<int:attr_id>/splice/contenders/" % cfg.URL_API_PREFIX,
+        api_views.AttributeSpliceContenders.as_view(),
+        name="attribute_splice_contenders",
+    ),
+    # Given an analysis result id and spec id, predict splices
+    path(
+        "%s/analysis/splices/attribute/<int:attr_id>/spec/<int:spec_id>/"
+        % cfg.URL_API_PREFIX,
+        api_views.AttributeSplicePredictions.as_view(),
+        name="predict_attribute_splices",
+    ),
+    # Download an attribute file
+    path(
+        "%s/attributes/<int:attr_id>/download/" % cfg.URL_API_PREFIX,
+        api_views.DownloadAttribute.as_view(),
+        name="download_attribute",
+    ),
+    # Get a list of splice contenders for a spec (and download links)
+    path(
+        "%s/specs/<int:spec_id>/splices/contenders/" % cfg.URL_API_PREFIX,
+        api_views.SpecSpliceContenders.as_view(),
+        name="spec_splice_contenders",
+    ),
 ]
+
 
 app_name = "api"

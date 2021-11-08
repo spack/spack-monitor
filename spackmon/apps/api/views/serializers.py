@@ -23,13 +23,8 @@ from spackmon.apps.main.models import (
 
 from taggit.models import Tag
 
-from .permissions import IsAuthenticated, IsStaffOrSuperUser, AllowAnyGet
-from rest_framework import generics, mixins, serializers, viewsets, status
-
-from rest_framework.exceptions import PermissionDenied, NotFound
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from .permissions import IsAuthenticated
+from rest_framework import serializers, viewsets
 
 
 ################################################################################

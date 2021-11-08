@@ -18,16 +18,11 @@ import spack.package
 import spack.package_prefs
 import spack.repo
 import spack.variant
-import sys, getopt
-from spack.util.executable import which
-from spack.version import ver
+import sys
 import spack.solver.asp
-from spack.solver.asp import packagize
 import spack.version as vn
 
-import collections
 import os
-import json
 import re
 import subprocess as sp
 

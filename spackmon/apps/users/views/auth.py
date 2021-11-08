@@ -4,20 +4,15 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-from django.contrib.auth import logout as auth_logout, authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import login as auth_login
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from ratelimit.decorators import ratelimit
-from django.utils import timezone
-from django.http import JsonResponse
-from social_core.backends.github import GithubOAuth2
-from six.moves.urllib.parse import urljoin
 
 from spackmon.settings import (
     VIEW_RATE_LIMIT as rl_rate,
     VIEW_RATE_LIMIT_BLOCK as rl_block,
-    cfg,
 )
 
 
@@ -115,7 +110,7 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     if social:
         if user and social.user != user:
             msg = "This {0} account is already in use.".format(provider)
-            return login(request=backend.strategy.request, message=msg)
+            return auth_login(request=backend.strategy.request, message=msg)
             # raise AuthAlreadyAssociated(backend, msg)
         elif not user:
             user = social.user
