@@ -238,9 +238,6 @@ def run_analysis(spec):
                 % (len(contender_specs), result["filename"])
             )
             for contender in contender_specs:
-                import IPython
-                IPython.embed()
-                sys.exit(0)
 
                 # Contender splices is a list of libs of different versions that can be spliced
                 try:
@@ -281,6 +278,7 @@ def run_analysis(spec):
                 for splice in contender_splices:
 
                     import IPython
+
                     IPython.embed()
                     sys.exit(0)
                     # A contender splice MUST be a lib
