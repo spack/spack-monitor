@@ -192,8 +192,10 @@ def main():
     for spec in specs:
         spec_id = get_spec_id(spec)
 
-        # Let the server rest a bit?
-        time.sleep(1)
+        # Don't parse something twice
+        if spec_id in results:
+            continue
+
         print("Preparing to parse %s" % spec_id)
         try:
             new_results = run_analysis(spec)
@@ -203,6 +205,7 @@ def main():
         except:
             logger.error("ERROR: Issue parsing %s" % spec_id)
             time.sleep(600)
+
 
 def run_analysis(spec):
 
@@ -256,6 +259,10 @@ def run_analysis(spec):
                 % (len(contender_specs), result["filename"])
             )
             for contender in contender_specs:
+
+                # Although we technically can, we don't want to splice a different version library into itself
+                if contender["name"] == spec["name"]:
+                    continue
 
                 # Contender splices is a list of libs of different versions that can be spliced
                 try:
