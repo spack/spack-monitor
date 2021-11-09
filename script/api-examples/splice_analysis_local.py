@@ -277,10 +277,6 @@ def run_analysis(spec):
                 # We may not want to do this (update run_symbol_splice function)
                 for splice in contender_splices:
 
-                    import IPython
-
-                    IPython.embed()
-                    sys.exit(0)
                     # A contender splice MUST be a lib
                     if not splice["filename"].startswith("lib"):
                         continue
@@ -291,6 +287,7 @@ def run_analysis(spec):
                         if sym_result:
                             will_splice = True if not sym_result["missing"] else False
                             predict = {
+                                "missing": sym_result["missing"],
                                 "B_insert": splice["filename"],
                                 "A_binary": result["filename"],
                                 "prediction": will_splice,
