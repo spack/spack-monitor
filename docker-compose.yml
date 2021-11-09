@@ -16,8 +16,10 @@ services:
 
     # Add your GitHub key and secret here
     environment:
-      - SOCIAL_AUTH_GITHUB_KEY=
-      - SOCIAL_AUTH_GITHUB_SECRET=
+      - SOCIAL_AUTH_GITHUB_KEY=ed69a3db2d81dbaef121
+      - SOCIAL_AUTH_GITHUB_SECRET=a258bbfee833634dec526b5e2fb0400a08557a67
+#      - SOCIAL_AUTH_GITHUB_KEY=
+#      - SOCIAL_AUTH_GITHUB_SECRET=
     volumes:
       - .:/code
       - ./static:/var/www/static
