@@ -108,3 +108,6 @@ Let's now do the same, but using the symbolator analyzer (we already have them i
     $ spack analyze --monitor run --analyzer symbolator --recursive --all curl
     $ spack analyze --monitor run --analyzer symbolator --recursive --all curl%gcc@8.4.0
     $ spack analyze --monitor run --analyzer symbolator --recursive --all curl%gcc@7.5.0
+    
+    
+For splice analysis examples, see the `api-examples folder _<https://github.com/spack/spack-monitor/tree/main/script/api-examples>`_.
