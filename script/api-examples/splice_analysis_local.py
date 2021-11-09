@@ -23,6 +23,7 @@ import os
 import sys
 import json
 import logging
+import time
 
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(here))
@@ -94,6 +95,16 @@ def run_symbol_solver(corpora):
         facts_only=False,
         # Loading from json already includes system libs
         system_libs=False,
+    )
+
+
+def get_spec_id(spec):
+    """Get a quasi identifier for the spec, with the name, version, hash, spackmon id"""
+    return "%s@%s/%s:%s" % (
+        spec["name"],
+        spec["version"],
+        spec["full_hash"],
+        spec["id"],
     )
 
 
@@ -172,24 +183,31 @@ def main():
     # Let's write a results file to analyzer folder
     result_file = os.path.join(results_dir, pkg, "symbolator-predictions.json")
 
-    # Keep global list of results
-    results = []
+    # If the results file exists, load the results we have!
+    results = {}
+    if os.path.exists(result_file):
+        results = read_json(result_file)
 
     # We will loop through specs, and download analysis results we want to look at further
-    for spec in specs:
+    for spec in specs[100:]:
+        spec_id = get_spec_id(spec)
+
+        # Let the server rest a bit?
+        time.sleep(1)
+        print("Preparing to parse %s" % spec_id)
         try:
             new_results = run_analysis(spec)
             if new_results:
-                results += new_results
+                results[spec_id] = new_results
                 write_json(results, result_file)
         except:
-            logger.error(
-                "ERROR: Issue parsing %s@%s/%s"
-                % (spec["name"], spec["version"], spec["full_hash"])
-            )
-
+            logger.error("ERROR: Issue parsing %s" % spec_id)
+            time.sleep(600)
 
 def run_analysis(spec):
+
+    # An easy way to identify it, if needed later
+    spec_id = get_spec_id(spec)
 
     # Make a directory for the spec
     spec_dir = os.path.join(
@@ -253,14 +271,10 @@ def run_analysis(spec):
                 if not contender_splices:
                     continue
 
-                contender_name = "%s@%s/%s" % (
-                    contender["name"],
-                    contender["version"],
-                    contender["full_hash"],
-                )
+                contender_id = get_spec_id(contender)
                 print(
                     "Found %s contender splices for %s."
-                    % (len(contender_splices), contender_name)
+                    % (len(contender_splices), contender_id)
                 )
 
                 # Now that we know there are splices, create a spec directory for the contender
@@ -293,8 +307,10 @@ def run_analysis(spec):
                                 "prediction": will_splice,
                                 "A_id": result["id"],
                                 "B_id": splice["id"],
-                                "specA": contender["id"],
-                                "specB": spec["id"],
+                                "specA_id": contender["id"],
+                                "specB_id": spec["id"],
+                                "specA": spec_id,
+                                "specB": contender_id,
                             }
                             print(predict)
                             predictions.append(predict)
