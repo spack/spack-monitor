@@ -189,7 +189,7 @@ def main():
         results = read_json(result_file)
 
     # We will loop through specs, and download analysis results we want to look at further
-    for spec in specs[100:]:
+    for spec in specs:
         spec_id = get_spec_id(spec)
 
         # Let the server rest a bit?
