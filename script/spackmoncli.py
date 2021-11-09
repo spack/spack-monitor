@@ -149,7 +149,9 @@ class SpackMonitorClient:
         Get a listing of analyzer results (ids to lookup) based on a spec id)
         """
         if analyzer:
-            return self.do_request("specs/%s/attributes/%s/" % (spec_id, analyzer), "GET").json()
+            return self.do_request(
+                "specs/%s/attributes/%s/" % (spec_id, analyzer), "GET"
+            ).json()
         return self.do_request("specs/%s/attributes/" % spec_id, "GET").json()
 
     def download_analyzer_result(self, result_id, return_type="json"):
@@ -173,18 +175,20 @@ class SpackMonitorClient:
         result = self.do_request("specs/%s/splices/contenders/" % spec_id, "GET")
         if result.status_code == 200:
             return result.json()
-       
+
     def get_splice_contenders(self, result_id):
         """
         Get splice contenders for a result based on id.
         """
-        return self.do_request("attributes/%s/splice/contenders/" % result_id, "GET").json()
+        return self.do_request(
+            "attributes/%s/splice/contenders/" % result_id, "GET"
+        ).json()
 
     def get_splice_predictions(self, result_id, splice_id):
         """
         Get splice contenders for a result based on id, and a dependency spec id (splice_id)
         This is a list of splice results with identifiers and then new missing symbols:
-        
+
         {'missing': [],
          'selected': [['libz.so.1.2.8', 'libz.so.1'], ['libc.so.6', 'libc.so.6']],
          'A': 'curl v7.79.0 2iqe362m',
@@ -192,7 +196,9 @@ class SpackMonitorClient:
          'A_id': 148,
          'B_id': 358},
         """
-        return self.do_request("analysis/splices/attribute/%s/spec/%s/" % (result_id, splice_id), "GET").json()        
+        return self.do_request(
+            "analysis/splices/attribute/%s/spec/%s/" % (result_id, splice_id), "GET"
+        ).json()
 
     # Functions to upload save local
     def upload_local_save(self, dirname):
@@ -222,9 +228,7 @@ class SpackMonitorClient:
             phase["build_id"] = build_id
             basename = os.path.basename(phasefile)
             print("Uploading phase %s" % basename)
-            self.do_request(
-                "builds/phases/update/", "POST", data=json.dumps(phase)
-            )
+            self.do_request("builds/phases/update/", "POST", data=json.dumps(phase))
 
         # Next find the status objects
         for statusfile in glob("%s%sbuild*status*" % (dirname, os.sep)):

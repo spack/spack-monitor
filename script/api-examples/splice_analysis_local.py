@@ -261,6 +261,11 @@ def run_analysis(spec):
                 # NOTE: this assumes that we bring in the spliced libs dependencies too
                 # We may not want to do this (update run_symbol_splice function)
                 for splice in contender_splices:
+
+                    # A contender splice MUST be a lib
+                    if not splice["filename"].startswith("lib"):
+                        continue
+
                     spliced = download_result(contender_dir, splice)
                     if spliced:
                         sym_result = run_symbols_splice(content, spliced)
@@ -272,6 +277,8 @@ def run_analysis(spec):
                                 "prediction": will_splice,
                                 "A_id": result["id"],
                                 "B_id": splice["id"],
+                                "specA": contender['id'],
+                                "specB": spec['id'],
                             }
                             print(predict)
                             predictions.append(predict)

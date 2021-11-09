@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from django.conf import settings
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
@@ -95,7 +96,7 @@ class SpecAttributes(APIView):
 
 
 class SpecSpliceContenders(APIView):
-    """Return a list of contender (and download links) for splicing."""
+    """Return a list of contenders (analyzer results) for a spec for splicing."""
 
     permission_classes = []
     allowed_methods = ("GET",)
@@ -119,33 +120,31 @@ class SpecSpliceContenders(APIView):
             )
         spec = get_object_or_404(Spec, id=spec_id)
 
-        # Keep a list of the splice contenders!
-        results = []
+        # Realistically we will just have one build for the hash
+        build = spec.build_set.first()
 
-        # What other versions can be spliced (aside from the original)?
-        contenders = Attribute.objects.filter(
-            name="symbolator-json",
-            install_file__build__spec__name=spec.name,
-        )
-
-        for attribute in contenders.all():
-            results.append(
-                {
-                    "filename": attribute.install_file.name,
-                    "id": attribute.id,
-                    "analyzer": attribute.analyzer,
-                    "name": attribute.name,
-                    "download": "%s%s"
-                    % (
-                        cfg.DOMAIN_NAME,
-                        reverse(
-                            "api:download_attribute", kwargs={"attr_id": attribute.id}
-                        ),
-                    ),
-                }
+        if not build:
+            return Response(
+                status=400, data={"message": "We don't have any builds for that spec."}
             )
 
-        return Response(status=200, data=results)
+        # Find specs first via other builds
+        builds = Build.objects.filter(
+            spec__name=spec.name,
+            spec__compiler__name=spec.compiler.name,
+            build_environment__host_os=build.build_environment.host_os,
+            build_environment__host_target=build.build_environment.host_target,
+            build_environment__platform=build.build_environment.platform,
+        ).values_list("spec", flat=True)
+
+        # What other versions can be spliced (aside from the original)?
+        contenders = list(
+            Attribute.objects.filter(
+                name="symbolator-json",
+                install_file__build__id__in=builds,
+            ).values("id", "analyzer", "name", filename=F("install_file__name"))
+        )
+        return Response(status=200, data=contenders)
 
 
 class NewSpec(APIView):
