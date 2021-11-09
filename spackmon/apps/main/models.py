@@ -350,8 +350,6 @@ class Build(BaseModel):
                     )
 
                 elif "json_value" in result:
-                    print(result["json_value"])
-                    print(type(result["json_value"]))
                     try:
                         value = json.loads(result["json_value"])
                         attr, _ = Attribute.objects.get_or_create(

@@ -10,7 +10,7 @@ from ratelimit.decorators import ratelimit
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
-from spackmon.apps.main.models import Spec, Attribute
+from spackmon.apps.main.models import Spec, Attribute, Build
 from spackmon.apps.main.analysis.symbols import run_symbols_splice
 from rest_framework.response import Response
 from rest_framework.views import APIView

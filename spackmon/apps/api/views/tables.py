@@ -148,7 +148,6 @@ class BuildsTable(RatelimitMixin, APIView):
                     '<a href="%s">%s</a><a href="%s"><span style="float:right" class="badge badge-primary">build details</span></a>'
                     % (
                         reverse("main:spec_detail", args=[build.spec.id]),
-                        build.spec.pretty_print(),
                         reverse("main:build_detail", args=[build.id]),
                     ),
                     '<div style="float: left; margin: 0px 4px;">%s</div>'
