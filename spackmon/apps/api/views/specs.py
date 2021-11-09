@@ -13,7 +13,7 @@ from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
 from spackmon.settings import cfg
-from spackmon.apps.main.models import Spec, Attribute
+from spackmon.apps.main.models import Spec, Attribute, Build
 from spackmon.apps.main.tasks import import_configuration
 from rest_framework.response import Response
 from rest_framework.views import APIView

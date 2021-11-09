@@ -201,7 +201,7 @@ def run_analysis(spec):
     # Now for the spec we need to get a listing of analyzer results!
     # We can do a splice analysis for any spec that has symbolator-json
     results = client.get_analyzer_results_spec(spec["id"], "symbolator")
-    logger.info(
+    print(
         "Found %s analysis results for %s@%s/%s"
         % (len(results), spec["name"], spec["version"], spec["full_hash"])
     )
@@ -230,7 +230,17 @@ def run_analysis(spec):
                 )
                 continue
 
+            if not contender_specs:
+                continue
+
+            print(
+                "Found %s dependency specs for %s"
+                % (len(contender_specs), result["filename"])
+            )
             for contender in contender_specs:
+                import IPython
+                IPython.embed()
+                sys.exit(0)
 
                 # Contender splices is a list of libs of different versions that can be spliced
                 try:
@@ -246,7 +256,15 @@ def run_analysis(spec):
                 if not contender_splices:
                     continue
 
-                logger.info("Found %s contender splices." % len(contender_splices))
+                contender_name = "%s@%s/%s" % (
+                    contender["name"],
+                    contender["version"],
+                    contender["full_hash"],
+                )
+                print(
+                    "Found %s contender splices for %s."
+                    % (len(contender_splices), contender_name)
+                )
 
                 # Now that we know there are splices, create a spec directory for the contender
                 contender_dir = os.path.join(
@@ -262,6 +280,9 @@ def run_analysis(spec):
                 # We may not want to do this (update run_symbol_splice function)
                 for splice in contender_splices:
 
+                    import IPython
+                    IPython.embed()
+                    sys.exit(0)
                     # A contender splice MUST be a lib
                     if not splice["filename"].startswith("lib"):
                         continue
@@ -277,8 +298,8 @@ def run_analysis(spec):
                                 "prediction": will_splice,
                                 "A_id": result["id"],
                                 "B_id": splice["id"],
-                                "specA": contender['id'],
-                                "specB": spec['id'],
+                                "specA": contender["id"],
+                                "specB": spec["id"],
                             }
                             print(predict)
                             predictions.append(predict)
