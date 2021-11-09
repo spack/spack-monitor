@@ -44,15 +44,34 @@ class AttributeSpliceContenders(APIView):
         # What spec is associated with the attribute?
         spec = attribute.install_file.build.spec
 
+        # Realistically we will just have one build for the hash
+        build = spec.build_set.first()
+
+        if not build:
+            return Response(
+                status=400, data={"message": "We don't have any builds for that spec."}
+            )
+
+        # Find specs first via other builds
+        builds = Build.objects.filter(
+            spec__name=spec.name,
+            spec__compiler__name=spec.compiler.name,
+            build_environment__host_os=build.build_environment.host_os,
+            build_environment__host_target=build.build_environment.host_target,
+            build_environment__platform=build.build_environment.platform,
+        ).values_list("spec", flat=True)
+
         # Return the list of specs that can be spliced...
+        # Currently, limit to compiler of the same name, and same host environment (os, target, platform)
         dep_ids = (
-            Spec.objects.filter(id=spec.id)
+            Spec.objects.filter(id__in=builds)
             .values_list("dependencies__spec", flat=True)
             .distinct()
         )
         specs = [
             SpecSerializer(x).data
             for x in Spec.objects.filter(id__in=dep_ids).distinct()
+            if x
         ]
         return Response(status=200, data=specs)
 
