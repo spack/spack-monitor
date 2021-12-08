@@ -11,7 +11,7 @@ represented by the pull requests that fixed them. Critical items to know are:
  - backward incompatible changes
 
 
-## [master](https://github.com/spack/spack-monitor/tree/main) (master)
- - skeleton release (0.0.0)
- - first version that has specs before September 2021 (1.0.0)
+## [main](https://github.com/spack/spack-monitor/tree/main) (main)
  - second version after that (2.0.0)
+ - first version that has specs before September 2021 (1.0.0)
+ - skeleton release (0.0.0)
