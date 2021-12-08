@@ -20,8 +20,8 @@ services:
       - SOCIAL_AUTH_GITHUB_SECRET=
     volumes:
       - .:/code
-      - ./static:/var/www/static
-      - ./images:/var/www/images
+      - ./spackmon/static:/var/www/static
+      - ./spackmon/images:/var/www/images
     links:
       - db
 
