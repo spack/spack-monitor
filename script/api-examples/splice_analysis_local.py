@@ -10,6 +10,8 @@ __license__ = "Apache-2.0 OR MIT"
 # 4. Doing a diff between the working symbol space and the anticipated symbol space
 # 5. Making a prediction based on not having new missing symbols!
 
+# USAGE: python splice_analysis_local.py <pkg>
+# If no package is provided as an argument, we default to curl.
 # Unlike splice_analysis.py, this uses API endpoints to download data locally
 # first, and then do analysis from that.
 
@@ -172,10 +174,8 @@ def run_symbols_splice(A, B):
     return result
 
 
-def main():
+def main(pkg):
     """Note that this is optimized for continuing to run, so we catch/continue"""
-    # This can be an argument
-    pkg = "curl"
 
     # Here is a package of interest! Let's get a spec for it.
     specs = client.get_specs_by_name(pkg)
@@ -327,4 +327,7 @@ def run_analysis(spec):
 
 
 if __name__ == "__main__":
-    main()
+    pkg = "curl"
+    if len(sys.argv) > 1:
+        pkg = sys.argv[1]
+    main(pkg)
