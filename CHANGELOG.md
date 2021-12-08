@@ -12,6 +12,7 @@ represented by the pull requests that fixed them. Critical items to know are:
 
 
 ## [main](https://github.com/spack/spack-monitor/tree/main) (main)
+ - update psycopg2-binary to 2.8.6, put upper limit on Django version (2.0.1)
  - second version after that (2.0.0)
  - first version that has specs before September 2021 (1.0.0)
  - skeleton release (0.0.0)
