@@ -58,7 +58,7 @@ for key, value in cfg:
 def generate_secret_keys(filename):
     """A helper function to write a randomly generated secret key to file"""
     with open(filename, "w") as fd:
-        for keyname in ["SECRET_KEY", "JWT_SERVER_SECRET"]:
+        for keyname in ["SECRET_KEY", "JWT_SERVER_SECRET", "SHELVE_SECRET_KEY"]:
             key = get_random_secret_key()
             fd.writelines("%s = '%s'\n" % (keyname, key))
 
@@ -74,13 +74,28 @@ def generate_creation_date(filename):
 SECRET_KEY = os.environ.get("SECRET_KEY")
 JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
 SERVER_CREATION_DATE = os.environ.get("CREATION_DATE")
+SHELVE_SECRET_KEY = os.environ.get("SHELVE_SECRET_KEY")
 
-if not SECRET_KEY or not JWT_SERVER_SECRET:
+if not SECRET_KEY or not JWT_SERVER_SECRET or not SHELVE_SECRET_KEY:
     try:
-        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
+        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET, SHELVE_SECRET_KEY
     except ImportError:
         generate_secret_keys(os.path.join(BASE_DIR, "secret_key.py"))
-        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET
+        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET, SHELVE_SECRET_KEY
+
+
+DJANGO_RIVER_ML = {
+    # Url base prefix
+    "URL_PREFIX": "ml",
+    # TODO will need to be updated to redis for production
+    "STORAGE_BACKEND": "shelve",
+    "APP_DIR": BASE_DIR,
+    "DISABLE_AUTHENTICATION": True,
+    # Shelve and jwt keys (will be generated if not found)
+    "SHELVE_SECRET_KEY": SHELVE_SECRET_KEY,
+    "JWT_SECRET_KEY": JWT_SERVER_SECRET,
+}
+
 
 # A record of the server creation date
 if not SERVER_CREATION_DATE:
@@ -124,6 +139,8 @@ INSTALLED_APPS = [
     "spackmon.apps.api",
     # main includes the main application models
     "spackmon.apps.main",
+    "dal",
+    "dal_select2",
     # users is relevant to create an authenticated user
     "spackmon.apps.users",
     "django.contrib.admin",
@@ -138,6 +155,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "social_django",
     "taggit",
+    "django_river_ml",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_swagger",

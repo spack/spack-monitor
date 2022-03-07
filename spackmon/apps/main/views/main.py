@@ -5,7 +5,6 @@
 
 from django.shortcuts import render, get_object_or_404
 from spackmon.apps.main.models import Build
-from spackmon.apps.main.logparser import parse_build_logs
 
 from ratelimit.decorators import ratelimit
 from spackmon.settings import (
@@ -46,8 +45,4 @@ def builds_by_owner(request, username):
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 def build_detail(request, bid):
     build = get_object_or_404(Build, pk=bid)
-
-    # Generate BuildWarnings and BuildErrors if don't exist
-    if build.logs_parsed == 0:
-        parse_build_logs(build)
     return render(request, "builds/detail.html", {"build": build})

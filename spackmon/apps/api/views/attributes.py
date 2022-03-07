@@ -10,70 +10,9 @@ from ratelimit.decorators import ratelimit
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 
-from spackmon.apps.main.models import Spec, Attribute, Build
-from spackmon.apps.main.analysis.symbols import run_symbols_splice
+from spackmon.apps.main.models import Attribute
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import SpecSerializer
-
-
-class AttributeSpliceContenders(APIView):
-    """Get a list of contender libraries to splice for an attribute."""
-
-    permission_classes = []
-    allowed_methods = ("GET",)
-
-    @never_cache
-    @method_decorator(
-        ratelimit(
-            key="ip",
-            rate=settings.VIEW_RATE_LIMIT,
-            method="GET",
-            block=settings.VIEW_RATE_LIMIT_BLOCK,
-        )
-    )
-    def get(self, request, *args, **kwargs):
-        """GET /ms1/attributes/<id>/splice/contenders/"""
-        attr_id = kwargs.get("attr_id")
-        if not attr_id:
-            return Response(
-                status=400, data={"message": "An attribute id is required."}
-            )
-        attribute = get_object_or_404(Attribute, id=attr_id)
-
-        # What spec is associated with the attribute?
-        spec = attribute.install_file.build.spec
-
-        # Realistically we will just have one build for the hash
-        build = spec.build_set.first()
-
-        if not build:
-            return Response(
-                status=400, data={"message": "We don't have any builds for that spec."}
-            )
-
-        # Find specs first via other builds
-        builds = Build.objects.filter(
-            spec__name=spec.name,
-            spec__compiler__name=spec.compiler.name,
-            build_environment__host_os=build.build_environment.host_os,
-            build_environment__host_target=build.build_environment.host_target,
-            build_environment__platform=build.build_environment.platform,
-        ).values_list("spec", flat=True)
-
-        # Return the list of specs that can be spliced...
-        # Currently, limit to compiler of the same name, and same host environment (os, target, platform)
-        dep_ids = (
-            Spec.objects.filter(id__in=builds)
-            .values_list("dependencies__spec", flat=True)
-            .distinct()
-        )
-        specs = [
-            SpecSerializer(x).data
-            for x in Spec.objects.filter(id__in=dep_ids).distinct()
-            if x
-        ]
-        return Response(status=200, data=specs)
 
 
 class DownloadAttribute(APIView):
@@ -111,47 +50,3 @@ class DownloadAttribute(APIView):
             status=404,
             data={"message": "This attribute does not have an associated value."},
         )
-
-
-class AttributeSplicePredictions(APIView):
-    """Given a spec id and attribute (analyer result), make predictions for splicing."""
-
-    permission_classes = []
-    allowed_methods = ("GET",)
-
-    @never_cache
-    @method_decorator(
-        ratelimit(
-            key="ip",
-            rate=settings.VIEW_RATE_LIMIT,
-            method="GET",
-            block=settings.VIEW_RATE_LIMIT_BLOCK,
-        )
-    )
-    def get(self, request, *args, **kwargs):
-        """GET /ms1/analysis/splices/attribute/<int:attr_id>/spec/<int:spec_id>/"""
-        attr_id = kwargs.get("attr_id")
-        spec_id = kwargs.get("spec_id")
-        if not attr_id or not spec_id:
-            return Response(
-                status=400,
-                data={
-                    "message": "An attribute id and spec id to splice in are required."
-                },
-            )
-        attribute = get_object_or_404(Attribute, id=attr_id)
-        spec = get_object_or_404(Spec, id=spec_id)
-
-        # Keep a list of the splices
-        splices = []
-
-        # What other versions can be spliced (aside from the original)?
-        contenders = Attribute.objects.filter(
-            name="symbolator-json",
-            install_file__build__spec__name=spec.name,
-        ).exclude(install_file__id=attribute.id)
-
-        for contender in contenders.all():
-            splices.append(run_symbols_splice(attribute, contender))
-
-        return Response(status=200, data=splices)

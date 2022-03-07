@@ -11,7 +11,7 @@ RUN /bin/bash -c "curl -L https://repo.continuum.io/miniconda/Miniconda3-latest-
 RUN /bin/bash -c "conda install -y -c conda-forge mamba && \
     mamba create -q -y -c conda-forge -n sm && \
     source activate sm && \
-    conda install -c conda-forge uwsgi xmlsec && \
+    conda install -c conda-forge uwsgi xmlsec river && \
     pip install --upgrade pip wheel && \
     pip install -r requirements.txt && \
     conda clean --all -y && \

@@ -54,6 +54,11 @@ schema_view = get_swagger_view(title="Spack Monitor API")
 server_views = [
     url(r"^api/docs/", schema_view, name="docs"),
     path(
+        "autocomplete/spec/",
+        api_views.SpecAutocomplete.as_view(),
+        name="spec-autocomplete",
+    ),
+    path(
         "tables/build/",
         api_views.BuildsTable.as_view(),
         name="builds_table",
@@ -61,6 +66,7 @@ server_views = [
 ]
 
 urlpatterns = [
+    path("", include("django_river_ml.urls", namespace="django_river_ml")),
     url(r"^api/", include(router.urls)),
     url(r"^", include((server_views, "api"), namespace="internal_apis")),
     url(r"^api-auth/", include("rest_framework.urls", namespace="rest_framework")),
@@ -121,30 +127,11 @@ urlpatterns = [
         api_views.SpecAttributes.as_view(),
         name="spec_attributes",
     ),
-    # Given an analysis result id, return splice contenders (dependency specs)
-    path(
-        "%s/attributes/<int:attr_id>/splice/contenders/" % cfg.URL_API_PREFIX,
-        api_views.AttributeSpliceContenders.as_view(),
-        name="attribute_splice_contenders",
-    ),
-    # Given an analysis result id and spec id, predict splices
-    path(
-        "%s/analysis/splices/attribute/<int:attr_id>/spec/<int:spec_id>/"
-        % cfg.URL_API_PREFIX,
-        api_views.AttributeSplicePredictions.as_view(),
-        name="predict_attribute_splices",
-    ),
     # Download an attribute file
     path(
         "%s/attributes/<int:attr_id>/download/" % cfg.URL_API_PREFIX,
         api_views.DownloadAttribute.as_view(),
         name="download_attribute",
-    ),
-    # Get a list of splice contenders for a spec (and download links)
-    path(
-        "%s/specs/<int:spec_id>/splices/contenders/" % cfg.URL_API_PREFIX,
-        api_views.SpecSpliceContenders.as_view(),
-        name="spec_splice_contenders",
     ),
 ]
 

@@ -16,8 +16,8 @@ services:
 
     # Add your GitHub key and secret here
     environment:
-      - SOCIAL_AUTH_GITHUB_KEY=
-      - SOCIAL_AUTH_GITHUB_SECRET=
+      #- SOCIAL_AUTH_GITHUB_KEY=
+      #- SOCIAL_AUTH_GITHUB_SECRET=
     volumes:
       - .:/code
       - ./spackmon/static:/var/www/static

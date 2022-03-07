@@ -5,6 +5,7 @@
 
 from spackmon.apps.main.models import (
     BuildPhase,
+    BuildError,
     BuildEnvironment,
     Build,
     Spec,
@@ -23,7 +24,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_build_phase(build, phase_name, status, output, **kwargs):
+def create_build_error(phase, error):
+    BuildError.objects.get_or_create(
+        phase=phase,
+        source_file=error.get("source_file"),
+        source_line=error.get("source_line_no"),
+        line_no=error.get("line_no"),
+        repeat_count=error.get("repeat_count"),
+        start=error.get("start"),
+        end=error.get("end"),
+        text=error.get("text"),
+        pre_context=error.get("pre_context"),
+        post_context=error.get("post_context"),
+    )
+
+
+def update_build_phase(build, phase_name, status, errors, **kwargs):
     """Given a build, and then a phase name, output, and
     status, update the phase associated with the build. Return a json response
     with a message
@@ -31,8 +47,12 @@ def update_build_phase(build, phase_name, status, output, **kwargs):
     try:
         build_phase, _ = BuildPhase.objects.get_or_create(build=build, name=phase_name)
         build_phase.status = status
-        build_phase.output = output
         build_phase.save()
+        for error in errors:
+            try:
+                create_build_error(phase, error)
+            except:
+                pass
         data = {"build_phase": build_phase.to_dict()}
         return {
             "message": "Phase %s was successfully updated." % phase_name,

@@ -28,7 +28,7 @@ class BuildEvent(BaseModel):
         "main.BuildPhase", null=False, blank=False, on_delete=models.CASCADE
     )
     source_file = models.CharField(
-        max_length=150, blank=False, null=False, help_text="The source file."
+        max_length=250, blank=False, null=False, help_text="The source file."
     )
     source_line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
     line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
@@ -787,6 +787,7 @@ class BuildPhase(BaseModel):
     )
 
     # Allow for arbitrary storage of output and error
+    # NOTE: this should not be used since the view has been updated to support errors
     output = models.TextField(blank=True, null=True)
     error = models.TextField(blank=True, null=True)
 

@@ -186,7 +186,7 @@ class UpdatePhaseStatus(APIView):
         if not build_id:
             return Response(status=400, data={"message": "Missing required build_id."})
 
-        output = data.get("output")
+        errors = data.get("errors")
         phase_name = data.get("phase_name")
         status = data.get("status")
 
@@ -207,5 +207,5 @@ class UpdatePhaseStatus(APIView):
             )
 
         # Update the phase
-        data = update_build_phase(build, phase_name, status, output)
+        data = update_build_phase(build, phase_name, status, errors)
         return Response(status=data["code"], data=data)
