@@ -1,8 +1,9 @@
-# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2022 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+from spackmon.settings import cfg as settings
 from spackmon.apps.main.models import (
     BuildPhase,
     BuildError,
@@ -16,6 +17,7 @@ from spackmon.apps.main.models import (
     Feature,
 )
 from spackmon.apps.main.utils import read_json
+import spackmon.apps.main.online_ml as online_ml
 
 import os
 
@@ -25,10 +27,13 @@ logger = logging.getLogger(__name__)
 
 
 def create_build_error(phase, error):
-    BuildError.objects.get_or_create(
+    """
+    Create or get a build error associated with a phase.
+    """
+    error, created = BuildError.objects.get_or_create(
         phase=phase,
         source_file=error.get("source_file"),
-        source_line=error.get("source_line_no"),
+        source_line_no=error.get("source_line_no"),
         line_no=error.get("line_no"),
         repeat_count=error.get("repeat_count"),
         start=error.get("start"),
@@ -37,6 +42,8 @@ def create_build_error(phase, error):
         pre_context=error.get("pre_context"),
         post_context=error.get("post_context"),
     )
+    if settings.MODEL_NAME and not settings.DISABLE_ONLINE_ML and created:
+        online_ml.learn(error.text)
 
 
 def update_build_phase(build, phase_name, status, errors, **kwargs):
@@ -50,7 +57,7 @@ def update_build_phase(build, phase_name, status, errors, **kwargs):
         build_phase.save()
         for error in errors:
             try:
-                create_build_error(phase, error)
+                create_build_error(build_phase, error)
             except:
                 pass
         data = {"build_phase": build_phase.to_dict()}

@@ -1,13 +1,16 @@
-# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2022 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+from django.http import JsonResponse
 from django.db.models import Value, F
 from django.db.models.functions import Concat
 from django.contrib import messages
 from django.shortcuts import render
+from django.views.decorators.cache import never_cache
 from spackmon.apps.main.models import Spec, Build
+import spackmon.apps.main.online_ml as online_ml
 from itertools import chain
 import pandas
 
@@ -16,6 +19,27 @@ from spackmon.settings import (
     VIEW_RATE_LIMIT as rl_rate,
     VIEW_RATE_LIMIT_BLOCK as rl_block,
 )
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
+@never_cache
+def view_clusters(request):
+    """
+    View machine learning clusters for our model!
+    """
+    data = online_ml.get_centers()
+    return render(request, "online_ml/clusters.html", {"data": data})
+
+
+@ratelimit(key="ip", rate=rl_rate, block=rl_block)
+@never_cache
+def get_cluster_center(request):
+    """
+    View machine learning clusters for our model!
+    """
+    number = int(request.GET.get("center", 99))
+    data = online_ml.get_center(number)
+    return JsonResponse(data)
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)

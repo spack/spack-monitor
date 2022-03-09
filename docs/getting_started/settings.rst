@@ -67,6 +67,12 @@ into Spack Monitor.
    * - ENABLE_GITHUB_AUTH
      - Enable GitHub OAuth2 Authentication (requires environment secrets)
      - True
+   * - MODEL_NAME
+     - If online machine learning is enabled (for errors) use this model name
+     - spack-errors
+   * - DISABLE_ONLINE_ML
+     - Disable all online machine learning and views
+     - False
    * - AUTH_INSTRUCTIONS
      - A link for the user to get authentication instructions
      - https://spack-monitor.readthedocs.io/en/latest/getting_started/auth.html

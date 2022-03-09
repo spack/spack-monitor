@@ -22,9 +22,6 @@ Read the ⭐️ [documentation](https://spack-monitor.readthedocs.io/) ⭐️ to
 ## TODO
 
  - refactor diff/matrix view to be more efficient
- - make sure api endpoints present and showing up in view (add to docs how to do that)
- - write spack-monitor-nlp to use endpoints
- - spack monitor in spack should have model name to use, fallback to create if it doesn't exist.
 
 ## License
 

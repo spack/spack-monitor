@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+from spackmon.settings import cfg
 from django.urls import path
 from . import views
 
@@ -22,5 +23,16 @@ urlpatterns = [
     path("analysis/matrix/", views.package_matrix, name="package-matrix"),
     path("specs/detail/<int:specid>", views.spec_detail, name="spec_detail"),
 ]
+
+# Add the cluster view if we aren't disabling online
+if not cfg.DISABLE_ONLINE_ML:
+    urlpatterns += [
+        path("analysis/clusters/", views.view_clusters, name="view-clusters"),
+        path(
+            "analysis/cluster/center/",
+            views.get_cluster_center,
+            name="get-cluster-center",
+        ),
+    ]
 
 app_name = "main"

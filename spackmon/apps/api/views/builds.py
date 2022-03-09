@@ -1,4 +1,4 @@
-# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2022 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -53,7 +53,9 @@ def get_build_environment(data):
 
 
 class UpdateBuildStatus(APIView):
-    """Given a spec, update the status of the BuildTask."""
+    """
+    Given a spec, update the status of the BuildTask.
+    """
 
     permission_classes = []
     allowed_methods = ("POST",)
@@ -68,7 +70,9 @@ class UpdateBuildStatus(APIView):
         )
     )
     def post(self, request, *args, **kwargs):
-        """POST /ms1/builds/update/ to update one or more tasks"""
+        """
+        POST /ms1/builds/update/ to update one or more tasks
+        """
 
         # If allow_continue False, return response
         allow_continue, response, user = is_authenticated(request)
@@ -108,7 +112,8 @@ class UpdateBuildStatus(APIView):
 
 
 class NewBuild(APIView):
-    """Given a spec and environment information, create a new Build.
+    """
+    Given a spec and environment information, create a new Build.
     If the build already exists, we return the build_id with it.
     """
 
@@ -156,7 +161,9 @@ class NewBuild(APIView):
 
 
 class UpdatePhaseStatus(APIView):
-    """Given a phase for a spec, update the BuildPhase."""
+    """
+    Given a phase for a spec, update the BuildPhase.
+    """
 
     permission_classes = []
     allowed_methods = ("POST",)

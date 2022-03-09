@@ -15,6 +15,7 @@ def globals(request):
         "DOMAIN_NAME": settings.DOMAIN_NAME_PORTLESS,
         "TWITTER_USERNAME": settings.cfg.TWITTER_USERNAME,
         "GITHUB_REPOSITORY": settings.cfg.GITHUB_REPOSITORY,
+        "DISABLE_ONLINE_ML": settings.cfg.DISABLE_ONLINE_ML,
         "ENABLE_GITHUB_AUTH": settings.cfg.ENABLE_GITHUB_AUTH,
         "GITHUB_DOCUMENTATION": settings.cfg.GITHUB_DOCUMENTATION,
         "SITE_NAME": get_current_site(request).name,

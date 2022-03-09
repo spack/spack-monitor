@@ -58,7 +58,11 @@ for key, value in cfg:
 def generate_secret_keys(filename):
     """A helper function to write a randomly generated secret key to file"""
     with open(filename, "w") as fd:
-        for keyname in ["SECRET_KEY", "JWT_SERVER_SECRET", "SHELVE_SECRET_KEY"]:
+        for keyname in [
+            "SECRET_KEY",
+            "SPACKMON_JWT_SERVER_SECRET",
+            "SHELVE_SECRET_KEY",
+        ]:
             key = get_random_secret_key()
             fd.writelines("%s = '%s'\n" % (keyname, key))
 
@@ -72,16 +76,24 @@ def generate_creation_date(filename):
 
 # Generate secret keys if do not exist, and not defined in environment
 SECRET_KEY = os.environ.get("SECRET_KEY")
-JWT_SERVER_SECRET = os.environ.get("JWT_SERVER_SECRET")
+SPACKMON_JWT_SERVER_SECRET = os.environ.get("SPACKMON_JWT_SERVER_SECRET")
 SERVER_CREATION_DATE = os.environ.get("CREATION_DATE")
 SHELVE_SECRET_KEY = os.environ.get("SHELVE_SECRET_KEY")
 
-if not SECRET_KEY or not JWT_SERVER_SECRET or not SHELVE_SECRET_KEY:
+if not SECRET_KEY or not SPACKMON_JWT_SERVER_SECRET or not SHELVE_SECRET_KEY:
     try:
-        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET, SHELVE_SECRET_KEY
+        from .secret_key import (
+            SECRET_KEY,
+            SPACKMON_JWT_SERVER_SECRET,
+            SHELVE_SECRET_KEY,
+        )
     except ImportError:
         generate_secret_keys(os.path.join(BASE_DIR, "secret_key.py"))
-        from .secret_key import SECRET_KEY, JWT_SERVER_SECRET, SHELVE_SECRET_KEY
+        from .secret_key import (
+            SECRET_KEY,
+            SPACKMON_JWT_SERVER_SECRET,
+            SHELVE_SECRET_KEY,
+        )
 
 
 DJANGO_RIVER_ML = {
@@ -93,9 +105,16 @@ DJANGO_RIVER_ML = {
     "DISABLE_AUTHENTICATION": True,
     # Shelve and jwt keys (will be generated if not found)
     "SHELVE_SECRET_KEY": SHELVE_SECRET_KEY,
-    "JWT_SECRET_KEY": JWT_SERVER_SECRET,
+    # Only allow these API views
+    "API_VIEWS_ENABLED": [
+        "predict",
+        "service_info",
+        "metrics",
+        "models",
+        "model_download",
+        "stats",
+    ],
 }
-
 
 # A record of the server creation date
 if not SERVER_CREATION_DATE:
@@ -495,12 +514,18 @@ SWAGGER_SETTINGS = {
 
 API_VERSION = "v1"
 
+## Online Machine Learning
+if not cfg.DISABLE_ONLINE_ML:
+    from .startup import ensure_model
+
+    ensure_model(cfg.MODEL_NAME)
+
 ## PLUGINS #####################################################################
 
 # Apply any plugin settings
 for plugin in PLUGINS_ENABLED:
 
-    plugin_module = "spakmon.plugins." + plugin
+    plugin_module = "spackmon.plugins." + plugin
     plugin = import_module(plugin_module)
 
     # Add the plugin to INSTALLED APPS

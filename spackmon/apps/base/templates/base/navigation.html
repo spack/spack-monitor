@@ -22,6 +22,7 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="{% url 'main:spec-diff' %}">Spec Diff</a>
           <a class="dropdown-item" href="{% url 'main:package-matrix' %}">Build Matrix</a>
+          {% if not DISABLE_ONLINE_ML %}<a class="dropdown-item" href="{% url 'main:view-clusters' %}">Errors</a>{% endif %}
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{% url 'api:internal_apis:docs' %}">API</a>
         </div>

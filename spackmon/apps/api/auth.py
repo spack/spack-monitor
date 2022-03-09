@@ -100,7 +100,7 @@ def generate_jwt(username, scope, realm):
         "jti": jti,
         "access": [{"type": "build", "actions": scope}],
     }
-    token = jwt.encode(payload, settings.JWT_SERVER_SECRET, algorithm="HS256")
+    token = jwt.encode(payload, settings.SPACKMON_JWT_SERVER_SECRET, algorithm="HS256")
     return {
         "token": token,
         "expires_in": cfg.API_TOKEN_EXPIRES_SECONDS,
@@ -118,14 +118,13 @@ def validate_jwt(request):
     header = request.META.get("HTTP_AUTHORIZATION", "")
     if re.search("bearer", header, re.IGNORECASE):
         encoded = re.sub("bearer", "", header, flags=re.IGNORECASE).strip()
-
         # Any reason not valid will issue an error here
         try:
             decoded = jwt.decode(
-                encoded, settings.JWT_SERVER_SECRET, algorithms=["HS256"]
+                encoded, settings.SPACKMON_JWT_SERVER_SECRET, algorithms=["HS256"]
             )
         except Exception as exc:
-            print("jwt could no be decoded, %s" % exc)
+            print("jwt could not be decoded, %s" % exc)
             return False, None
 
         # Ensure that the jti is still valid

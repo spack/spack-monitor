@@ -1,0 +1,534 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% load my_filters %}
+{% load static %}
+{% block page_title %}Package {% if package %}> {{ package.name }}{% endif %}{% endblock %}
+{% block css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style type="text/css">
+#controls {
+  position: absolute:
+  top: 10px;
+  left: 30px;
+}
+
+
+path {
+  stroke: steelblue;
+  stroke-width: 2;
+  fill: none;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: grey;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+div.tooltip {
+  color: white;
+  position: absolute;
+  text-align: center;
+  width: 80px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: rgba(0,0,0,.8);
+  border: 2px solid black;
+  pointer-events: none;
+}
+
+svg {
+	width: 100%;
+	max-width: 1200px;
+	max-height: 800px;
+}
+text {
+	font-size: 27px;
+}
+.btn {
+	cursor: pointer;
+	opacity: 0.9;
+	-webkit-transition: all .3s;
+	transition: all .3s;
+}
+.btn.disabled {
+	cursor: default;
+	opacity: 0.3;
+}
+.dot {
+	fill: #104d93;
+	opacity: 0.6;
+}
+.dot.selected {
+	fill: #ff5252;
+	opacity: 1;
+}
+</style>
+{% endblock %}
+{% block content %}
+{% include "messages/message.html" %}
+
+<div class="row" id="therow">
+   <div class="col-md-9">
+        <svg width="1200" height="1200" id="first">
+            <g>
+                    <clipPath id="scatterplot-area-clip"></clipPath>
+                    <symbol id="plus" viewBox="0 0 18 18">
+                        <path d="M3,9 h 12" stroke-width="1.2" stroke-linecap="round" stroke="#000" />
+                        <path d="M9,3 v 12" stroke-width="1.2" stroke-linecap="round" stroke="#000" />
+                    </symbol>
+                    <symbol id="minus" viewBox="0 0 18 18" >
+                        <path d="M3,9 h 12" stroke-width="1.2" stroke-linecap="round" stroke="#000" />
+                    </symbol>
+                    <symbol id="reset" viewBox="0 0 18 18">
+                        <path stroke-width="0" fill="#000"  d="M9 13.5c-2.49 0-4.5-2.01-4.5-4.5S6.51 4.5 9 4.5c1.24 0 2.36.52 3.17 1.33L10 8h5V3l-1.76 1.76C12.15 3.68 10.66 3 9 3 5.69 3 3.01 5.69 3.01 9S5.69 15 9 15c2.97 0 5.43-2.16 5.9-5h-1.52c-.46 2-2.24 3.5-4.38 3.5z"/>
+                    </symbol>
+            </g>
+        </svg>
+   </div>
+   <div class="col-md-3">
+     <p style="font-variant:italic" id="terms">Terms will be appended here</p>
+   </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.14.2/d3.min.js"></script>
+<script src="{% static 'js/column-heatmap.js' %}"></script>
+<script>
+$(document).ready(function() {
+
+var data = [{% for d in data %}{"x": {{d.x}}, "name": "{{d.name}}", "r": 10, "y": {{d.y}}}{% if forloop.last %}{% else %},{% endif%}{% endfor %}]
+
+const minX = d3.min(data, d => d.x) -2
+const minY = d3.min(data, d => d.y) - 2
+const maxX = d3.max(data, d => d.x) + 2
+const maxY = d3.max(data, d => d.y) + 2
+
+// set graphics parameters
+const
+    svgSize = { w: 1200, h: 900 },
+    svgCenter = [ svgSize.w / 2, svgSize.h / 2 ],
+    dottedLineThickness = 4,
+    dottedLineSpacing = 3 * dottedLineThickness,
+    labelPadding = { v: 5, h: 10 },
+    btnSize = 55,
+    btnPadding = 15,
+    trimmedFormat = d3.format('.3~s');
+
+// zooming
+const zoomingDuration = 500,
+    zoomBound = [1, 6];
+
+let zoomTransformData;
+// for dot selection
+let selectedDotIdx = 0;
+let xDotLabel, yDotLabel, labelLines = [];
+
+// create SVG
+let svg = d3.select('#first')
+    .attr('viewBox', '-80 -30 ' + (svgSize.w + 100) + ' ' + (svgSize.h + 80));
+
+// Define the div for the tooltip
+const div = d3
+  .select('#therow')
+  .append('div')
+  .attr('class', 'tooltip')
+  .style('opacity', 0);
+
+// create scales
+let x = d3
+    .scaleLinear()
+    .range([0, svgSize.w])
+    .domain([minX, maxX]);
+let y = d3
+    .scaleLinear()
+    .range([svgSize.h, 0])
+    .domain([minY, maxY]);
+let rescaledX = x;
+let rescaledY = y;
+
+// append both axis
+//let xAxis = d3.axisBottom().scale(x);
+//let yAxis = d3.axisLeft().scale(y).ticks(6);
+//let gX = svg.append('g')
+//    .attr('class', 'axis axis--x')
+//    .attr('transform', 'translate(0,' + svgSize.h + ')')
+//    .call(xAxis);
+//let gY = svg.append('g')
+//    .attr('class', 'axis axis--y')
+//    .call(yAxis);
+
+// create labels & lines
+let labels = svg
+    .append('g')
+    .attr('class', 'labels');
+let labelLinesGroup = svg
+    .append('g');
+
+// create chart area and make it clipped (for zooming)
+svg.select('#scatterplot-area-clip')
+    .append('rect')
+    .attr('class', 'scatterplot-area-clip')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('width', svgSize.w + 10)
+    .attr('height', svgSize.h);
+
+let chart = svg
+    .append('g')
+    .attr('clip-path', 'url(#scatterplot-area-clip)')
+    .append('g')
+    .attr('class', 'zoom');
+
+// draw labels & lines
+drawSelectionLines();
+drawSelectionLabels();
+
+// append dots to the chart
+let dots = chart.append('g')
+    .selectAll('dot')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('data-dot-id', (d, idx) => idx)
+    .attr('class', 'dot')
+    .attr('cx', (d) => x(d.x))
+    .attr('cy', (d) => y(d.y))
+    .attr('r', (d) => d.r)
+    .on('mouseover', d => {
+      div
+        .transition()
+        .duration(200)
+        .style('opacity', 0.9);
+      div
+        .html("Cluster " + d.name + '<br/>')
+        .style('left', d3.event.pageX + 'px')
+        .style('top', d3.event.pageY - 28 + 'px');
+
+      $.getJSON("{% url 'main:get-cluster-center' %}?center=" + d.name, function(meta) {              
+              console.log(meta)
+
+              var table = "<table id='table'><thead id='table'><tr><th>Term</th><th>Weight</th></tr></thead><tbody>"
+              $.each(meta, function(k, v){
+                  if (k.length > 30) {
+                     k = k.slice(0,30) + "..."
+                  }
+                  table = table + "<tr><td>" + k + "</td><td>" + v + "</td></tr>"
+              })
+              table += "</tbody></table>"
+              $("#terms").html(table); 
+              $('#table').columnHeatmap({
+                  columns: [1],// required
+                  animated: true,
+                  animationSpeed: .1,
+                  inverse: true,
+              });
+      })
+      .fail(function() {
+         $("#error-info").html("There is no data assigned to that cluster!"); 
+      })
+    })
+    .on('mouseout', () => {
+      div
+        .transition()
+        .duration(500)
+        .style('opacity', 0);
+    })
+
+    // Add the X Axis
+    .on('mouseenter', function() {
+        updateDotSelection(this);
+    })
+    .on('click', function() {
+        updateDotSelection(this);
+        zoomIn();
+    });
+
+// select one dot
+chart
+    .selectAll('.dot')
+    .filter((d, idx) => (idx === selectedDotIdx))
+    .classed('selected', true);
+
+// create zooming buttons
+let btns = svg.append('g').attr('class', 'btns');
+let zoomInBtn = drawBtn(btns, null, 'plus', 0)
+    .on('click', zoomIn);
+let zoomOutBtn = drawBtn(btns, 'disabled', 'minus', 1)
+    .on('click', zoomOut);
+let zoomResetBtn = drawBtn(btns, 'disabled', 'reset', 2)
+    .on('click', zoomReset);
+
+// set the position of zooming buttons
+const btnsSize = btns.node().getBBox();
+btns.attr('transform', 'translate(' + (svgSize.w - btnsSize.width) + ', ' + (svgSize.h - 30 - btnsSize.height) + ')');
+
+// zoom-related data & defs
+zoomTransformData = d3.zoomTransform(chart);
+
+// update dot selection, redraw labels
+function updateDotSelection(dot) {
+    svg.select('.selected').classed('selected', false);
+    const d3Dot = d3.select(dot);
+    d3Dot.classed('selected', true);
+    selectedDotIdx = +d3Dot.attr('data-dot-id');
+    updateLinesAndLabels(100);
+}
+
+// zooming buttons handlers
+function zoomIn() {
+    if (!zoomInBtn.classed('disabled')) {
+        zoomTransformData.k *= 2.5;
+        zoomTransformData.k = Math.min(zoomTransformData.k, zoomBound[1]);
+        centralizeZoom();
+        focusOnPoint();
+    }
+}
+function zoomOut() {
+    if (!zoomOutBtn.classed('disabled')) {
+        zoomTransformData.k /= 1.8;
+        zoomTransformData.k = Math.max(zoomTransformData.k, zoomBound[0]);
+        if (zoomTransformData.k === zoomBound[0]) {
+            resetZoom();
+        } else {
+            centralizeZoom();
+        }
+        focusOnPoint();
+    }
+}
+function zoomReset() {
+    if (!zoomResetBtn.classed('disabled')) {
+        resetZoom();
+        focusOnPoint();
+    }
+}
+
+// zooming transforms
+function resetZoom() {
+    zoomTransformData.x = 0;
+    zoomTransformData.y = 0;
+    zoomTransformData.k = 1;
+}
+function centralizeZoom() {
+    const selectedDot = chart.selectAll('.dot')
+        .filter((d, idx) => (idx === selectedDotIdx));
+    zoomTransformData.x = svgCenter[0] - selectedDot.attr('cx') * zoomTransformData.k;
+    zoomTransformData.y = svgCenter[1] - selectedDot.attr('cy') * zoomTransformData.k;
+}
+
+// zoom to the point
+function focusOnPoint() {
+    handleBtnsAvailibity();
+    // make sure labels and lines have same style regardless zoom level
+    dots
+        .transition()
+        .duration(zoomingDuration)
+        .attr('r', (d) => (d.r / zoomTransformData.k));
+
+    // apply zooming to chart area
+    chart
+        .transition()
+        .duration(zoomingDuration)
+        .attr('transform', zoomTransformData);
+    // rescale for new bounds
+    //let newXAxis = xAxis.scale(zoomTransformData.rescaleX(x));
+    //let newYAxis = yAxis.scale(zoomTransformData.rescaleY(y));
+    // apply rescaling to both axes
+    //gX
+    //    .transition()
+    //    .duration(zoomingDuration)
+    //    .call(newXAxis);
+    //gY
+    //    .transition()
+    //    .duration(zoomingDuration)
+    //    .call(newYAxis);
+
+    // recalculate auxiliary x & y so tha labels could be transformed together with chart area
+    //rescaledX = d3
+    //    .scaleLinear()
+    //    .range([0, svgSize.w])
+    //    .domain(newXAxis.scale().domain());
+    //rescaledY = d3
+    //    .scaleLinear()
+    //    .range([svgSize.h, 0])
+    //    .domain(newYAxis.scale().domain());
+
+    updateLinesAndLabels(zoomingDuration);
+}
+
+// control btns activated / deactivated state
+function handleBtnsAvailibity() {
+    zoomInBtn.classed('disabled', false);
+    zoomOutBtn.classed('disabled', false);
+    zoomResetBtn.classed('disabled', false);
+    if (zoomTransformData.k === zoomBound[0]) {
+        zoomOutBtn.classed('disabled', true);
+        if (zoomTransformData.x === 0 && zoomTransformData.y === 0) {
+            zoomResetBtn.classed('disabled', true);
+        }
+    }
+    if (zoomTransformData.k === zoomBound[1]) {
+        zoomInBtn.classed('disabled', true);
+    }
+}
+
+// draw buttons
+function drawBtn(parent, className, iconName, idx) {
+    let btn = parent
+        .append('g')
+        .attr('class', 'btn ' + className)
+        .attr('fill', '#dddddd');
+    btn
+        .append('rect')
+        .attr('x', (btnPadding + btnSize) * idx)
+        .attr('y', 0)
+        .attr('rx', 5)
+        .attr('ry', 5)
+        .attr('width', btnSize)
+        .attr('height', btnSize);
+    btn
+        .append('use')
+        .attr('xlink:href', '#' + iconName)
+        .attr('x', (btnPadding + btnSize) * idx)
+        .attr('y', 0)
+        .attr('width', btnSize)
+        .attr('height', btnSize);
+    return btn;
+}
+
+// draw lines from selected dot down to the axis
+function drawSelectionLines() {
+    labelLines[0] = labelLinesGroup
+        .append('line')
+        .attr('x1', x(data[selectedDotIdx].x))
+        .attr('y1', 0)
+        .attr('x2', x(data[selectedDotIdx].x))
+        .attr('y2', svgSize.h)
+        .attr('stroke', '#ff5252')
+        .attr('stroke-width', dottedLineThickness)
+        .attr('stroke-dasharray', dottedLineSpacing + ' ' + dottedLineSpacing);
+    labelLines[1] = labelLinesGroup
+        .append('line')
+        .attr('x1', svgSize.w)
+        .attr('y1', y(data[selectedDotIdx].y))
+        .attr('x2', 0)
+        .attr('y2', y(data[selectedDotIdx].y))
+        .attr('stroke', '#ff5252')
+        .attr('stroke-width', dottedLineThickness)
+        .attr('stroke-dasharray', dottedLineSpacing + ' ' + dottedLineSpacing);
+}
+
+// append labels to the both axis
+function drawSelectionLabels() {
+    xDotLabel = labels.append('g');
+    let back = appendBack(xDotLabel);
+    let text = appendText(xDotLabel, trimmedFormat(data[selectedDotIdx].x));
+    let bb = text.node().getBBox();
+    let width = bb.width + labelPadding.h * 2;
+    let height = bb.height + labelPadding.v * 2;
+    setLabelSize(back, text, width, height);
+    xDotLabel
+        .attr('transform', 'translate( ' +
+            (x(data[selectedDotIdx].x) - width * 0.5) + ', ' +
+            (svgSize.h + 5.5) +
+            ')');
+
+    yDotLabel = labels.append('g');
+    back = appendBack(yDotLabel);
+    text = appendText(yDotLabel, trimmedFormat(data[selectedDotIdx].y));
+    bb = text.node().getBBox();
+    width = bb.width + labelPadding.h * 2;
+    height = bb.height + labelPadding.v * 2;
+    setLabelSize(back, text, width, height);
+    yDotLabel
+        .attr('transform', 'translate( ' +
+            (-width - 6) + ', ' +
+            (y(data[selectedDotIdx].y) - height * 0.5) +
+            ')');
+    function appendBack(parent) {
+        return parent
+            .append('rect')
+            .attr('fill', '#ff5252')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('rx', 5)
+            .attr('ry', 5);
+    }
+    function appendText(parent, text) {
+        return parent
+            .append('text')
+            .attr('fill', '#ffffff')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('text-anchor', 'middle')
+            .text(text);
+    }
+}
+
+// change labels position for new selected point
+// (not for zooming, zooming adjustment is done within focusOnPoint())
+function updateLinesAndLabels(dur) {
+    let text = xDotLabel
+        .select('text')
+        .text(trimmedFormat(data[selectedDotIdx].x));
+    let back = xDotLabel
+        .select('rect');
+    let bb = text.node().getBBox();
+    let width = bb.width + labelPadding.h * 2;
+    let height = bb.height + labelPadding.v * 2;
+    setLabelSize(back, text, width, height);
+    xDotLabel
+        .transition()
+        .duration(dur)
+        .attr('transform', 'translate( ' +
+            (rescaledX(data[selectedDotIdx].x) - width * 0.5) + ', ' +
+            (svgSize.h + 5.5) +
+            ')');
+
+    text = yDotLabel
+        .select('text')
+        .text(trimmedFormat(data[selectedDotIdx].y));
+    back = yDotLabel
+        .select('rect');
+    bb = text.node().getBBox();
+    width = bb.width + labelPadding.h * 2;
+    height = bb.height + labelPadding.v * 2;
+    setLabelSize(back, text, width, height);
+    yDotLabel
+        .transition()
+        .duration(dur)
+        .attr('transform', 'translate( ' +
+            (-width - 6) + ', ' +
+            (rescaledY(data[selectedDotIdx].y) - height * 0.5) +
+            ')');
+
+    labelLines[0]
+        .transition()
+        .duration(dur)
+        .attr('x1', rescaledX(data[selectedDotIdx].x))
+        .attr('x2', rescaledX(data[selectedDotIdx].x));
+
+    labelLines[1]
+        .transition()
+        .duration(dur)
+        .attr('y1', rescaledY(data[selectedDotIdx].y))
+        .attr('y2', rescaledY(data[selectedDotIdx].y));
+}
+
+// little helper for both label-related functions
+function setLabelSize(back, text, width, height) {
+    back
+        .attr('width', width)
+        .attr('height', height);
+    text
+        .attr('x', width * 0.5)
+        .attr('y', height * 0.75);
+}
+})
+</script>
+{% endblock %}
