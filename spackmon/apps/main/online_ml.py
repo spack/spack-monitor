@@ -3,9 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-
-from django_river_ml.client import DjangoClient
 from spackmon.settings import cfg as settings
+
+if not settings.DISABLE_ONLINE_ML:
+    from django_river_ml.client import DjangoClient
 
 from scipy.spatial.distance import pdist, squareform
 from sklearn import manifold
@@ -18,23 +19,31 @@ import pandas
 logger = logging.getLogger(__name__)
 
 
-def get_centers():
+def get_centers(model):
     """
-    Get centroids of the KMeans model to visualize!
+    Helper function to derive centroids from a model
     """
-    client = DjangoClient()
-    model = client.get_model(settings.MODEL_NAME)
+    if hasattr(model, "steps"):
+        for step_name, step in model.steps.items():
+            if hasattr(step, "centers") and step.centers:
+                return step.centers
+    elif hasattr(model, "centers") and model.centers:
+        return model.centers
 
-    # Get the centers!
-    centers = model.steps["KMeans"].centers
 
-    # UIDS as id for each row, vectors across columns
-    values = list(centers.values())
+def get_center(model, number):
+    """
+    Helper function to derive centroids from a model
+    """
+    centers = get_centers(model)
+    if centers and number < len(centers):
+        return centers[number]
+
+
+def generate_embeddings(centers):
     df = pandas.DataFrame(centers)
 
-    # 100 rows (centers) and N columns (words)
-    # This might have issues with scaling if the vocabulary gets too big
-    # (hopefully it does not)
+    # 200 rows (centers) and N columns (words)
     df = df.transpose()
     df = df.fillna(0)
 
@@ -48,27 +57,10 @@ def get_centers():
     embedding = fit.fit_transform(distance)
     emb = pandas.DataFrame(embedding, index=distance.index, columns=["x", "y"])
     emb.index.name = "name"
+
+    # cluster ids
     emb["name"] = emb.index
     return emb.to_dict(orient="records")
-
-
-def get_center(number):
-    """
-    Given a centroid number, get the centroid values
-    """
-    client = DjangoClient()
-    model = client.get_model(settings.MODEL_NAME)
-
-    # Get the centers!
-    centers = model.steps["KMeans"].centers
-    if number not in centers:
-        return {}
-    values = dict(centers[number])
-
-    # Return sorted highest to lowest weight
-    return {
-        k: v for k, v in sorted(values.items(), key=lambda item: item[1], reverse=True)
-    }
 
 
 def predict(text):

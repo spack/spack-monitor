@@ -518,7 +518,7 @@ API_VERSION = "v1"
 if not cfg.DISABLE_ONLINE_ML:
     from .startup import ensure_model
 
-    ensure_model(cfg.MODEL_NAME)
+    ensure_model(cfg.MODEL_NAME, cfg.MODEL_LOAD_FROM_FILE)
 
 ## PLUGINS #####################################################################
 

@@ -70,6 +70,9 @@ into Spack Monitor.
    * - MODEL_NAME
      - If online machine learning is enabled (for errors) use this model name
      - spack-errors
+   * - MODEL_LOAD_FROM_FILE
+     - If the model name isn't found, load this model from file.
+     - spack-errors.pkl
    * - DISABLE_ONLINE_ML
      - Disable all online machine learning and views
      - False

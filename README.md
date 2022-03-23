@@ -22,6 +22,7 @@ Read the ⭐️ [documentation](https://spack-monitor.readthedocs.io/) ⭐️ to
 ## TODO
 
  - refactor diff/matrix view to be more efficient
+ - license strings
 
 ## License
 

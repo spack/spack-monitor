@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+from django_river_ml.client import DjangoClient
 from django.http import JsonResponse
 from django.db.models import Value, F
 from django.db.models.functions import Concat
@@ -16,6 +17,7 @@ import pandas
 
 from ratelimit.decorators import ratelimit
 from spackmon.settings import (
+    cfg,
     VIEW_RATE_LIMIT as rl_rate,
     VIEW_RATE_LIMIT_BLOCK as rl_block,
 )
@@ -27,18 +29,40 @@ def view_clusters(request):
     """
     View machine learning clusters for our model!
     """
-    data = online_ml.get_centers()
-    return render(request, "online_ml/clusters.html", {"data": data})
+    # Get a django client
+    client = DjangoClient()
+
+    model = client.get_model(cfg.MODEL_NAME)
+    have_centroids = False
+    if online_ml.get_centers(model) is not None:
+        have_centroids = True
+    return render(
+        request,
+        "online_ml/clusters.html",
+        {"have_centroids": have_centroids, "model_name": cfg.MODEL_NAME},
+    )
+
+
+def get_centroids(request, name):
+    """
+    JsonResponse to just retrun centroids
+    """
+    client = DjangoClient()
+    model = client.get_model(name)
+    centers = online_ml.get_centers(model)
+    return JsonResponse({"centers": online_ml.generate_embeddings(centers)})
 
 
 @ratelimit(key="ip", rate=rl_rate, block=rl_block)
 @never_cache
-def get_cluster_center(request):
+def get_cluster_center(request, name):
     """
-    View machine learning clusters for our model!
+    Get a particular center for our omdel
     """
+    client = DjangoClient()
     number = int(request.GET.get("center", 99))
-    data = online_ml.get_center(number)
+    model = client.get_model(name)
+    data = online_ml.get_center(model, number)
     return JsonResponse(data)
 
 

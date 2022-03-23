@@ -29,7 +29,12 @@ if not cfg.DISABLE_ONLINE_ML:
     urlpatterns += [
         path("analysis/clusters/", views.view_clusters, name="view-clusters"),
         path(
-            "analysis/cluster/center/",
+            "analysis/clusters/centroids/<name>/",
+            views.get_centroids,
+            name="get-centroids",
+        ),
+        path(
+            "analysis/cluster/center/<name>/",
             views.get_cluster_center,
             name="get-cluster-center",
         ),

@@ -67,10 +67,46 @@ do that, let's discuss the different ways that you can interact.
 Spackmon Interactions
 =====================
 
-There are two use cases that might be relevant to you:
+There are three use cases that might be relevant to you:
 
+ - You want to upload a pre-build river model for Django River ML
  - you have existing configuration files that you want to import
  - you have a spack install that you want to build with, and directly interact
+ 
+Import Django River ML
+**********************
+
+If you haven't started the server yet, the easiest thing to do is save a pickle of your
+model in the root of the install, and then define the path (in ``/code``) under settings
+``MODEL_LOAD_FROM_FILE``:
+
+
+.. code-block:: python
+
+    # Online machine learning
+    MODEL_NAME: spack-dbstream-errors
+
+    # If the model name isn't found, load from file
+    MODEL_LOAD_FROM_FILE: /code/spack-dbstream-errors.pkl
+    DISABLE_ONLINE_ML: false
+
+However, this will only be used if you already don't have a model. If you want to
+update or otherwise overwrite an existing model, by name, you can use the following command.
+First make sure you are in the container:
+
+
+.. code-block:: console
+
+    $ docker exec -it uwsgi bash
+
+Then inside, run this command, providing your pickled model and a name to use:
+
+.. code-block:: console
+
+    $ python manage.py load_river_model spack-dbstream-errors.pkl spack-dbstream-errors
+ 
+Note that I'm overwriting this model, and it corresponds to the name I've used in my settings
+under ``MODEL_NAME``.
  
 Import Existing Specs
 *********************
