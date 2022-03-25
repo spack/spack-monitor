@@ -13,3 +13,6 @@ static/
 env/
 db.sqlite3
 test-db.sqlite
+spackmon/shelve.*
+spackmon/cache
+*.pkl

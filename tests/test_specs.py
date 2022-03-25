@@ -2,19 +2,20 @@
 test spackmon specs endpoints
 """
 
-from spackmon.apps.main.models import Spec, Dependency
-from spackmon.apps.users.models import User
-from django.test import TestCase
+from spackmon.apps.main.models import Spec
 
 import os
 import sys
 
 # Add spackmoncli to the path
-base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+test_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, test_dir)
+base = os.path.dirname(test_dir)
 spackmon_dir = os.path.join(base, "script")
 specs_dir = os.path.join(base, "specs")
 sys.path.insert(0, spackmon_dir)
 
+from base import SpackMonitorTest
 
 try:
     from spackmoncli import read_json, parse_auth_header, get_basic_auth
@@ -25,12 +26,7 @@ except ImportError:
     )
 
 
-class SimpleTest(TestCase):
-    def setUp(self):
-        self.password = "bigd"
-        self.user = User.objects.create_user(
-            username="dinosaur", email="dinosaur@dinosaur.com", password=self.password
-        )
+class SimpleTest(SpackMonitorTest):
 
     def test_new_spec(self):
         """Test the new spec endpoint. This also tests the auth workflow"""
@@ -121,12 +117,8 @@ class SimpleTest(TestCase):
         hashes = set()
         hashes.add(data.get("full_hash"))
         for spec_name, spec_hash in specs.items():
-            spec_obj = Spec.objects.get(full_hash=spec_hash)
+            Spec.objects.get(full_hash=spec_hash)
             hashes.add(spec_hash)
-
-        # Get all spec hashes to compare against top level
-        created_hashes = set(Spec.objects.all().values_list("full_hash", flat=True))
-        dependency_hashes = created_hashes.difference(hashes)
 
         # A second response should indicate it already exists (200)
         response = self.client.post(

@@ -81,6 +81,12 @@ urlpatterns = [
         api_views.ServiceInfo.as_view(),
         name="service_info",
     ),
+    # TODO tink about this
+    path(
+        "%s/errors/new/" % cfg.URL_API_PREFIX,
+        api_views.NewErrors.as_view(),
+        name="new_errors",
+    ),
     path(
         "%s/specs/new/" % cfg.URL_API_PREFIX,
         api_views.NewSpec.as_view(),

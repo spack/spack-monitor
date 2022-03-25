@@ -24,8 +24,8 @@ urlpatterns = [
     path("specs/detail/<int:specid>", views.spec_detail, name="spec_detail"),
 ]
 
-# Add the cluster view if we aren't disabling online
-if not cfg.DISABLE_ONLINE_ML:
+# Add the cluster view if we aren't disabling online and if the model flavor is cluster
+if not cfg.DISABLE_ONLINE_ML and cfg.MODEL_FLAVOR == "cluster":
     urlpatterns += [
         path("analysis/clusters/", views.view_clusters, name="view-clusters"),
         path(

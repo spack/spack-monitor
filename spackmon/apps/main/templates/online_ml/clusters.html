@@ -411,8 +411,8 @@ function generate_graph(data) {
 
               var table = "<table id='table'><thead id='table'><tr><th>Term</th><th>Weight</th></tr></thead><tbody>"
               $.each(meta, function(k, v){
-                  if (k.length > 20) {
-                     k = k.slice(0,20) + "..."
+                  if (k.length > 10) {
+                     k = k.slice(0,10) + "..."
                   }
                   table = table + "<tr><td>" + k + "</td><td>" + v + "</td></tr>"
               })

@@ -24,10 +24,11 @@ GITHUB_DOCUMENTATION: https://spack-monitor.readthedocs.io
 USE_SQLITE: null
 
 # Online machine learning
-MODEL_NAME: spack-dbstream-errors
+MODEL_NAME: spack-knn-errors
+MODEL_FLAVOR: creme
 
 # If the model name isn't found, load from file
-MODEL_LOAD_FROM_FILE: /code/spack-dbstream-errors.pkl
+MODEL_LOAD_FROM_FILE: /code/spack-knn-errors.pkl
 DISABLE_ONLINE_ML: false
 
 # TODO we will eventually support loading a model from a URL

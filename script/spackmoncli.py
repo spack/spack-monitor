@@ -73,6 +73,14 @@ class SpackMonitorClient:
             return self.session.request(method, url, data=data, headers=self.headers)
         return response
 
+    def add_errors(self, errors):
+        """
+        Upload a list of errors.        
+        """
+        if not isinstance(errors, list):
+            errors = [errors]
+        return self.do_request("errors/new/", "POST", data=json.dumps(data)).json()
+
     def authenticate_request(self, originalResponse):
         """
         Authenticate Request

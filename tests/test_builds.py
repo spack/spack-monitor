@@ -1,5 +1,5 @@
 """
-test spackmon specs endpoints
+test spackmon build endpoints
 """
 
 from spackmon.apps.main.models import (
@@ -7,22 +7,23 @@ from spackmon.apps.main.models import (
     BuildPhase,
     Build,
 )
-from spackmon.apps.users.models import User
-from django.test import TestCase
 
 import os
-import re
 import sys
 
 # Add spackmoncli to the path
-base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+test_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, test_dir)
+base = os.path.dirname(test_dir)
 spackmon_dir = os.path.join(base, "script")
 specs_dir = os.path.join(base, "specs")
 sys.path.insert(0, spackmon_dir)
 
+from base import SpackMonitorTest
+
 
 try:
-    from spackmoncli import read_json, parse_auth_header, get_basic_auth, read_file
+    from spackmoncli import read_json
 except ImportError:
     sys.exit(
         "Cannot import functions from spackmoncli, "
@@ -38,38 +39,7 @@ fake_environment = {
 }
 
 
-class SimpleTest(TestCase):
-    def setUp(self):
-        self.password = "bigd"
-        self.headers = {}
-        self.user = User.objects.create_user(
-            username="dinosaur", email="dinosaur@dinosaur.com", password=self.password
-        )
-
-    def add_authentication(self, response):
-        """Given a request that gets a 403 response, authenticate it."""
-        assert "www-authenticate" in response.headers
-        h = parse_auth_header(response.headers["www-authenticate"])
-
-        self.headers.update(
-            {
-                "service": h.Service,
-                "Accept": "application/json",
-                "User-Agent": "spackmoncli",
-                "HTTP_AUTHORIZATION": "Basic %s"
-                % get_basic_auth(self.user.username, self.user.token),
-            }
-        )
-        auth_response = self.client.get(h.Realm, **self.headers)
-        assert auth_response.status_code == 200
-
-        # Get the token and update headers
-        info = auth_response.json()
-        token = info.get("token")
-        assert token
-
-        # Update authorization headers
-        self.headers["HTTP_AUTHORIZATION"] = "Bearer %s" % token
+class SimpleTest(SpackMonitorTest):
 
     def test_build_metadata(self):
         """Test the build endpoints, meaning updating a build, and then

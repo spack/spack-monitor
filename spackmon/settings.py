@@ -515,10 +515,16 @@ SWAGGER_SETTINGS = {
 API_VERSION = "v1"
 
 ## Online Machine Learning
-if not cfg.DISABLE_ONLINE_ML:
+if (
+    not cfg.DISABLE_ONLINE_ML
+    and cfg.MODEL_NAME
+    and cfg.MODEL_FLAVOR
+    and cfg.MODEL_LOAD_FROM_FILE
+):
+
     from .startup import ensure_model
 
-    ensure_model(cfg.MODEL_NAME, cfg.MODEL_LOAD_FROM_FILE)
+    ensure_model(cfg.MODEL_NAME, cfg.MODEL_FLAVOR, cfg.MODEL_LOAD_FROM_FILE)
 
 ## PLUGINS #####################################################################
 

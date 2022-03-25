@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PATH /opt/conda/bin:${PATH}
 ENV LANG C.UTF-8
 ENV SHELL /bin/bash
-RUN install_packages wget curl bzip2 ca-certificates openssl gnupg2 git vim python3-pygraphviz gcc pkg-config
+RUN install_packages wget curl bzip2 ca-certificates openssl gnupg2 git vim python3-pygraphviz gcc pkg-config linux-libc-dev g++
 COPY requirements.txt /requirements.txt
 RUN /bin/bash -c "curl -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh > miniconda.sh && \
     bash miniconda.sh -b -p /opt/conda && \

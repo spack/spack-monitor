@@ -20,4 +20,6 @@ gunicorn
 whitenoise
 pandas
 django-river-ml
+creme
 django-autocomplete-light
+git+https://github.com/vsoch/online-ml-custom.git@main

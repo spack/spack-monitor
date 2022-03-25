@@ -1,6 +1,7 @@
 from .autocomplete import SpecAutocomplete
 from .auth import GetAuthToken
 from .base import ServiceInfo
+from .errors import NewErrors
 from .specs import NewSpec, SpecByName, SpecAttributes
 from .attributes import DownloadAttribute
 from .builds import UpdateBuildStatus, UpdatePhaseStatus, NewBuild

@@ -43,7 +43,49 @@ def create_build_error(phase, error):
         post_context=error.get("post_context"),
     )
     if settings.MODEL_NAME and not settings.DISABLE_ONLINE_ML and created:
-        online_ml.learn(error.text)
+        online_ml.learn(error.text, uid=error.id)
+
+
+def add_errors(errors):
+    """
+    Add standalone errors.
+    """
+    count = 0
+    error_ids = set()
+    for error in errors:
+        if "text" not in error:
+            logger.warning(
+                f"Found error missing text attribute, which is required, skipping.\n{error}"
+            )
+            continue
+
+        print(error)
+        err, created = BuildError.objects.get_or_create(
+            source_file=error.get("source_file"),
+            source_line_no=error.get("source_line_no"),
+            line_no=error.get("line_no"),
+            repeat_count=error.get("repeat_count"),
+            start=error.get("start"),
+            end=error.get("end"),
+            text=error["text"],
+            pre_context=error.get("pre_context"),
+            post_context=error.get("post_context"),
+        )
+        error_ids.add(err.id)
+        if "meta" in error:
+            print("ADDING META")
+            err.meta = error["meta"]
+            err.save()
+
+        if settings.MODEL_NAME and not settings.DISABLE_ONLINE_ML and created:
+            online_ml.learn(err.text, uid=err.id)
+        count += 1
+
+    return {
+        "message": "Successful addition of %s errors" % count,
+        "code": 200,
+        "error_ids": list(error_ids),
+    }
 
 
 def update_build_phase(build, phase_name, status, errors, **kwargs):

@@ -25,19 +25,25 @@ class BuildEvent(BaseModel):
     """A BuildEvent is either a warning or an error produced by a build"""
 
     phase = models.ForeignKey(
-        "main.BuildPhase", null=False, blank=False, on_delete=models.CASCADE
+        "main.BuildPhase", null=True, blank=True, on_delete=models.CASCADE
     )
     source_file = models.CharField(
-        max_length=250, blank=False, null=False, help_text="The source file."
+        max_length=250, blank=True, null=True, help_text="The source file."
     )
     source_line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
     line_no = models.PositiveIntegerField(default=None, blank=True, null=True)
-    repeat_count = models.PositiveIntegerField(default=0)
+    repeat_count = models.PositiveIntegerField(default=0, blank=True, null=True)
     start = models.PositiveIntegerField(default=None, blank=True, null=True)
     end = models.PositiveIntegerField(default=None, blank=True, null=True)
     text = models.TextField()
-    pre_context = models.TextField()
-    post_context = models.TextField()
+    pre_context = models.TextField(blank=True, null=True, default="")
+    post_context = models.TextField(blank=True, null=True, default="")
+
+    # Extra (custom) metadata that doesn't fit into model above
+    # must be key/value pairs
+    meta = models.JSONField(
+        blank=True, null=True, help_text="A json value", default=dict
+    )
 
     @property
     def pre_context_lines(self):

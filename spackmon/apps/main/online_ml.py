@@ -71,10 +71,10 @@ def predict(text):
     if not text:
         return
     client = DjangoClient()
-    return client.predict(model_name=settings.MODEL_NAME, features=sentence)
+    return client.predict(model_name=settings.MODEL_NAME, features=text)
 
 
-def learn(text):
+def learn(text, **kwargs):
     """
     Given a new text entry, preprocess it and give to the model to learn.
     """
@@ -82,7 +82,9 @@ def learn(text):
     if not text:
         return
     client = DjangoClient()
-    client.learn(model_name=settings.MODEL_NAME, features=sentence)
+
+    # Extra kwargs go to learn
+    client.learn(model_name=settings.MODEL_NAME, features=text, **kwargs)
 
 
 def process_text(text):
@@ -110,5 +112,5 @@ def process_text(text):
 
     # Strip whitespace
     text = text.strip()
-    words = [word.strip() for work in text.split(" ")]
+    words = [word.strip() for word in text.split(" ")]
     return " ".join(words)
